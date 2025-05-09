@@ -7,6 +7,7 @@ import MainContainer from './MainContainer';
 import AboutContainer from './AboutContainer';
 import ServiceSection from './ServiceSection';
 import Carousel from './scrolling';
+import FooterSection from './FooterSection';
 
 const LandingPage = () => {
   useEffect(() => {
@@ -24,6 +25,7 @@ const LandingPage = () => {
       <AboutContainer />
       <ServiceSection category={'Offering'} />
       <Carousel />
+      <FooterSection />
     </>
   );
 };

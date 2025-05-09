@@ -9,15 +9,14 @@
 
 .stylish-button {
   position: relative;
-  width: 22vh;
-  display:  flex;
+  display: flex;
   align-items: center;
-  margin-top: 7vh;
-  margin-left: 35vh;
-  padding: 5px 20px;
+  justify-content: center;
+  padding: 12px 24px;
   border-radius: 50px;
-  color: white;
-  font-size: 18px; background: linear-gradient(45deg, #6ee7b7, #3b82f6);
+  background: linear-gradient(45deg, #6ee7b7, #3b82f6);
+  color: black;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -27,6 +26,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
+  z-index: 1;
 }
 
 .stylish-button:hover {
@@ -38,7 +38,7 @@
   opacity: 0;
   margin-left: 12px;
   transition: opacity 0.3s ease, transform 0.3s ease;
-  font-size: 30px;
+  font-size: 24px;
 }
 
 .stylish-button:hover .arrow {
@@ -46,8 +46,6 @@
   animation: blink 1s infinite;
   transform: translateX(8px);
 }
-
-.
 
 .stylish-button .glow-effect {
   position: absolute;
@@ -57,10 +55,23 @@
   filter: blur(12px);
   opacity: 0.3;
   transition: opacity 0.3s ease;
+  z-index: -1;
 }
 
 .stylish-button:hover .glow-effect {
   opacity: 0.6;
+}
+
+/* Optional media query for extra fine-tuning */
+@media (max-width: 640px) {
+  .stylish-button {
+    font-size: 14px;
+    padding: 10px 18px;
+  }
+
+  .stylish-button .arrow {
+    font-size: 20px;
+  }
 }
 
 @import 'tailwindcss'
