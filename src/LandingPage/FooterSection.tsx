@@ -36,9 +36,9 @@ const FooterSection = () => {
         <div>
           <h3 className="text-lg font-semibold text-white mb-3">Follow Us</h3>
           <div className="flex space-x-4 text-xl">
-            <a href="#" className="hover:text-purple-400 transition">icon</a>
-            <a href="#" className="hover:text-purple-400 transition">icon</a>
-            <a href="#" className="hover:text-purple-400 transition">icon</a>
+            <a href="#" className="hover:text-purple-400 transition"><img src="/twitter.png" className="w-6"/></a>
+            <a href="#" className="hover:text-purple-400 transition"><img src="/instagram.png" className="w-6"/></a>
+            <a href="#" className="hover:text-purple-400 transition"><img src="/whatsapp.png" className="w-6"/></a>
           </div>
         </div>
       </div>
