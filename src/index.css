@@ -37,6 +37,7 @@
 .stylish-button .arrow {
   opacity: 0;
   margin-left: 12px;
+  margin-bottom: 5px;
   transition: opacity 0.3s ease, transform 0.3s ease;
   font-size: 24px;
 }

@@ -1,4 +1,4 @@
-import GetStartedBtn from "../Buttons/GetStartedBtn"
+import GetStartedBtn from "../../Buttons/GetStartedBtn"
 
 
 const MainContainer = () => {
@@ -8,9 +8,9 @@ const MainContainer = () => {
                 <h1
                     data-aos="zoom-out"
                     data-aos-duration="1500"
-                    className="text-[#b1ddfa] text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight md:leading-[4rem] font-medium"
+                    className="text-[#b1ddfa] text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-tight md:leading-[10px]] font-medium "
                 >
-                    Empowering Rural Minds,<br />
+                    Empowering Rural Minds, <br />
                     Enlightening <b className="text-amber-200 font-medium">Futures</b>
                 </h1>
 
