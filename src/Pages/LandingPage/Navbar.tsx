@@ -68,12 +68,13 @@ const Navbar = () => {
           <Link to="/contact" className="text-white">Contact</Link>
 
           <div className="flex flex-col gap-3 w-full mt-3">
-            <button className="w-full border-2 text-orange-500 border-orange-500 px-5 py-1 rounded-[9px] font-medium">
-              Login
-            </button>
-            <button className="w-full border-2 text-white border-white bg-orange-500 px-3 py-1 rounded-[9px] font-medium">
+            <Link to="/auth/login" className="w-full border-2 text-orange-500 border-orange-500 px-5 py-1 rounded-[9px] font-medium text-center">
+            Login
+            </Link>
+            
+            <Link to="/auth/signup" className="w-full border-2 text-white border-white bg-orange-500 px-3 py-1 rounded-[9px] font-medium text-center">
               Sign Up
-            </button>
+            </Link>
           </div>
         </div>
       )}

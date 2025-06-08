@@ -1,23 +1,50 @@
-{ "Offering" :[
-  {
-    "image": "📚",
-    "title": "Interactive Learning Modules",
-    "description": "Engaging videos, quizzes, and AI-powered lessons tailored for rural students to make learning accessible and enjoyable."
-  },
-  {
-    "title": "Health Awareness Content",
-    "description": "Easy-to-understand guides and tips on hygiene, nutrition, and well-being for students and communities.",
-    "image": "💡"
-  },
-  {
-    "title": "Multilingual AI Assistant",
-    "description": "Voice-enabled AI assistant that helps learners in local languages, powered by Amazon Bedrock and SageMaker.",
-    "image": "🗣️"
-  },
-  {
-    "title": "Offline Access & Smart Downloads",
-    "description": "Downloadable lessons and low-data content for schools with limited connectivity using edge computing.",
-    "image": "🌐"
-  }
-]
+{
+  "Offering": [
+    {
+      "image": "📚",
+      "title": "Interactive Learning Modules",
+      "description": "Engaging videos, quizzes, and AI-powered lessons tailored for rural students to make learning accessible and enjoyable."
+    },
+    {
+      "title": "Health Awareness Content",
+      "description": "Easy-to-understand guides and tips on hygiene, nutrition, and well-being for students and communities.",
+      "image": "💡"
+    },
+    {
+      "title": "Multilingual AI Assistant",
+      "description": "Voice-enabled AI assistant that helps learners in local languages, powered by Amazon Bedrock and SageMaker.",
+      "image": "🗣️"
+    },
+    {
+      "title": "Offline Access & Smart Downloads",
+      "description": "Downloadable lessons and low-data content for schools with limited connectivity using edge computing.",
+      "image": "🌐"
+    }
+  ],
+
+  
+  "languages": [
+    { "language": "Assamese", "greeting": "নমস্কাৰ" },
+    { "language": "Bengali", "greeting": "নমস্কার" },
+    { "language": "Bodo", "greeting": "खोय थाय" },
+    { "language": "Dogri", "greeting": "नमस्ते" },
+    { "language": "Gujarati", "greeting": "નમસ્તે" },
+    { "language": "Hindi", "greeting": "नमस्ते" },
+    { "language": "Kannada", "greeting": "ನಮಸ್ಕಾರ" },
+    { "language": "Kashmiri", "greeting": "آداب" },
+    { "language": "Konkani", "greeting": "नमस्कार" },
+    { "language": "Maithili", "greeting": "नमस्कार" },
+    { "language": "Malayalam", "greeting": "നമസ്കാരം" },
+    { "language": "Manipuri (Meitei)", "greeting": "ꯊꯧꯗꯣꯛ" },
+    { "language": "Marathi", "greeting": "नमस्कार" },
+    { "language": "Nepali", "greeting": "नमस्ते" },
+    { "language": "Odia", "greeting": "ନମସ୍କାର" },
+    { "language": "Punjabi", "greeting": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ" },
+    { "language": "Sanskrit", "greeting": "नमः" },
+    { "language": "Santali", "greeting": "ᱵᱟᱝᱜᱟ" },
+    { "language": "Sindhi", "greeting": "نمستے" },
+    { "language": "Tamil", "greeting": "வணக்கம்" },
+    { "language": "Telugu", "greeting": "నమస్తే" },
+    { "language": "Urdu", "greeting": "آداب" }
+  ]
 }

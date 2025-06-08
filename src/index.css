@@ -75,4 +75,20 @@
   }
 }
 
+@keyframes fade {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.animate-fade {
+  animation: fade 1s ease-in-out infinite;
+}
+
+
 @import 'tailwindcss'

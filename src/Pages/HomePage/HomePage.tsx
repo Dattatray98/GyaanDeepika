@@ -4,10 +4,8 @@ import 'aos/dist/aos.css'; // AOS styles
 
 import Navbar from './Navbar';
 import WelcomNote from './WelcomNote';
-import FirstContent from './FirstContent';
-import SecContent from './SecContent';
-import ThirdContent from './ThirdContent';
 import FooterSection from '../LandingPage/FooterSection';
+import SelectCourse from './SelectCourse';
 
 const LandingPage = () => {
   useEffect(() => {
@@ -19,14 +17,12 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <>
+    <div className='bg-gray-950'>
       <Navbar />
       <WelcomNote />
-      <FirstContent />
-      <SecContent />
-      <ThirdContent />
+      <SelectCourse />
       <FooterSection />
-    </>
+    </div>
   );
 };
 
