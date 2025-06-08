@@ -3,8 +3,13 @@ import AOS from 'aos';
 import 'aos/dist/aos.css'; // AOS styles
 
 import Navbar from './Navbar';
+import WelcomNote from './WelcomNote';
+import FirstContent from './FirstContent';
+import SecContent from './SecContent';
+import ThirdContent from './ThirdContent';
+import FooterSection from '../LandingPage/FooterSection';
 
-const HomePage= () => {
+const LandingPage = () => {
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -16,8 +21,14 @@ const HomePage= () => {
   return (
     <>
       <Navbar />
+      <WelcomNote />
+      <FirstContent />
+      <SecContent />
+      <ThirdContent />
+      <FooterSection />
     </>
   );
 };
 
-export default HomePage;
+export default LandingPage;
+

@@ -31,22 +31,8 @@ const Navbar = () => {
         <a data-aos="fade-up" data-aos-duration="1650" href="#">Contact</a>
       </div>
 
-      {/* Buttons - Desktop */}
-      <div className="hidden lg:flex gap-7 absolute right-5">
-        <button
-          data-aos="zoom-in"
-          data-aos-duration="800"
-          className="border-2 text-orange-500 border-orange-500 px-5 py-1 rounded-[9px] font-medium cursor-pointer"
-        >
-          Login
-        </button>
-        <button
-          data-aos="zoom-in"
-          data-aos-duration="1500"
-          className="border-2 text-white border-white bg-orange-500 px-3 py-1 rounded-[9px] font-medium cursor-pointer"
-        >
-          Sign Up
-        </button>
+      <div>
+        <img src="/user.png" alt="Profile" className='w-[30px] mr-3' />
       </div>
 
       {/* Mobile Dropdown */}
@@ -59,13 +45,8 @@ const Navbar = () => {
           <a href="#" className="text-white">Testimonials</a>
           <a href="#" className="text-white">Contact</a>
 
-          <div className="flex flex-col gap-3 w-full mt-3">
-            <button className="w-full border-2 text-orange-500 border-orange-500 px-5 py-1 rounded-[9px] font-medium">
-              Login
-            </button>
-            <button className="w-full border-2 text-white border-white bg-orange-500 px-3 py-1 rounded-[9px] font-medium">
-              Sign Up
-            </button>
+          <div>
+            <img src="/user.png" alt="Profile" className='w-[30px] mr-3' />
           </div>
         </div>
       )}

@@ -10,7 +10,7 @@ const ServiceSection = ({ category }: { category: string }) => {
   const [offering, setOffering] = useState<Offering[]>([]);
 
   useEffect(() => {
-    fetch('/jsondatafile/offering.json') // Make sure path is correct relative to `public` directory
+    fetch('/jsondatafile/data.json') // Make sure path is correct relative to `public` directory
       .then((res) => res.json())
       .then((data) => {
         setOffering(data[category] || []);
