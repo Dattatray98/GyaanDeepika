@@ -30,6 +30,7 @@ const Navbar = () => {
         <Link to="/resources" data-aos="fade-up" data-aos-duration="1250">Resources</Link>
         <Link to="/testimonials" data-aos="fade-up" data-aos-duration="1450">Testimonials</Link>
         <Link to="/contact" data-aos="fade-up" data-aos-duration="1650">Contact</Link>
+        <Link to="/contact" data-aos="fade-up" data-aos-duration="1700">Language</Link>
       </div>
 
       {/* Buttons */}
@@ -66,7 +67,7 @@ const Navbar = () => {
           <Link to="/resources" className="text-white">Resources</Link>
           <Link to="/testimonials" className="text-white">Testimonials</Link>
           <Link to="/contact" className="text-white">Contact</Link>
-
+          <Link to="/contact" className="text-white">Language</Link>
           <div className="flex flex-col gap-3 w-full mt-3">
             <Link to="/auth/login" className="w-full border-2 text-orange-500 border-orange-500 px-5 py-1 rounded-[9px] font-medium text-center">
             Login

@@ -1,29 +1,6 @@
 {
-  "Offering": [
-    {
-      "image": "📚",
-      "title": "Interactive Learning Modules",
-      "description": "Engaging videos, quizzes, and AI-powered lessons tailored for rural students to make learning accessible and enjoyable."
-    },
-    {
-      "title": "Health Awareness Content",
-      "description": "Easy-to-understand guides and tips on hygiene, nutrition, and well-being for students and communities.",
-      "image": "💡"
-    },
-    {
-      "title": "Multilingual AI Assistant",
-      "description": "Voice-enabled AI assistant that helps learners in local languages, powered by Amazon Bedrock and SageMaker.",
-      "image": "🗣️"
-    },
-    {
-      "title": "Offline Access & Smart Downloads",
-      "description": "Downloadable lessons and low-data content for schools with limited connectivity using edge computing.",
-      "image": "🌐"
-    }
-  ],
-
-
- "languages": [
+  "languages": [
+    {"code": "en", "label": "English - hello"},
     { "code": "as", "label": "Assamese - নমস্কাৰ" },
     { "code": "bn", "label": "Bengali - নমস্কার" },
     { "code": "bo", "label": "Bodo - खोय थाय" },
@@ -47,5 +24,4 @@
     { "code": "te", "label": "Telugu - నమస్తే" },
     { "code": "ur", "label": "Urdu - آداب" }
   ]
-
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const greetings = [
   'नमस्ते',       // Hindi
@@ -63,9 +64,9 @@ const WelcomeNote = () => {
         </p>
 
         <div className="mt-8 flex justify-center gap-4 flex-wrap">
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-6 rounded-full transition duration-300">
+          <Link to="/LearningPage" className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-6 rounded-full transition duration-300">
             Start Learning
-          </button>
+          </Link>
           <button className="bg-white text-gray-800 hover:bg-blue-200 font-medium py-2 px-6 rounded-full transition duration-300">
             Explore Courses
           </button>
