@@ -6,6 +6,7 @@ import Navbar from './Navbar';
 import WelcomNote from './WelcomNote';
 import FooterSection from '../LandingPage/FooterSection';
 import SelectCourse from './SelectCourse';
+import ExploreCourse from './ExploreCourse';
 
 const LandingPage = () => {
   useEffect(() => {
@@ -21,6 +22,7 @@ const LandingPage = () => {
       <Navbar />
       <WelcomNote />
       <SelectCourse />
+      <ExploreCourse />
       <FooterSection />
     </div>
   );

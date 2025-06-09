@@ -32,7 +32,7 @@ const courses = [
 
 const CourseDashboard = () => {
   return (
-    <div className="min-h-screen bg-[#f7f9fa] p-6 sm:p-10">
+    <div className="min-h-screen bg-[#f7f9fa] p-6 sm:p-10 border-2 border-red-800">
       <h2 className="text-3xl font-bold text-[#1d1d1d] mb-6">📚 My Courses</h2>
 
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">

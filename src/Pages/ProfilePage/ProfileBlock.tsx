@@ -13,8 +13,8 @@ const ProfileBlock = () => {
                         className="w-20 h-20 rounded-full border-4 border-orange-400 object-cover"
                     />
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800">Datta Jojewar</h2>
-                        <p className="text-sm text-gray-500">Rural Learner | Class 10</p>
+                        <h2 className="text-2xl font-bold text-gray-800">Username</h2>
+                        <p className="text-sm text-gray-500">Rural Learner | Class Name</p>
                     </div>
                 </div>
 
@@ -26,11 +26,11 @@ const ProfileBlock = () => {
                     </div>
                     <div>
                         <p className="font-medium">Email:</p>
-                        <p>dattatray@example.com</p>
+                        <p>email@example.com</p>
                     </div>
                     <div>
                         <p className="font-medium">Phone:</p>
-                        <p>+91 98765 43210</p>
+                        <p>+91 xxxxxxxxxx</p>
                     </div>
                     <div>
                         <p className="font-medium">Language Preference:</p>
@@ -48,7 +48,7 @@ const ProfileBlock = () => {
                         Edit Profile
                     </Link>
                     <Link to="/CourseDashboard" className="border border-orange-500 text-orange-500 px-5 py-2 rounded-lg w-full sm:w-auto">
-                        View Achievements
+                        View Dashboard
                     </Link>
                 </div>
             </div>

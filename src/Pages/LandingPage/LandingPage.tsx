@@ -6,7 +6,7 @@ import Navbar from './Navbar';
 import MainContainer from './MainContainer';
 import AboutContainer from './AboutContainer';
 import ServiceSection from './ServiceSection';
-import Carousel from './scrolling';
+import Carousel from './Carousel';
 import FooterSection from './FooterSection';
 
 const LandingPage = () => {

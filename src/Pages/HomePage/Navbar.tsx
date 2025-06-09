@@ -33,22 +33,26 @@ const Navbar = () => {
             className="h-[40px] cursor-pointer"
           />
         </div>
+      <div className='border-2 border-gray-400 w-[30%] h-10 rounded-[8px] flex relative'>
+        <input type="text" placeholder='Search here' className='text-white w-[93%] flex items-center h-10 p-2 outline-none placeholder:text-gray-300'/>
+        <img className='h-10 p-2 absolute right-0 rounded-r-[8px]' src="search.png" alt="" />
+      </div>
 
         {/* Desktop Nav Links */}
         <div className="hidden lg:flex items-center gap-6 font-medium text-white">
           <a data-aos="fade-up" data-aos-duration="650" href="#">Home</a>
           <a data-aos="fade-up" data-aos-duration="850" href="#">About</a>
-          <a data-aos="fade-up" data-aos-duration="1050" href="#">Services</a>
-          <a data-aos="fade-up" data-aos-duration="1250" href="#">Resources</a>
+          <Link to="/ProgressTracker" data-aos="fade-up" data-aos-duration="1050">Services</Link>
+          <Link to="/AssessmentPage" data-aos="fade-up" data-aos-duration="1250">Resources</Link>
           <a data-aos="fade-up" data-aos-duration="1450" href="#">Testimonials</a>
-          <a data-aos="fade-up" data-aos-duration="1650" href="#">Contact</a>
+          <Link to="/CourseContent" data-aos="fade-up" data-aos-duration="1650">Contact</Link>
 
           {/* Language Dropdown */}
           <select
             data-aos="fade-up" data-aos-duration="1700"
             value={selectedLang}
             onChange={handleLangChange}
-            className="bg-transparent text-green-800 text-sm px-2 py-1 rounded-md max-h-[50px overflow-auto outline-none"
+            className="bg-transparent font-bold text-green-800 text-[16px] px-2 py-1 rounded-md max-h-[50px overflow-auto outline-none"
           >
             <option value="" disabled>Select Language</option>
             {languages.map(({ code, label }) => (
@@ -77,7 +81,7 @@ const Navbar = () => {
           <a href="#" className="text-white">Home</a>
           <a href="#" className="text-white">About</a>
           <a href="#" className="text-white">Services</a>
-          <a href="#" className="text-white">Resources</a>
+          <Link to="/AssessmentPage" className="text-white">Resources</Link>
           <a href="#" className="text-white">Testimonials</a>
           <a href="#" className="text-white">Contact</a>
 

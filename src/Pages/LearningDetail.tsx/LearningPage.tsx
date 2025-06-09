@@ -1,7 +1,7 @@
 
 const LearningPage = () => {
   return (
-    <div className="border-2 border-red-800 bg-[#f9fafb] p-2">
+    <div className="border-2 border-red-800 bg-[#f9fafb] p-2 h-full">
       {/* Top Section: Video + Lesson Info */}
       <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 w-full h-[70vh]">
         
