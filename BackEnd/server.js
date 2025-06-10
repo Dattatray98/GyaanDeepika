@@ -1,33 +1,28 @@
-const express = require("express");
-const cors = require("cors");
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import fs from "fs";
 
+const users = JSON.parse(fs.readFileSync("./data.json", "utf-8"));
 
 const app = express();
-const PORT = 5000;
-
 app.use(cors());
-app.use(express.json());
 
+mongoose.connect("mongodb+srv://jojewardattatray:iftgrtpdUWrn4SV8@cluster0.grtadzq.mongodb.net/")
+  .then(() => console.log("MongoDB is connected"))
+  .catch((err) => console.log("Got an error", err));
 
-//mongoDB connection set up
-const mongoose = require("mongoose");
-require("dotenv").config(); // load from .env
-
-
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
-
-
-
-
-app.get("/api/message", (req, res) => {
-  res.json({ message: "Hello from backend again! agsin" });
+app.get("/", (req, res) => {
+  res.send("Server is ready");
+  console.log("server is ready")
 });
 
+app.get("/users", (req, res) => {
+  res.json(users);  // ✅ Corrected
+});
+
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`Server started at http://localhost:${PORT}`);
 });

@@ -1,18 +1,7 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from 'react';
-import axios from 'axios';
 
 
 const ProfileBlock = () => {
-      const [courses, setCourses] = useState([]);
-
-  useEffect(() => {
-    axios.get("http://localhost:5000/api/message")
-      .then(() => console.log("backend is connected"))
-      .catch(err => console.error(err));
-  }, []);
-
-
     return (
         <div className="w-full border-2 border-red-800 mb-5 rounded-[8px]">
             <div className="bg-white rounded-xl shadow-lg w-full p-6 ">
