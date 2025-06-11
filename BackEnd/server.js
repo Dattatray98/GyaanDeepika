@@ -14,15 +14,13 @@ app.use(express.json());
 app.use(cors());
 
 // MongoDB connection
-mongoose.connect("mongodb+srv://jojewardattatray:iftgrtpdUWrn4SV8@cluster0.grtadzq.mongodb.net/gyaandeepikaDB",
-     {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    dbName: "GyaanDeepika" // 👈 force the DB name
-  }
-)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.log("❌ MongoDB error:", err));
+import dotenv from "dotenv";
+dotenv.config();
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => console.log("mongoDB connected")).catch((err)=>console.log("got some error",err));
 
 // POST /users - to create a new user
 app.post("/users", async (req, res) => {
