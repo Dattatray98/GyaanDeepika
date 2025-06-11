@@ -3,13 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
- "scripts": {
-  "dev": "vite",
-  "build": "tsc -b && vite build",
-  "vercel-build": "npm install --include=dev && npm run build",
-  "lint": "eslint .",
-  "preview": "vite preview"
-},
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "vercel-build": "npm install --include=dev && npm run build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.817.0",
     "@tailwindcss/vite": "^4.1.5",
@@ -19,7 +19,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.57.0",
-    "react-router-dom": "^7.6.2"
+    "react-router-dom": "^7.6.2",
+    "vite": "^6.3.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
@@ -34,6 +35,5 @@
     "globals": "^16.0.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
-    "vite": "^6.3.5"
   }
 }
