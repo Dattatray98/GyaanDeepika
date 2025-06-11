@@ -25,7 +25,7 @@ const Navbar = () => {
       {/* Desktop Nav Links */}
       <div className="hidden lg:flex h-[60px] items-center absolute right-[33%] text-white gap-7 font-medium">
         <Link to="/home" data-aos="fade-up" data-aos-duration="650">Home</Link>
-        <Link to="/about" data-aos="fade-up" data-aos-duration="850">About</Link>
+        <Link to="/DataComponents" data-aos="fade-up" data-aos-duration="850">About</Link>
         <Link to="/services" data-aos="fade-up" data-aos-duration="1050">Services</Link>
         <Link to="/resources" data-aos="fade-up" data-aos-duration="1250">Resources</Link>
         <Link to="/testimonials" data-aos="fade-up" data-aos-duration="1450">Testimonials</Link>
@@ -62,7 +62,7 @@ const Navbar = () => {
       {isOpen && (
         <div className="lg:hidden absolute top-[60px] left-0 w-full bg-[#1D1D1D] flex flex-col items-start px-4 pb-4 gap-3 z-50">
           <Link to="/home" className="text-white">Home</Link>
-          <Link to="/about" className="text-white">About</Link>
+          <Link to="/DataComponents" className="text-white">About</Link>
           <Link to="/services" className="text-white">Services</Link>
           <Link to="/resources" className="text-white">Resources</Link>
           <Link to="/testimonials" className="text-white">Testimonials</Link>

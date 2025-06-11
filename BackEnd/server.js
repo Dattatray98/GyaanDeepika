@@ -1,28 +1,22 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
-import fs from "fs";
-
-const users = JSON.parse(fs.readFileSync("./data.json", "utf-8"));
-
+import bodyParser from "body-parser";
 const app = express();
-app.use(cors());
+const PORT = 3000;
 
-mongoose.connect("mongodb+srv://jojewardattatray:iftgrtpdUWrn4SV8@cluster0.grtadzq.mongodb.net/")
-  .then(() => console.log("MongoDB is connected"))
-  .catch((err) => console.log("Got an error", err));
+app.use(cors())
+app.use(bodyParser.json())
+app.get('/', (req, res) =>{
+    return res.send("server started and this message from backend")
+})
 
-app.get("/", (req, res) => {
-  res.send("Server is ready");
-  console.log("server is ready")
-});
 
-app.get("/users", (req, res) => {
-  res.json(users);  // ✅ Corrected
-});
+app.post('/', (req, res) => {
+    console.log(req.body)
+    res.send("hello world!")
+})
 
-const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server started at http://localhost:${PORT}`);
-});
+app.listen(PORT, ()=>{
+    console.log(`server started at http://localhost:${PORT}`)
+})
