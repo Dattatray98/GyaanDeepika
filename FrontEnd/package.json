@@ -3,12 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+ "scripts": {
+  "dev": "vite",
+  "build": "tsc -b && vite build",
+  "vercel-build": "npm install --include=dev && npm run build",
+  "lint": "eslint .",
+  "preview": "vite preview"
+},
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.817.0",
     "@tailwindcss/vite": "^4.1.5",
