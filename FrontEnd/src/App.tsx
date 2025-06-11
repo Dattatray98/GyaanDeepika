@@ -8,6 +8,8 @@ import EditProfile from './Pages/ProfilePage/EditProfile';
 import LearningPage from './Pages/LearningDetail.tsx/LearningPage';
 import AssessmentPage from './Pages/LearningDetail.tsx/AssessmentPage';
 import CourseContent from './Pages/LearningDetail.tsx/CourseContent';
+import DataComponent from './testfiles/DataComponent';
+
 
 
 export default function App() {
@@ -22,7 +24,7 @@ export default function App() {
         <Route path="/LearningPage" element={<LearningPage />} />
         <Route path="/AssessmentPage" element={<AssessmentPage />} />
         <Route path="/CourseContent" element={<CourseContent />} />
-
+        <Route path="/DataComponents" element={<DataComponent />} />
       </Routes>
   );
 }

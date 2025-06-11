@@ -1,81 +1,42 @@
-// import { useForm } from 'react-hook-form'; // Missing imporclet
+import React, { useState } from "react";
+import axios from "axios";
 
-// type FormData = {
-//   username: string;
-//   password: string;
-// };
+const DataComponent = () => {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    mobile: ""
+  });
 
-// const DataComponent = () => {
-//   // const {
-//   //   register,
-//   //   handleSubmit,
-//   //   formState: { errors, isSubmitting },
-//   // } = useForm<FormData>(); // Add type parameter
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-//   // const onSubmit = async (data: FormData) => {
-//   //   // await delay(2) 
-//   //   let r = await fetch("http://localhost:3000", {
-//   //     method: "POST"})
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:8000/users", formData);
+      alert("✅ User Created!");
+      console.log(res.data);
+    } catch (err) {
+      console.error("❌ Error:", err);
+      alert("Failed to create user");
+    }
+  };
 
-//   //   let res = await r.text()
-//   //   console.log(data, res)
-//   // };
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm mx-auto">
+      <input name="firstName" placeholder="First Name" onChange={handleChange} className="border p-2" />
+      <input name="lastName" placeholder="Last Name" onChange={handleChange} className="border p-2" />
+      <input name="email" type="email" placeholder="Email" onChange={handleChange} className="border p-2" />
+      <input name="mobile" placeholder="Mobile" onChange={handleChange} className="border p-2" />
+      <button type="submit" className="bg-blue-600 text-white p-2 rounded">Create User</button>
+    </form>
+  );
+};
 
-//   return (
-//     <>
-//       {isSubmitting && <div>Loading...</div>}
-//       <div className="bg-gray-900 h-[100vh] flex justify-center items-center">
-//         <form onSubmit={handleSubmit(onSubmit)}>
-//           <input
-//             type="text"
-//             placeholder="username"
-//             {...register("username", {
-//               required: "Username is required",
-//               minLength: {
-//                 value: 3,
-//                 message: "Minimum 3 characters"
-//               },
-//               maxLength: {
-//                 value: 8,
-//                 message: "Maximum 8 characters"
-//               }
-//             })}
-//             className="placeholder:text-white border-2 border-white mb-10 text-white"
-//           />
-//           {errors.username && (
-//             <div className="text-red-500">
-//               {errors.username.message}
-//             </div>
-//           )}
-//           <br />
+export default DataComponent;
 
-//           <input
-//             type="password" // Changed to lowercase 'password'
-//             placeholder="password"
-//             {...register("password", {
-//               required: "Password is required"
-//             })}
-//             className="placeholder:text-white border-2 border-white mb-10 text-white"
-//           />
-//           {errors.password && (
-//             <div className="text-red-500">
-//               {errors.password.message}
-//             </div>
-//           )}
-//           <br />
-
-//           <input
-//             type="submit"
-//             value="submit"
-//             disabled={isSubmitting}
-//             className="border-2 border-white text-white"
-//           />
-//         </form>
-//       </div>
-//     </>
-//   );
-// };
-
-// export default DataComponent;
 
 
