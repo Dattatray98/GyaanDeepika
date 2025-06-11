@@ -1,7 +1,32 @@
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
+interface User {
+    _id: string;
+    firstName: string;
+    email: string;
+    mobile?: string;
+    language?: string;
+    location?: string;
+}
 
-const ProfileBlock = () => {
+const ProfileBlock: React.FC = () => {
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        axios.get("http://localhost:8000/users") // ⬅ Change this to your deployed backend URL
+            .then((response) => {
+                // Show the first user from the fetched array
+                if (response.data.length > 0) {
+                    setUser(response.data[0]);
+                }
+            })
+            .catch((error) => {
+                console.error("❌ Error fetching users:", error.message);
+            });
+    }, []);
+
     return (
         <div className="w-full border-2 border-red-800 mb-5 rounded-[8px]">
             <div className="bg-white rounded-xl shadow-lg w-full p-6 ">
@@ -13,7 +38,9 @@ const ProfileBlock = () => {
                         className="w-20 h-20 rounded-full border-4 border-orange-400 object-cover"
                     />
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800">Username</h2>
+                        <h2 className="text-2xl font-bold text-gray-800">
+                            {user ? user.firstName : "Loading..."}
+                        </h2>
                         <p className="text-sm text-gray-500">Rural Learner | Class Name</p>
                     </div>
                 </div>
@@ -22,23 +49,23 @@ const ProfileBlock = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
                     <div>
                         <p className="font-medium">Name:</p>
-                        <p>User Name</p>
+                        <p>{user ? user.firstName : "Loading..."}</p>
                     </div>
                     <div>
                         <p className="font-medium">Email:</p>
-                        <p>email@example.com</p>
+                        <p>{user ? user.email : "Loading..."}</p>
                     </div>
                     <div>
                         <p className="font-medium">Phone:</p>
-                        <p>+91 xxxxxxxxxx</p>
+                        <p>{user?.mobile || "Not Provided"}</p>
                     </div>
                     <div>
                         <p className="font-medium">Language Preference:</p>
-                        <p>Marathi</p>
+                        <p>{user?.language || "Marathi"}</p>
                     </div>
                     <div>
                         <p className="font-medium">Location:</p>
-                        <p>Beed, Maharashtra</p>
+                        <p>{user?.location || "Beed, Maharashtra"}</p>
                     </div>
                 </div>
 

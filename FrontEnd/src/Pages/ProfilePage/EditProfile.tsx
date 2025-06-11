@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 interface ProfileData {
   fullName: string;
@@ -9,6 +10,7 @@ interface ProfileData {
 }
 
 const EditProfile: React.FC = () => {
+  const userId = 'REPLACE_WITH_USER_ID'; // TODO: Dynamically get this based on logged-in user
   const [profile, setProfile] = useState<ProfileData>({
     fullName: 'Ramesh Kumar',
     email: 'ramesh@example.com',
@@ -22,11 +24,16 @@ const EditProfile: React.FC = () => {
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Profile updated successfully!');
-    // You can send this data to your backend here
-    console.log(profile);
+    try {
+      const response = await axios.patch(`http://localhost:8000/users/${userId}`, profile);
+      alert('✅ Profile updated successfully!');
+      console.log("Updated user:", response.data.user);
+    } catch (error: any) {
+      console.error("❌ Error updating profile:", error.response?.data || error.message);
+      alert("❌ Failed to update profile");
+    }
   };
 
   return (
