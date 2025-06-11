@@ -1,129 +1,42 @@
-import { useState } from 'react';
+import React, { useState } from "react";
+import axios from "axios";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    mobile: '',
-    password: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    mobile: ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Add backend integration or form validation here
+    try {
+      const res = await axios.post("http://localhost:8000/users", formData);
+      alert("✅ User Created!");
+      console.log(res.data);
+    } catch (err) {
+      console.error("❌ Error:", err);
+      alert("Failed to create user");
+    }
   };
 
   return (
-      <form
-        onSubmit={handleSubmit}
-        className="h-[80vh] w-[140vh] border-2 border-black relative rounded-[8px] bg-white"
-      >
-        <div className="w-full mt-5 flex flex-wrap justify-center items-center">
-          <h1 className="text-[28px] font-medium leading-[36px] text-[#1D2226] font-rubik">
-            Create an account with Gyaan Deepika and imporve your knowladge this is sign up page
-          </h1> 
-
-          <p className="text-[18px] text-[#1D2226] font-rubik">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-          </p>
-        </div>
-
-        <div className="absolute top-[30vh] left-[45vh] p-3">
-          {/* Full Name */}
-          <div className="flex h-[40px] w-[50vh] items-center justify-center bg-transparent mb-5">
-            <label htmlFor="fullName" className="relative w-full">
-              <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                value={formData.fullName}
-                onChange={handleChange}
-                className="h-[40px] w-[50vh] px-4 py-2 text-lg outline-none border-[1px] border-[#CBCBCB] rounded-[6px] hover:border-[#CBCBCB] duration-200 peer focus:border-indigo-600 bg-inherit"
-                required
-              />
-              <span className="absolute left-0 top-2 px-1 text-[16px] tracking-wide peer-focus:text-indigo-600 pointer-events-none duration-200 peer-focus:text-sm peer-focus:-translate-y-5 bg-[#F7F8F9] ml-[10px] peer-valid:text-sm peer-valid:-translate-y-5">
-                Enter Full Name
-              </span>
-            </label>
-          </div>
-
-          {/* Email */}
-          <div className="flex h-[40px] w-[50vh] items-center justify-center bg-transparent mb-5">
-            <label htmlFor="email" className="relative w-full">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="h-[40px] w-[50vh] px-4 py-2 text-lg outline-none border-[1px] border-[#CBCBCB] rounded-[6px] hover:border-[#CBCBCB] duration-200 peer focus:border-indigo-600 bg-inherit"
-                required
-              />
-              <span className="absolute left-0 top-2 px-1 text-[16px] tracking-wide peer-focus:text-indigo-600 pointer-events-none duration-200 peer-focus:text-sm peer-focus:-translate-y-5 bg-[#F7F8F9] ml-[10px] peer-valid:text-sm peer-valid:-translate-y-5">
-                Enter email
-              </span>
-            </label>
-          </div>
-
-          {/* Mobile Number */}
-          <div className="flex h-[40px] w-[50vh] items-center justify-center bg-transparent mb-5">
-            <label htmlFor="mobile" className="relative w-full">
-              <input
-                id="mobile"
-                name="mobile"
-                type="tel"
-                pattern="[0-9]*"
-                inputMode="numeric"
-                maxLength={10}
-                value={formData.mobile}
-                onChange={handleChange}
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(/\D/g, '');
-                }}
-                className="h-[40px] w-[50vh] px-4 py-2 text-lg outline-none border-[1px] border-[#CBCBCB] rounded-[6px] hover:border-[#CBCBCB] duration-200 peer focus:border-indigo-600 bg-inherit"
-                required
-              />
-
-              <span className="absolute left-0 top-2 px-1 text-[16px] tracking-wide peer-focus:text-indigo-600 pointer-events-none duration-200 peer-focus:text-sm peer-focus:-translate-y-5 bg-[#F7F8F9] ml-[10px] peer-valid:text-sm peer-valid:-translate-y-5">
-                Enter Mobile Number
-              </span>
-            </label>
-          </div>
-
-          {/* Password */}
-          <div className="flex h-[40px] w-[50vh] items-center justify-center bg-transparent">
-            <label htmlFor="password" className="relative w-full">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="h-[40px] w-[50vh] px-4 py-2 text-lg outline-none border-[1px] border-[#CBCBCB] rounded-[6px] hover:border-[#CBCBCB] duration-200 peer focus:border-indigo-600 bg-inherit"
-                required
-              />
-              <span className="absolute left-0 top-2 px-1 text-[16px] tracking-wide peer-focus:text-indigo-600 pointer-events-none duration-200 peer-focus:text-sm peer-focus:-translate-y-5 bg-[#F7F8F9] ml-[10px] peer-valid:text-sm peer-valid:-translate-y-5">
-                Password
-              </span>
-            </label>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="absolute top-[321px] left-[20px] w-[335px] h-[46px] bg-[#CBCBCB] rounded-[6px] text-[16px] text-[#1D2226] font-medium font-rubik hover:bg-[#6C25FF] hover:text-white"
-          >
-            Login
-          </button>
-        </div>
-      </form>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm mx-auto">
+      <input name="firstName" placeholder="First Name" onChange={handleChange} className="border p-2" />
+      <input name="lastName" placeholder="Last Name" onChange={handleChange} className="border p-2" />
+      <input name="email" type="email" placeholder="Email" onChange={handleChange} className="border p-2" />
+      <input name="mobile" placeholder="Mobile" onChange={handleChange} className="border p-2" />
+      <button type="submit" className="bg-blue-600 text-white p-2 rounded">Create User</button>
+    </form>
   );
 };
 
 export default SignUp;
+
+
+
