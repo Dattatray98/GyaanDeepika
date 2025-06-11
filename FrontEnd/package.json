@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "install": "npm install vite -g && npm install",
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "vercel-build": "npm install --include=dev && npm run build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -34,6 +34,6 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
     "typescript": "~5.8.3",
-    "typescript-eslint": "^8.30.1",
+    "typescript-eslint": "^8.30.1"
   }
 }
