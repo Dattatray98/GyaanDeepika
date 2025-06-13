@@ -1,57 +1,36 @@
-// All imports
-import express from "express";
-import mongoose from "mongoose";
-import { User } from "./models/user.js"; // Make sure this file exists
-import cors from "cors";
+const express = require("express");
+const cors = require("cors");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
+
+const events = require('events');
+events.EventEmitter.defaultMaxListeners = 20; // or higher
 
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = 8000;
 
-// Middleware to parse JSON
+// Middleware
 app.use(express.json());
+
 app.use(cors());
 
-// MongoDB connection
-import dotenv from "dotenv";
-dotenv.config();
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URL)
+.then(() => console.log("✅ Database connected"))
+.catch((err) => console.error("❌ Error connecting to DB:", err));
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("mongoDB connected")).catch((err)=>console.log("got some error",err));
+// Import & Use Routes
+const userRoutes = require("./routes/user.js");
+app.use("/users", userRoutes); // All user-related routes (signup, login, etc.)
 
-// POST /users - to create a new user
-app.post("/users", async (req, res) => {
-  try {
-    const newUser = new User(req.body);
-    await newUser.save();
-    res.status(201).json({ message: "✅ User created successfully and this is from backend", user: newUser });
-  } catch (error) {
-    console.error("❌ Error creating user:", error.message);
-    res.status(400).json({ message: "Error creating user", error: error.message });
-  }
-});
-
-app.get("/users", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching users", error: error.message });
-  }
-});
+const VideoRoutes = require("./routes/videos.js")
+app.use("/videos", VideoRoutes);
 
 
-app.get("/users", (req, res) => {
-    res.send("backend is working ")
-})
+const uploadVideoRoute = require("./CloudinaryRotes/video-upload.js")
+app.use("/vi", uploadVideoRoute)
 
-// Root route
-app.get("/", (req, res) => {
-  res.send("🚀 Server is ready");
-});
-
-// Start server
+// Start Server
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));

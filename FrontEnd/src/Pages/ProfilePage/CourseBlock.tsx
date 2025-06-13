@@ -1,55 +1,41 @@
+import { Link } from "react-router-dom";
 
-
-const CourseBlock = () => {
+const CourseBlock: React.FC = () => {
   return (
-    <div className="w-full border-2 border-red-800 rounded-[8px] mb-5">
-      <div className="bg-white rounded-xl shadow-lg w-full p-6 ">
-        {/* Header */}
-        <div className="flex items-center gap-5 border-b pb-5 mb-5">
-          <img
-            src="/user.png"
-            alt="Profile"
-            className="w-20 h-20 rounded-full border-4 border-orange-400 object-cover"
-          />
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">UserName</h2>
-            <p className="text-sm text-gray-500">Rural Learner | Class 10</p>
+    <div className="flex w-full border-[0.5px] border-gray-700 rounded-xl mb-10">
+      <div className="bg-white rounded-xl shadow-lg w-full max-h-[80vh] bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white p-6">
+        
+        {/* Quick Access Dashboard */}
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-white mb-3">Quick Access</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link to="/CourseDashboard" className="bg-[#ff8c00] text-white px-4 py-2 rounded-lg text-center shadow-md hover:scale-[1.02] duration-200">
+              Your Courses
+            </Link>
+            <Link to="/Assignments" className="bg-[#29a19c] text-white px-4 py-2 rounded-lg text-center shadow-md hover:scale-[1.02] duration-200">
+              Assignments
+            </Link>
+            <Link to="/Certificates" className="bg-[#6c5ce7] text-white px-4 py-2 rounded-lg text-center shadow-md hover:scale-[1.02] duration-200">
+              Certificates
+            </Link>
           </div>
         </div>
 
-        {/* Information */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-            <div>
-                <p className="font-medium">Name:</p>
-                <p>User Name</p>
+        {/* Course Details */}
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-3">Enrolled Course</h3>
+          <div className="bg-[#ffffff0a] border border-white/10 rounded-lg p-4 shadow-md">
+            <h4 className="text-lg font-bold mb-1 text-orange-400">Full Stack Web Development</h4>
+            <p className="text-sm text-gray-300 mb-2">Progress: 45%</p>
+            <div className="w-full bg-gray-700 rounded-full h-2.5 mb-4">
+              <div className="bg-orange-400 h-2.5 rounded-full" style={{ width: "45%" }}></div>
             </div>
-          <div>
-            <p className="font-medium">Email:</p>
-            <p>dattatray@example.com</p>
-          </div>
-          <div>
-            <p className="font-medium">Phone:</p>
-            <p>+91 98765 43210</p>
-          </div>
-          <div>
-            <p className="font-medium">Language Preference:</p>
-            <p>Marathi</p>
-          </div>
-          <div>
-            <p className="font-medium">Location:</p>
-            <p>Beed, Maharashtra</p>
+            <Link to="/CourseDashboard" className="underline text-sm text-orange-300 hover:text-orange-200">
+              Continue Learning →
+            </Link>
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          <button className="bg-orange-500 text-white px-5 py-2 rounded-lg w-full sm:w-auto">
-            Edit Profile
-          </button>
-          <button className="border border-orange-500 text-orange-500 px-5 py-2 rounded-lg w-full sm:w-auto">
-            View Achievements
-          </button>
-        </div>
       </div>
     </div>
   );

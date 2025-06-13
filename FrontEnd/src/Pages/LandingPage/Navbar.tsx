@@ -1,86 +1,119 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { FiX } from "react-icons/fi";
+import { FiMenu } from "react-icons/fi";
+import { FaGraduationCap } from "react-icons/fa";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const navLinks = [
+    { path: '/home', label: 'Home' },
+    { path: '/about', label: 'About' },
+    { path: '/services', label: 'Services' },
+    { path: '/resources', label: 'Resources' },
+    { path: '/testimonials', label: 'Testimonials' },
+    { path: '/contact', label: 'Contact' },
+  ];
 
   return (
-    <div className="h-[60px] bg-[#1D1D1D] w-full flex items-center px-3 relative justify-between">
-      {/* Logo */}
-      <div>
-        <img
-          data-aos="zoom-in"
-          data-aos-duration="1000"
-          src="/GyaanDeepika.png"
-          alt="logo"
-          className="h-[40px] cursor-pointer"
-        />
-      </div>
+    <nav className="bg-[#1D1D1D] sticky top-0 z-50 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex justify-center items-center space-x-3 relative z-10">
+            <FaGraduationCap className="text-indigo-400 text-4xl animate-float" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent">
+              Gyaan<span className="text-white">Deepika</span>
+            </h1>
+          </div>
 
-      {/* Hamburger Icon */}
-      <div className="lg:hidden block text-white text-2xl cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-        ☰
-      </div>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="text-white hover:text-orange-500 transition-colors text-sm font-medium"
+                data-aos="fade-down"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
-      {/* Desktop Nav Links */}
-      <div className="hidden lg:flex h-[60px] items-center absolute right-[33%] text-white gap-7 font-medium">
-        <Link to="/home" data-aos="fade-up" data-aos-duration="650">Home</Link>
-        <Link to="/DataComponents" data-aos="fade-up" data-aos-duration="850">About</Link>
-        <Link to="/services" data-aos="fade-up" data-aos-duration="1050">Services</Link>
-        <Link to="/resources" data-aos="fade-up" data-aos-duration="1250">Resources</Link>
-        <Link to="/testimonials" data-aos="fade-up" data-aos-duration="1450">Testimonials</Link>
-        <Link to="/contact" data-aos="fade-up" data-aos-duration="1650">Contact</Link>
-        <Link to="/contact" data-aos="fade-up" data-aos-duration="1700">Language</Link>
-      </div>
-
-      {/* Buttons */}
-      <div className="hidden lg:flex gap-7 absolute right-5">
-
-        <Link to="/auth/login">
-          <button
-            data-aos="zoom-in"
-            data-aos-duration="800"
-            className="border-2 text-orange-500 border-orange-500 px-5 py-1 rounded-[9px] font-medium cursor-pointer"
-          >
-            Login
-          </button>
-        </Link>
-
-        <Link to="/auth/signup">
-          <button
-            data-aos="zoom-in"
-            data-aos-duration="1500"
-            className="border-2 text-white border-white bg-orange-500 px-3 py-1 rounded-[9px] font-medium cursor-pointer"
-          >
-            Sign Up
-          </button>
-        </Link>
-
-      </div>
-
-      {/* Mobile Dropdown */}
-      {isOpen && (
-        <div className="lg:hidden absolute top-[60px] left-0 w-full bg-[#1D1D1D] flex flex-col items-start px-4 pb-4 gap-3 z-50">
-          <Link to="/home" className="text-white">Home</Link>
-          <Link to="/DataComponents" className="text-white">About</Link>
-          <Link to="/services" className="text-white">Services</Link>
-          <Link to="/resources" className="text-white">Resources</Link>
-          <Link to="/testimonials" className="text-white">Testimonials</Link>
-          <Link to="/contact" className="text-white">Contact</Link>
-          <Link to="/contact" className="text-white">Language</Link>
-          <div className="flex flex-col gap-3 w-full mt-3">
-            <Link to="/auth/login" className="w-full border-2 text-orange-500 border-orange-500 px-5 py-1 rounded-[9px] font-medium text-center">
-            Login
-            </Link>
-            
-            <Link to="/auth/signup" className="w-full border-2 text-white border-white bg-orange-500 px-3 py-1 rounded-[9px] font-medium text-center">
+          {/* Auth Buttons - Desktop */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button
+              onClick={() => navigate('/auth/login')}
+              className="border-2 border-orange-500 text-orange-500 px-4 py-1 rounded-lg font-medium hover:bg-orange-500 hover:text-white transition-colors text-sm"
+              data-aos="zoom-in"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => navigate('/auth/signup')}
+              className="bg-orange-500 text-white px-4 py-1 rounded-lg font-medium hover:bg-orange-600 transition-colors text-sm"
+              data-aos="zoom-in"
+              data-aos-delay="200"
+            >
               Sign Up
-            </Link>
+            </button>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-white focus:outline-none"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            </button>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      <div className={`md:hidden ${isOpen ? 'block' : 'hidden'} bg-[#1D1D1D] transition-all duration-300`}>
+        <div className="px-2 pt-2 pb-4 space-y-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className="block px-3 py-2 text-white hover:bg-gray-800 rounded-md text-base font-medium"
+              onClick={() => setIsOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="pt-4 border-t border-gray-700">
+            <button
+              onClick={() => {
+                navigate('/auth/login');
+                setIsOpen(false);
+              }}
+              className="w-full text-center px-4 py-2 text-orange-500 border border-orange-500 rounded-lg mb-2 font-medium"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => {
+                navigate('/auth/signup');
+                setIsOpen(false);
+              }}
+              className="w-full text-center px-4 py-2 bg-orange-500 text-white rounded-lg font-medium"
+            >
+              Sign Up
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 };
+
 
 export default Navbar;

@@ -1,0 +1,38 @@
+#. What you have to learn 
+
+1. learn file handling
+-- learn how to handle files in backend and how to access them in frontend
+
+2. how to upload files in mongodb 
+-- learn hot to upload files(video files, images, data files) and how to access them in frontend
+
+3. learn get, post, patch, delete, put, requiest
+
+4. how to access the backend content on frontend
+
+
+
+#. What work is pending and how to complite this work
+
+1. listing the content in learnging page
+-- list all the video content on learning page anyone can access it on learning page
+
+2. authentication of user 
+-- create a authentication for user login and sign upload
+
+
+
+## 12-06-2025 (Starting the setup of authentication) 
+
+<iframe width="1047" height="589" src="https://www.youtube.com/watch?v=PrOhbi1S5Gk" title="Bajaa Bajaa Dhol Bajaa | Ja Re Hat Natkhat |Shankar| Ehsaan| Loy| Gulzar| मेरे प्यारे Prime Minister" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
+
+
+### cloudy details
+
+cloud name : dx1eoqsvt
+
+api key : 115514661298733
+
+api scecrat : oUh2upl78rAuMcBrVo3xbjItRW4

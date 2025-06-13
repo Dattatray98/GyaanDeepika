@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 interface User {
     _id: string;
     firstName: string;
+    lastName: string;
     email: string;
     mobile?: string;
     language?: string;
@@ -17,7 +18,6 @@ const ProfileBlock: React.FC = () => {
     useEffect(() => {
         axios.get("http://localhost:8000/users") // ⬅ Change this to your deployed backend URL
             .then((response) => {
-                // Show the first user from the fetched array
                 if (response.data.length > 0) {
                     setUser(response.data[0]);
                 }
@@ -28,28 +28,28 @@ const ProfileBlock: React.FC = () => {
     }, []);
 
     return (
-        <div className="w-full border-2 border-red-800 mb-5 rounded-[8px]">
-            <div className="bg-white rounded-xl shadow-lg w-full p-6 ">
+        <div className="flex w-full border-[0.5px] border-gray-700 rounded-xl mb-10">
+            <div className="bg-white border-green-800 rounded-xl shadow-lg w-full bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] text-white p-6">
                 {/* Header */}
                 <div className="flex items-center gap-5 border-b pb-5 mb-5">
                     <img
                         src="/user.png"
                         alt="Profile"
-                        className="w-20 h-20 rounded-full border-4 border-orange-400 object-cover"
+                        className="w-20 h-20 rounded-full border-2 border-green-800 object-cover"
                     />
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800">
-                            {user ? user.firstName : "Loading..."}
+                        <h2 className="text-2xl font-bold text-gray-400">
+                            {user ? user.firstName + " " + user.lastName : "Loading..."}
                         </h2>
                         <p className="text-sm text-gray-500">Rural Learner | Class Name</p>
                     </div>
                 </div>
 
                 {/* Information */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-300">
                     <div>
                         <p className="font-medium">Name:</p>
-                        <p>{user ? user.firstName : "Loading..."}</p>
+                        <p>{user ? user.firstName + " " + user.lastName : "Loading..."}</p>
                     </div>
                     <div>
                         <p className="font-medium">Email:</p>

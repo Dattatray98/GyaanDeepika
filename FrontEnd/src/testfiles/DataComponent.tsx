@@ -1,40 +1,52 @@
-// DataComponent.tsx or UserList.tsx
-import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useState } from "react";
 
-interface User {
-  _id: string;
-  name: string; // or your field names
-  email: string;
-}
+const DataComponent = () => {
+  const [firstName, setFirstName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-const UserList: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault(); // prevent page reload
 
-  // Fetch users from backend on component mount
-  useEffect(() => {
-    axios.get("http://localhost:8000/users") // use your deployed backend URL in production
-      .then((response) => {
-        setUsers(response.data); // set users into state
-      })
-      .catch((error) => {
-        console.error("❌ Error fetching users:", error.message);
+    try {
+      const response = await axios.post("http://localhost:8000/signin", {
+        firstName,
+        email,
+        password,
       });
-  }, []);
+      console.log("Signup success:", response.data);
+    } catch (error) {
+      console.error("Signup failed:", error);
+    }
+  };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Users List</h2>
-      <ul className="space-y-2">
-        {users.map((user) => (
-          <li key={user._id} className="border p-2 rounded shadow">
-            <p><strong>Name:</strong> {user.name}</p>
-            <p><strong>Email:</strong> {user.email}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        name="firstName"
+        placeholder="First Name"
+        value={firstName}
+        onChange={(e) => setFirstName(e.target.value)}
+      />
+      <input
+        type="email"
+        name="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="text"
+        name="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button type="submit">Sign Up</button>
+    </form>
   );
 };
 
-export default UserList;
+export default DataComponent;

@@ -3,31 +3,35 @@ import AOS from 'aos';
 import 'aos/dist/aos.css'; // AOS styles
 
 import Navbar from './Navbar';
-import MainContainer from './MainContainer';
-import AboutContainer from './AboutContainer';
-import ServiceSection from './ServiceSection';
-import Carousel from './Carousel';
-import FooterSection from './FooterSection';
+import HeroSection from './herosection';
+import Footer from './FooterSection';
+import CallToAction from './CallToAction';
+import TestimonialsSection from './TestimonialsSection';
+import AboutSection from './AboutSection';
+import ServicesSection from './ServiceSection';
+
 
 const LandingPage = () => {
   useEffect(() => {
     AOS.init({
       duration: 800,
-      once: false,   // true = animate only once
-      mirror: true,  // true = animate on scroll up as well
+      once: true,
+      mirror: false,
     });
   }, []);
 
   return (
-    <>
+    <div className="bg-black text-white">
       <Navbar />
-      <MainContainer />
-      <AboutContainer />
-      <ServiceSection category={'Offering'} />
-      <Carousel />
-      <FooterSection />
-    </>
+      <HeroSection />
+      <AboutSection />
+      <ServicesSection />
+      <TestimonialsSection />
+      <CallToAction />
+      <Footer />
+    </div>
   );
 };
+
 
 export default LandingPage;
