@@ -1,8 +1,0 @@
-
-
-GET http://localhost:8000/videos
-
-
-###
-
-POST http://localhost:5000/api/ai/generate-text
