@@ -7,10 +7,20 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "start": "node Server.js"
+    "start": "nodemon Server.js"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.828.0",
+    "@aws-sdk/client-rekognition": "^3.828.0",
+    "cloudinary": "^2.6.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "nodemon": "^3.1.10"
+    "express-session": "^1.18.1",
+    "mongoose": "^8.15.2",
+    "multer": "^2.0.1",
+    "nodemon": "^3.1.10",
+    "uuid": "^11.1.0"
   }
 }
