@@ -10,6 +10,8 @@
     "start": "nodemon server.js"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.828.0",
+    "@aws-sdk/client-rekognition": "^3.828.0",
     "cloudinary": "^1.30.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

@@ -32,5 +32,8 @@ app.use("/videos", VideoRoutes);
 const uploadVideoRoute = require("./CloudinaryRotes/video-upload.js")
 app.use("/vi", uploadVideoRoute)
 
+const aiRoutes = require("./routes/aiRoutes");
+app.use("/api/ai", aiRoutes);
+
 // Start Server
 app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));

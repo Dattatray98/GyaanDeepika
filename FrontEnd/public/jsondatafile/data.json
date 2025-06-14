@@ -20,32 +20,5 @@
       "description": "Downloadable lessons and low-data content for schools with limited connectivity using edge computing.",
       "image": "🌐"
     }
-  ],
-
-
- "languages": [
-    { "code": "as", "label": "Assamese - নমস্কাৰ" },
-    { "code": "bn", "label": "Bengali - নমস্কার" },
-    { "code": "bo", "label": "Bodo - खोय थाय" },
-    { "code": "do", "label": "Dogri - नमस्ते" },
-    { "code": "gu", "label": "Gujarati - નમસ્તે" },
-    { "code": "hi", "label": "Hindi - नमस्ते" },
-    { "code": "kn", "label": "Kannada - ನಮಸ್ಕಾರ" },
-    { "code": "ks", "label": "Kashmiri - آداب" },
-    { "code": "ko", "label": "Konkani - नमस्कार" },
-    { "code": "ma", "label": "Maithili - नमस्कार" },
-    { "code": "ml", "label": "Malayalam - നമസ്കാരം" },
-    { "code": "mi", "label": "Manipuri - ꯊꯧꯗꯣꯛ" },
-    { "code": "mr", "label": "Marathi - नमस्कार" },
-    { "code": "ne", "label": "Nepali - नमस्ते" },
-    { "code": "or", "label": "Odia - ନମସ୍କାର" },
-    { "code": "pa", "label": "Punjabi - ਸਤ ਸ੍ਰੀ ਅਕਾਲ" },
-    { "code": "sa", "label": "Sanskrit - नमः" },
-    { "code": "st", "label": "Santali - ᱵᱟᱝᱜᱟ" },
-    { "code": "sd", "label": "Sindhi - نمستے" },
-    { "code": "ta", "label": "Tamil - வணக்கம்" },
-    { "code": "te", "label": "Telugu - నమస్తే" },
-    { "code": "ur", "label": "Urdu - آداب" }
   ]
-
 }

@@ -27,7 +27,7 @@ router.post("/video", upload.single("video"), async (req, res) => {
     const result = await cloudinary.uploader.upload_stream(
       {
         resource_type: "video",
-        folder: "hackathon_videos", // Optional folder
+        folder: "GyaanDeepika", // Optional folder
       },
       (error, result) => {
         if (error) {

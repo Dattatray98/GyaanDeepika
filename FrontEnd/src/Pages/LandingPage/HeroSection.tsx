@@ -33,7 +33,8 @@ const HeroSection = () => {
           </p>
           <div data-aos="fade-up" data-aos-delay="400">
             <button
-              onClick={() => window.scrollTo({ top: document.getElementById('services')?.offsetTop, behavior: 'smooth' })}
+              // onClick={() => window.scrollTo({ top: document.getElementById('services')?.offsetTop, behavior: 'smooth' })}
+              onClick={()=>window.location.href = "/auth/signup"}
               className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center mx-auto md:mx-0"
             >
               Get Started <FiArrowRight className="ml-2" />

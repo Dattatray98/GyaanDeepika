@@ -1,7 +1,7 @@
 // routes/video.js
 const express = require("express");
 const router = express.Router();
-const { GetVideoContent, UploadVideoContent } = require("../controllers/videos"); // ✅ Import properly
+const { GetVideoContent, UploadVideoContent } = require("../controllers/video"); // ✅ Import properly
 
 router.get("/", GetVideoContent);
 
