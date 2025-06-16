@@ -3,50 +3,47 @@ const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const events = require('events');
+const cookieParser = require("cookie-parser");
 const passport = require("passport");
-const session = require("express-session");
-require("./config/passport");
-
-app.use(session({
-  secret: process.env.JWT_SECRET,
-  resave: false,
-  saveUninitialized: false
-}));
+require('./config/passport');
 app.use(passport.initialize());
-app.use(passport.session());
 
-
-events.EventEmitter.defaultMaxListeners = 20; // Optional: Only if needed
 
 const PORT = process.env.PORT || 8000;
 
-// ───────────────────── MIDDLEWARE ─────────────────────
-app.use(express.json({ limit: "100mb" })); // Increase limit if uploading large files
-app.use(cors());
+// Middleware
+app.use(express.json({ limit: "100mb" }));
+app.use(cookieParser());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true
+}));
 
-// ─────────────────── DATABASE CONNECTION ──────────────
+// Passport initialization
+app.use(passport.initialize());
+
+// MongoDB connection
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-
-// ─────────────────────── ROUTES ────────────────────────
-app.use("/auth", require("./Routes/auth.js"));
+// Routes
 app.use("/users", require("./Routes/user.js"));
+app.use("/auth", require("./Routes/auth.js"));
 app.use("/videos", require("./Routes/video.js"));
 app.use("/upload", require("./CloudinaryRotes/video-upload.js"));
 app.use("/api/ai", require("./Routes/ai.js"));
 app.use("/Courses", require("./Routes/course.js"));
 app.use("/EnrolledCourses", require("./Routes/EnrolledCourse.js"));
 
-
-// ────────────────────── DEFAULT ROUTE ──────────────────
+// Default Route
 app.get("/", (req, res) => {
   res.send("🎓 GyaanDeepika Backend is Live");
 });
 
-// ────────────────────── START SERVER ───────────────────
+app.use('/api', require("./Routes/user.js"));
+
+// Start Server
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });

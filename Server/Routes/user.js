@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { handleuserlogin, handleusersignup, GetsignedUsers } = require("../Controllers/user");
+const { handleuserlogin, handleusersignup, getAllSignedUsers } = require("../Controllers/user");
 
 
 
@@ -11,6 +11,6 @@ router.post("/signin", handleusersignup);
 router.post("/login", handleuserlogin);
 
 // ✅ Get All Users
-router.get("/", GetsignedUsers);
+router.get('/getsignedusers', getAllSignedUsers);
 
 module.exports = router;

@@ -1,43 +1,29 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login, token, googleLogin } = useAuth();
 
-  // ✅ Redirect to /home if already logged in
   useEffect(() => {
-    const token = localStorage.getItem("token");
     if (token) {
       navigate("/home");
     }
-  }, [navigate]);
+  }, [token, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post("http://localhost:8000/users/login", {
-        email,
-        password,
-      });
-
-      const token = response.data.token;
-      localStorage.setItem("token", token); // ✅ Save JWT
-
-      console.log("Login success:", response.data);
+      await login(email, password);
       navigate("/home");
     } catch (error) {
       console.error("Login failed:", error);
       alert("Invalid email or password.");
     }
-  };
-
-  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/auth/google"; // ✅ Google OAuth redirect
   };
 
   return (
@@ -97,12 +83,11 @@ const Login = () => {
       {/* Google Login Button */}
       <button
         type="button"
-        onClick={handleGoogleLogin}
+        onClick={googleLogin}
         className="bg-transparent text-white p-2 rounded w-full flex gap-3 justify-center"
       >
         Sign in with Google <FcGoogle className="h-7 w-7 flex " />
       </button>
-
     </form>
   );
 };

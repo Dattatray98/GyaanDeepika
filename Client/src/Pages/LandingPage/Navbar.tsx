@@ -8,7 +8,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const navLinks = [
-    { path: '/HomePage', label: 'Home' },
+    { path: '/home', label: 'Home' },
     { path: '/about', label: 'About' },
     { path: '/EnrolledCoursesPage', label: 'Services' },
     { path: '/BrowseCousre', label: 'Resources' },
@@ -47,14 +47,14 @@ const Navbar = () => {
           {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             <button
-              onClick={() => navigate('/Auth/login')}
+              onClick={() => navigate('/auth/login')}
               className="border-2 border-orange-500 text-orange-500 px-4 py-1 rounded-lg font-medium hover:bg-orange-500 hover:text-white transition-colors text-sm"
               data-aos="zoom-in"
             >
               Login
             </button>
             <button
-              onClick={() => navigate('/Auth/SignUp')}
+              onClick={() => navigate('/auth/SignUp')}
               className="bg-orange-500 text-white px-4 py-1 rounded-lg font-medium hover:bg-orange-600 transition-colors text-sm"
               data-aos="zoom-in"
               data-aos-delay="200"

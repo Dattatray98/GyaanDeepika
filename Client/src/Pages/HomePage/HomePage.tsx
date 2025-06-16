@@ -211,14 +211,17 @@ const HomePage = () => {
 
         <nav className="space-y-1 mb-8">
           {[
-            { icon: <FiHome />, label: 'Home', value: 'home' },
-            { icon: <FiCompass />, label: 'Discover', value: 'discover' },
-            { icon: <FiBook />, label: 'My Learning', value: 'learning' }
+            { icon: <FiHome />, label: 'Home', value: 'home', path:"/home" },
+            { icon: <FiCompass />, label: 'Discover', value: 'discover', path:"/BrowseCousre" },
+            { icon: <FiBook />, label: 'My Learning', value: 'learning', path:"/LearningPage" }
           ].map(tab => (
             <button
               key={tab.value}
               className={`flex items-center w-full p-3 rounded-lg ${activeTab === tab.value ? 'bg-gray-800 text-orange-500' : 'text-gray-400 hover:bg-gray-800'}`}
-              onClick={() => setActiveTab(tab.value)}
+           onClick={() => {
+              setActiveTab(tab.value);
+              navigate(tab.path);
+            }}
             >
               <span className="mr-3">{tab.icon}</span>
               {tab.label}
@@ -260,7 +263,7 @@ const HomePage = () => {
           </div>
           <div className="flex items-center space-x-4">
             <FiBell className="text-xl text-gray-400 hover:text-white cursor-pointer" />
-            <Link to="/ProfilPage" className="w-8 h-8 rounded-full bg-orange-500"></Link>
+            <Link to="/ProfilePage" className="w-8 h-8 rounded-full bg-orange-500"></Link>
           </div>
         </header>
 
@@ -276,7 +279,7 @@ const HomePage = () => {
           <div className="lg:col-span-2 bg-gray-800 rounded-xl p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold">Your Courses</h3>
-              <Link to="/courses" className="text-orange-500">View All</Link>
+              <Link to="/EnrolledCoursesPage" className="text-orange-500">View All</Link>
             </div>
             
             <div className="space-y-4">
@@ -324,7 +327,7 @@ const HomePage = () => {
         <section className="bg-gray-800 rounded-xl p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold">Recommended For You</h3>
-            <Link to="/courses" className="text-orange-500">Browse All</Link>
+            <Link to="/BrowseCousre" className="text-orange-500">Browse All</Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

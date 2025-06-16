@@ -1,1 +1,1 @@
-GET http://localhost:8000/videos
+http://localhost:8000/auth/google
