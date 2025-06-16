@@ -260,7 +260,7 @@ const HomePage = () => {
           </div>
           <div className="flex items-center space-x-4">
             <FiBell className="text-xl text-gray-400 hover:text-white cursor-pointer" />
-            <div className="w-8 h-8 rounded-full bg-orange-500"></div>
+            <Link to="/ProfilPage" className="w-8 h-8 rounded-full bg-orange-500"></Link>
           </div>
         </header>
 

@@ -1,20 +1,39 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { FiSearch, FiClock, FiUsers, FiStar, FiArrowRight } from 'react-icons/fi';
+import { FaGraduationCap } from 'react-icons/fa';
 import Footer from '../LandingPage/Footer';
 
-
 const BrowseCourses = () => {
-  // Initialize AOS animations
-  AOS.init({
-    duration: 800,
-    once: true,
-    mirror: false,
-  });
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Sample course data
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2000);
+    AOS.init({
+      duration: 800,
+      once: true,
+      mirror: false,
+    });
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
+        <div className="animate-pulse flex flex-col items-center">
+          <FaGraduationCap className="text-orange-500 text-4xl mb-4 animate-bounce" />
+          <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-full bg-orange-500 animate-[progress_2s_ease-in-out_infinite]"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const courses = [
     {
       id: 1,
@@ -84,73 +103,62 @@ const BrowseCourses = () => {
     }
   ];
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-
   const categories = ['All', 'Education', 'Health', 'Language', 'Agriculture', 'Technology', 'Community'];
 
   const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         course.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.description.toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesCategory = selectedCategory === 'All' || course.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
   return (
     <div className="bg-black text-white min-h-screen">
-        
-      {/* Hero Section for Browse Courses */}
+      {/* Hero Section */}
       <section className="relative bg-gray-900 py-20">
-        <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-24">
-          <div className="text-center">
-            <h1 
-              className="text-4xl sm:text-5xl font-bold mb-6"
-              data-aos="fade-up"
-            >
-              Explore Our <span className="text-orange-500">Courses</span>
-            </h1>
-            <p 
-              className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto"
-              data-aos="fade-up"
-              data-aos-delay="100"
-            >
-              Accessible education designed specifically for rural learners.
-            </p>
-            
-            {/* Search and Filter */}
-            <div 
-              className="max-w-3xl mx-auto"
-              data-aos="fade-up"
-              data-aos-delay="200"
-            >
-              <div className="relative mb-6">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiSearch className="text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search courses..."
-                  className="bg-gray-800 text-white w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+        <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-24 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-6" data-aos="fade-up">
+            Explore Our <span className="text-orange-500">Courses</span>
+          </h1>
+          <p
+            className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            Accessible education designed specifically for rural learners.
+          </p>
+
+          <div className="max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+            <div className="relative mb-6">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FiSearch className="text-gray-400" />
               </div>
-              
-              <div className="flex flex-wrap justify-center gap-3 mb-8">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      selectedCategory === category 
-                        ? 'bg-orange-500 text-white' 
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
+              <input
+                type="text"
+                placeholder="Search courses..."
+                className="bg-gray-800 text-white w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              {categories.map(category => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    selectedCategory === category
+                      ? 'bg-orange-500 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -186,7 +194,7 @@ const BrowseCourses = () => {
                     </div>
                     <h3 className="text-xl font-bold mb-2">{course.title}</h3>
                     <p className="text-gray-400 text-sm mb-4">{course.description}</p>
-                    
+
                     <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
                       <div className="flex items-center">
                         <FiClock className="mr-1" />
@@ -201,7 +209,7 @@ const BrowseCourses = () => {
                         <span>{course.rating}</span>
                       </div>
                     </div>
-                    
+
                     <Link
                       to={`/courses/${course.id}`}
                       className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
@@ -213,10 +221,7 @@ const BrowseCourses = () => {
               ))}
             </div>
           ) : (
-            <div 
-              className="text-center py-16"
-              data-aos="fade-up"
-            >
+            <div className="text-center py-16" data-aos="fade-up">
               <h3 className="text-xl font-medium text-gray-300 mb-2">No courses found</h3>
               <p className="text-gray-500">Try adjusting your search or filter criteria</p>
             </div>
@@ -227,17 +232,10 @@ const BrowseCourses = () => {
       {/* Call to Action */}
       <section className="py-16 bg-gradient-to-r from-purple-600 to-indigo-600">
         <div className="max-w-4xl mx-auto px-6 sm:px-12 text-center">
-          <h2 
-            className="text-3xl font-bold text-white mb-4"
-            data-aos="fade-up"
-          >
+          <h2 className="text-3xl font-bold text-white mb-4" data-aos="fade-up">
             Can't find what you're looking for?
           </h2>
-          <p 
-            className="text-gray-200 mb-8"
-            data-aos="fade-up"
-            data-aos-delay="100"
-          >
+          <p className="text-gray-200 mb-8" data-aos="fade-up" data-aos-delay="100">
             We're constantly adding new courses. Let us know what you'd like to learn!
           </p>
           <button
@@ -250,7 +248,6 @@ const BrowseCourses = () => {
         </div>
       </section>
 
-      {/* Reuse the same Footer component */}
       <Footer />
     </div>
   );

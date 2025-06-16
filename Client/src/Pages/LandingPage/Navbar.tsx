@@ -10,9 +10,9 @@ const Navbar = () => {
   const navLinks = [
     { path: '/HomePage', label: 'Home' },
     { path: '/about', label: 'About' },
-    { path: '/services', label: 'Services' },
+    { path: '/EnrolledCoursesPage', label: 'Services' },
     { path: '/BrowseCousre', label: 'Resources' },
-    { path: '/testimonials', label: 'Testimonials' },
+    { path: '/LearningPage', label: 'Testimonials' },
     { path: '/contact', label: 'Contact' },
   ];
 
@@ -47,14 +47,14 @@ const Navbar = () => {
           {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             <button
-              onClick={() => navigate('/auth/login')}
+              onClick={() => navigate('/Auth/login')}
               className="border-2 border-orange-500 text-orange-500 px-4 py-1 rounded-lg font-medium hover:bg-orange-500 hover:text-white transition-colors text-sm"
               data-aos="zoom-in"
             >
               Login
             </button>
             <button
-              onClick={() => navigate('/auth/signup')}
+              onClick={() => navigate('/Auth/SignUp')}
               className="bg-orange-500 text-white px-4 py-1 rounded-lg font-medium hover:bg-orange-600 transition-colors text-sm"
               data-aos="zoom-in"
               data-aos-delay="200"
