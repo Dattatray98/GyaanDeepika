@@ -6,6 +6,7 @@ interface User {
   name: string;
   email: string;
 }
+
 interface SignupData {
   firstName: string;
   lastName: string;
@@ -41,8 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('token', token);
       setToken(token);
       
-      // Verify token with backend
-      const response = await axios.get('http://localhost:8000/users/me', {
+      const response = await axios.get(`http://localhost:8000/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -72,13 +72,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initializeAuth();
-  }, [handleToken]);
+  }, [handleToken, user]);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post('http://localhost:8000/users/login', { email, password });
+      const response = await axios.post(`http://localhost:8000/users/login`, { email, password });
       await handleToken(response.data.token);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post('http://localhost:8000/users/signin', userData);
+      const response = await axios.post(`http://localhost:8000/users/signup`, userData);
       await handleToken(response.data.token);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed');
@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const googleLogin = () => {
-    window.location.href = 'http://localhost:8000/auth/google';
+    window.location.href = `http://localhost:8000/auth/google`;
   };
 
   const logout = () => {
@@ -112,7 +112,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
-  // Axios interceptors
   useEffect(() => {
     const requestInterceptor = axios.interceptors.request.use(config => {
       if (token) {

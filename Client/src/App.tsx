@@ -1,6 +1,6 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider } from './Pages/context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import LandingPage from "./Pages/LandingPage/LandingPage";
 import BrowseCourses from "./Pages/BrowseCourse/BrowseCousre";
 import HomePage from "./Pages/HomePage/HomePage";
@@ -10,7 +10,7 @@ import Auth from "./Pages/Auth/auth";
 import CourseContent from "./Pages/CourseContentPage/CourseContent";
 import ProfilePage from "./Pages/Profile/ProfilePage";
 import Settings from "./Pages/Settings/Settings";
-import ProtectedRoute from "./Pages/components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import OAuthRedirect from "./Pages/Auth/OAuthRedirect";
 
 function App() {
@@ -26,12 +26,12 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<HomePage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/ProfilePage" element={<ProfilePage />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/course-content" element={<CourseContent />} />
-            <Route path="/enrolled-courses" element={<EnrolledCoursesPage />} />
-            <Route path="/browse-courses" element={<BrowseCourses />} />
-            <Route path="/learning" element={<LearningPage />} />
+            <Route path="/CourseContent" element={<CourseContent />} />
+            <Route path="/EnrolledCoursesPage" element={<EnrolledCoursesPage />} />
+            <Route path="/BrowseCousre" element={<BrowseCourses />} />
+            <Route path="/LearningPage" element={<LearningPage />} />
           </Route>
 
           {/* Fallback Route */}

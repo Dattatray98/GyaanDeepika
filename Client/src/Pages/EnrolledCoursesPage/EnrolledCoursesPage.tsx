@@ -262,7 +262,8 @@ const EnrolledCoursesPage = () => {
                       className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded-lg text-sm flex items-center"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/CourseContent/${continueLearning.id}/learn`);
+                        // navigate(`/CourseContent/${continueLearning.id}/learn`);
+                        navigate("/CourseContent")
                       }}
                     >
                       Continue <FiChevronRight className="ml-1" />
@@ -391,7 +392,8 @@ const EnrolledCoursesPage = () => {
                             className={`flex items-center p-3 rounded-lg ${
                               module.completed ? 'bg-gray-700/30' : 'hover:bg-gray-700/50'
                             } cursor-pointer`}
-                            onClick={() => navigate(`/course/${course.id}/module/${module.id}`)}
+                            // onClick={() => navigate(`/course/${course.id}/module/${module.id}`)}
+                            onClick={()=>navigate("/CourseContent")}
                           >
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
                               module.completed ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'
@@ -415,13 +417,15 @@ const EnrolledCoursesPage = () => {
                       <div className="flex space-x-3">
                         <button
                           className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex-1 text-center"
-                          onClick={() => navigate(`/course/${course.id}/learn`)}
+                          // onClick={() => navigate(`/course/${course.id}/learn`)}
+                          onClick={()=>navigate("CousreContent")}
                         >
                           Continue Learning
                         </button>
                         <button
                           className="border border-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium flex-1 text-center"
-                          onClick={() => navigate(`/course/${course.id}/resources`)}
+                          // onClick={() => navigate(`/course/${course.id}/resources`)}
+                          onClick={()=>navigate("CousreContent")}
                         >
                           View Resources
                         </button>

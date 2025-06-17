@@ -1,16 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const { handleuserlogin, handleusersignup, getAllSignedUsers } = require("../Controllers/user");
+const { 
+  handleUserSignup, 
+  handleUserLogin, 
+  getCurrentUser,
+  getAllSignedUsers 
+} = require("../Controllers/user");
+const { verifyToken } = require("../Service/auth");
 
-
-
-// ✅ User Registration
-router.post("/signin", handleusersignup);
-
-// ✅ User Login
-router.post("/login", handleuserlogin);
-
-// ✅ Get All Users
-router.get('/getsignedusers', getAllSignedUsers);
+router.post("/signup", handleUserSignup);
+router.post("/login", handleUserLogin);
+router.get("/me", verifyToken, getCurrentUser);
+router.get("/getsignedusers", verifyToken, getAllSignedUsers);
 
 module.exports = router;

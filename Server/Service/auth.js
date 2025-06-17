@@ -1,21 +1,19 @@
 const jwt = require('jsonwebtoken');
 
-// Generate JWT token
 const generateToken = (user) => {
   return jwt.sign(
     {
       id: user._id,
       email: user.email,
-      name: user.firstName
+      name: `${user.firstName} ${user.lastName}`
     },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
   );
 };
 
-// Verify JWT middleware
 const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1] || req.cookies.token;
+  const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
   
   if (!token) {
     return res.status(401).json({ success: false, message: 'Unauthorized' });
@@ -25,7 +23,7 @@ const verifyToken = (req, res, next) => {
     if (err) {
       return res.status(403).json({ success: false, message: 'Invalid token' });
     }
-    req.user = decoded; // Attach user payload to request
+    req.user = decoded;
     next();
   });
 };

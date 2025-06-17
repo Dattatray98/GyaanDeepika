@@ -4,7 +4,7 @@ const User = require('../models/user');
 
 const saltRounds = 10;
 
-async function handleusersignup(req, res) {
+async function handleUserSignup(req, res) {
   try {
     const { firstName, lastName, email, mobile, password } = req.body;
 
@@ -28,20 +28,21 @@ async function handleusersignup(req, res) {
 
     const token = generateToken(newUser);
 
-    // Set token in cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
+      maxAge: 24 * 60 * 60 * 1000
     });
 
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
+      token,
       user: {
         id: newUser._id,
-        name: newUser.firstName,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
         email: newUser.email
       }
     });
@@ -54,7 +55,7 @@ async function handleusersignup(req, res) {
   }
 }
 
-async function handleuserlogin(req, res) {
+async function handleUserLogin(req, res) {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -63,6 +64,13 @@ async function handleuserlogin(req, res) {
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
+      });
+    }
+
+    if (!user.password) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login with Google",
       });
     }
 
@@ -76,20 +84,21 @@ async function handleuserlogin(req, res) {
 
     const token = generateToken(user);
 
-    // Set token in cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 24 * 60 * 60 * 1000 // 1 day
+      maxAge: 24 * 60 * 60 * 1000
     });
 
     return res.status(200).json({
       success: true,
       message: "Login successful",
+      token,
       user: {
         id: user._id,
-        name: user.firstName,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email
       }
     });
@@ -112,21 +121,19 @@ async function getCurrentUser(req, res) {
   }
 }
 
-
-
-// GET: Fetch all signed users
-const getAllSignedUsers = async (req, res) => {
+async function getAllSignedUsers(req, res) {
   try {
-    const users = await User.find(); // Get all users from DB
-    res.status(200).json(users);     // Send user list in response
+    const users = await User.find().select('-password -googleId');
+    res.status(200).json(users);
   } catch (error) {
     console.error('Error fetching users:', error.message);
-    res.status(500).json({ message: 'Failed to fetch users from the database.' });
+    res.status(500).json({ message: 'Failed to fetch users' });
   }
-};
+}
+
 module.exports = {
-  handleusersignup,
-  handleuserlogin,
+  handleUserSignup,
+  handleUserLogin,
   getCurrentUser,
   getAllSignedUsers
 };

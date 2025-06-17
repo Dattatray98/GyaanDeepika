@@ -5,45 +5,42 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const passport = require("passport");
-require('./config/passport');
-app.use(passport.initialize());
-
 
 const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true
 }));
 
-// Passport initialization
+// Passport
+require('./config/passport');
 app.use(passport.initialize());
 
-// MongoDB connection
+// Database
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Routes
-app.use("/users", require("./Routes/user.js"));
-app.use("/auth", require("./Routes/auth.js"));
-app.use("/videos", require("./Routes/video.js"));
-app.use("/upload", require("./CloudinaryRotes/video-upload.js"));
-app.use("/api/ai", require("./Routes/ai.js"));
-app.use("/Courses", require("./Routes/course.js"));
-app.use("/EnrolledCourses", require("./Routes/EnrolledCourse.js"));
+app.use("/users", require("./Routes/user"));
+app.use("/auth", require("./Routes/auth"));
 
-// Default Route
+// Health check
 app.get("/", (req, res) => {
   res.send("🎓 GyaanDeepika Backend is Live");
 });
 
-app.use('/api', require("./Routes/user.js"));
+// Error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ success: false, message: 'Internal Server Error' });
+});
 
-// Start Server
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
