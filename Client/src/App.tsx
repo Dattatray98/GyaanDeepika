@@ -2,16 +2,17 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from "./Pages/LandingPage/LandingPage";
-import BrowseCourses from "./Pages/BrowseCourse/BrowseCousre";
+import BrowseCourses from "./Pages/BrowseCourse/BrowseCourse.tsx.tsx";
 import HomePage from "./Pages/HomePage/HomePage";
 import EnrolledCoursesPage from "./Pages/EnrolledCoursesPage/EnrolledCoursesPage";
-import LearningPage from "./Pages/LearningPage/LearningPage";
 import Auth from "./Pages/Auth/auth";
-import CourseContent from "./Pages/CourseContentPage/CourseContent";
+import CourseContent from "./Pages/CourseContentPage/CourseContentPage";
 import ProfilePage from "./Pages/Profile/ProfilePage";
 import Settings from "./Pages/Settings/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OAuthRedirect from "./Pages/Auth/OAuthRedirect";
+import VideoPlayerPage from "./Pages/LearningPage/VideoPlayerPage";
+import VideoUploadPage from "./Pages/LearningPage/VideoUploadPage";
 
 function App() {
   return (
@@ -31,7 +32,8 @@ function App() {
             <Route path="/CourseContent" element={<CourseContent />} />
             <Route path="/EnrolledCoursesPage" element={<EnrolledCoursesPage />} />
             <Route path="/BrowseCousre" element={<BrowseCourses />} />
-            <Route path="/LearningPage" element={<LearningPage />} />
+            <Route path="/VideoPlayerPage" element={<VideoPlayerPage/>} />
+            <Route path="/VideoUploadPage" element={<VideoUploadPage />} />
           </Route>
 
           {/* Fallback Route */}

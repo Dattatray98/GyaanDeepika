@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { generateToken } = require('../Service/auth');
+const { generateToken } = require('../middleware/auth');
 const User = require('../models/user');
 
 const saltRounds = 10;

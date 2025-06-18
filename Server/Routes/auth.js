@@ -1,7 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
-const { generateToken } = require('../Service/auth');
+const { generateToken } = require('../middleware/auth');
 
 router.get(
   '/google',

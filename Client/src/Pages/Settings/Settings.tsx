@@ -5,11 +5,13 @@ import {
 } from "react-icons/fi";
 import { FaGraduationCap } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext"; // Make sure this path is correct
 
 const Settings = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState("settings");
   const navigate = useNavigate();
+  const { logout } = useAuth(); // Get the logout function from your AuthContext
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -21,10 +23,11 @@ const Settings = () => {
   }, []);
 
   const handleLogout = () => {
-    console.log("User logged out");
-    navigate("/auth/login");
+    logout(); // This will clear the auth state
+    navigate("/auth/login"); // Redirect to login page
   };
 
+  // Rest of your component remains exactly the same
   const MobileView = () => (
     <div className="min-h-screen pb-16 bg-gray-900 text-white">
       <header className="p-4 sticky top-0 z-10 bg-[#1D1D1D]">

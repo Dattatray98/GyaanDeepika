@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FiUser } from "react-icons/fi";
+import { useAuth } from "../../context/AuthContext"; // Adjust path as needed
 
 interface User {
   _id: string;
@@ -14,19 +15,58 @@ interface User {
 
 const ProfileBlock: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth(); // Get token from AuthContext
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/users")
-      .then((response) => {
-        if (response.data.length > 0) {
-          setUser(response.data[0]);
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("http://localhost:8000/users/me", {
+          headers: {
+            Authorization: `Bearer ${token}` // Send token with request
+          }
+        });
+
+        if (response.data) {
+          setUser(response.data); // Assuming backend returns user object directly
         }
-      })
-      .catch((error) => {
-        console.error("❌ Error fetching users:", error.message);
-      });
-  }, []);
+      } catch (err) {
+        console.error("❌ Error fetching user data:", err);
+        setError("Failed to load profile data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (token) {
+      fetchUserData();
+    }
+  }, [token]);
+
+  if (loading) {
+    return (
+      <div className="rounded-xl p-6 w-full bg-gray-800 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500 mx-auto"></div>
+        <p className="text-gray-400 mt-2">Loading profile...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl p-6 w-full bg-gray-800 text-center">
+        <p className="text-red-400">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 text-orange-500 hover:text-orange-400"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-xl p-6 w-full bg-gray-800">
@@ -44,7 +84,13 @@ const ProfileBlock: React.FC = () => {
         </div>
         <div>
           <h2 className="text-xl font-bold text-white">
-            {user ? user.firstName + " " + user.lastName : "Loading..."}
+            {user
+              ? user.firstName && user.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user.firstName
+                  ? user.firstName
+                  : "Guest User"
+              : "Guest User"}
           </h2>
           <p className="text-sm text-gray-400">Rural Learner</p>
         </div>
@@ -54,11 +100,20 @@ const ProfileBlock: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="p-3 rounded-lg bg-gray-700/50">
           <p className="text-xs font-medium mb-1 text-gray-400">Name</p>
-          <p className="text-white">{user ? user.firstName + " " + user.lastName : "Loading..."}</p>
+          <p className="text-white">
+            {user
+              ? user.firstName && user.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user.firstName
+                  ? user.firstName
+                  : "Not available"
+              : "Not available"}
+
+          </p>
         </div>
         <div className="p-3 rounded-lg bg-gray-700/50">
           <p className="text-xs font-medium mb-1 text-gray-400">Email</p>
-          <p className="text-white">{user ? user.email : "Loading..."}</p>
+          <p className="text-white">{user?.email || "Not available"}</p>
         </div>
         <div className="p-3 rounded-lg bg-gray-700/50">
           <p className="text-xs font-medium mb-1 text-gray-400">Phone</p>

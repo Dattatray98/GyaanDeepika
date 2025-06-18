@@ -1,35 +1,66 @@
 const mongoose = require("mongoose");
-
 const userSchema = new mongoose.Schema({
-  // Common fields
+  // Core Identity Fields
   email: {
     type: String,
     required: true,
     unique: true,
+    trim: true,
+    lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, "Invalid email format"]
   },
-  firstName: {
-    type: String,
-  },
-  lastName: {
-    type: String,
-  },
+  firstName: { type: String, trim: true },
+  lastName: { type: String, trim: true },
+  avatar: { type: String }, // URL for profile picture (Google OAuth or uploaded)
 
-  // Manual Sign-up fields
-  mobile: {
+  // Authentication Fields
+  password: { 
     type: String,
+    select: false, // Never returned in queries unless explicitly requested
+    minlength: [8, "Password must be at least 8 characters"]
   },
-  password: {
-    type: String,
-  },
-
-  // Google OAuth fields
-  googleId: {
+  googleId: { 
     type: String,
     unique: true,
-    sparse: true, // allows null but ensures uniqueness if present
+    sparse: true 
+  },
+  emailVerified: { 
+    type: Boolean, 
+    default: false 
+  },
+  // Course Management
+  enrolledCourses: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Course",
+    default: []
+  }],
+  progress: {
+    type: Map, // Key: courseId, Value: { completedVideos: [videoIds], lastAccessed: Date }
+    of: new mongoose.Schema({
+      completedVideos: [String],
+      lastAccessed: Date,
+      completionPercentage: { type: Number, default: 0 }
+    }),
+    default: {}
   },
 
-}, { timestamps: true });
+  // Roles & Timestamps
+  role: { 
+    type: String, 
+    enum: ["student", "instructor", "admin"], 
+    default: "student" 
+  }
+}, { 
+  timestamps: true,
+  toJSON: { virtuals: true }, // Include virtuals when converting to JSON
+  toObject: { virtuals: true }
+});
 
-const User = mongoose.model("User", userSchema, "users");
+
+// Virtual for full name (not stored in DB)
+userSchema.virtual("fullName").get(function() {
+  return `${this.firstName} ${this.lastName}`.trim();
+});
+
+const User = mongoose.model("User", userSchema);
 module.exports = User;

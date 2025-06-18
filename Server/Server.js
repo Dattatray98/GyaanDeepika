@@ -29,11 +29,12 @@ mongoose.connect(process.env.MONGO_URL)
 // Routes
 app.use("/users", require("./Routes/user"));
 app.use("/auth", require("./Routes/auth"));
+app.use("/api/courses", require("./Routes/course"))
 
-// Health check
 app.get("/", (req, res) => {
   res.send("🎓 GyaanDeepika Backend is Live");
 });
+
 
 // Error handling
 app.use((err, req, res, next) => {

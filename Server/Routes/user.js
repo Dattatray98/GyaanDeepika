@@ -6,7 +6,7 @@ const {
   getCurrentUser,
   getAllSignedUsers 
 } = require("../Controllers/user");
-const { verifyToken } = require("../Service/auth");
+const { verifyToken } = require("../middleware/auth");
 
 router.post("/signup", handleUserSignup);
 router.post("/login", handleUserLogin);
