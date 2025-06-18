@@ -104,4 +104,85 @@ router.get('/enrolled', verifyToken, async (req, res) => {
 });
 
 
+// POST /api/courses/progress
+router.post("/progress", auth, async (req, res) => {
+  const { courseId, videoId, watchedDuration, isCompleted } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Get existing course progress or initialize
+    let courseProgress = user.progress.get(courseId) || {
+      completedVideos: [],
+      lastAccessed: new Date(),
+      currentVideoId: videoId,
+      currentVideoProgress: watchedDuration,
+      completionPercentage: 0
+    };
+
+    // Update current video info
+    courseProgress.lastAccessed = new Date();
+    courseProgress.currentVideoId = videoId;
+    courseProgress.currentVideoProgress = watchedDuration;
+
+    // Check if this video already exists in completedVideos
+    const existingVideo = courseProgress.completedVideos.find(v => v.videoId === videoId);
+
+    if (existingVideo) {
+      existingVideo.watchedDuration = watchedDuration;
+      if (typeof isCompleted !== "undefined") {
+        existingVideo.isCompleted = isCompleted;
+      }
+    } else {
+      courseProgress.completedVideos.push({
+        videoId,
+        watchedDuration,
+        isCompleted: !!isCompleted
+      });
+    }
+
+    // Optionally calculate completion percentage
+    const completedCount = courseProgress.completedVideos.filter(v => v.isCompleted).length;
+    const totalVideos = courseProgress.completedVideos.length;
+    courseProgress.completionPercentage = totalVideos > 0 ? (completedCount / totalVideos) * 100 : 0;
+
+    // Set updated course progress
+    user.progress.set(courseId, courseProgress);
+
+    await user.save();
+
+    res.status(200).json({ message: "Progress updated successfully", progress: courseProgress });
+  } catch (err) {
+    console.error("Progress update failed:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+
+// GET /api/courses/progress
+router.get("/progress", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).lean();
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Convert Map to object
+    const progressData = {};
+    if (user.progress instanceof Map) {
+      for (const [courseId, progress] of user.progress.entries()) {
+        progressData[courseId] = progress;
+      }
+    } else if (typeof user.progress === "object") {
+      Object.assign(progressData, user.progress);
+    }
+
+    res.status(200).json({ progress: progressData });
+  } catch (err) {
+    console.error("Failed to fetch progress:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 module.exports = router;

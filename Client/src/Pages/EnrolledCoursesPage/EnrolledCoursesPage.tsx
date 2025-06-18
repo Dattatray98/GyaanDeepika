@@ -1,4 +1,4 @@
-import { useEffect, useState, type Key, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FiSearch,
@@ -21,84 +21,77 @@ import 'aos/dist/aos.css';
 import axios, { AxiosError } from 'axios';
 import { useAuth } from '../../context/AuthContext';
 
+interface Module {
+  id: string;
+  name: string;
+  duration: string;
+  completed: boolean;
+  resources: number;
+}
 
 interface Course {
   _id: string;
-  modules: any;
-  deadline: string | number | Date;
-  certificates: number;
-  id: Key | null | undefined;
-  rating: ReactNode;
-  students: any;
-  duration: ReactNode;
-  image: string | undefined;
-  lastAccessed: any;
-  progress: number;
+  id: string;
   title: string;
   description: string;
   thumbnail: string;
+  image: string;
   instructor: string;
   price: string;
   category: string;
+  progress: number;
+  lastAccessed: string;
+  duration: string;
+  rating: number;
+  students: number;
+  modules: Module[];
+  certificates: number;
+  deadline: string;
+  nextLesson: string;
 }
-
 
 const EnrolledCoursesPage = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
+  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
   const [error, setError] = useState('');
   const [courses, setCourses] = useState<Course[]>([]);
 
   // Initialize animations
-  AOS.init({
-    duration: 800,
-    once: true
-  });
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      once: true
+    });
+  }, []);
 
-
-
-
-  // Set timeout to remove loading screen after 2.5 seconds
+  // Set timeout to remove loading screen after 2 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2000); // 2500ms = 2.5 seconds
+    }, 2000);
 
-    return () => clearTimeout(timer); // cleanup on unmount
+    return () => clearTimeout(timer);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
-        <div className="animate-pulse flex flex-col items-center">
-          <FaGraduationCap className="text-orange-500 text-4xl mb-4 animate-bounce" />
-          <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full bg-orange-500 animate-[progress_2s_ease-in-out_infinite]"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   useEffect(() => {
-    const fetchEnrolleCourse = async () => {
+    const fetchEnrolledCourses = async () => {
       try {
-
         if (!token) {
           throw new Error('Authentication required');
         }
 
-        const response = await axios.get('http://localhost:8000/api/courses/unenrolled', {
+        const response = await axios.get('http://localhost:8000/api/courses/enrolled', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
           validateStatus: (status) => status < 500
         });
+
         if (response.status === 401) {
           localStorage.removeItem('token');
           navigate('/login');
@@ -113,80 +106,15 @@ const EnrolledCoursesPage = () => {
       } catch (err: unknown) {
         if (err instanceof AxiosError) {
           const errorMessage = (err.response?.data as { message?: string })?.message || err.message;
-
           setError(errorMessage);
           console.error('Fetch error:', err);
+        } else if (err instanceof Error) {
+          setError(err.message);
         }
       }
     }
-    fetchEnrolleCourse();
-  }, [navigate])
-
-
-  // // Sample enrolled courses data
-  // const enrolledCourses = [
-  //   {
-  //     id: 1,
-  //     title: "Mathematics Fundamentals",
-  //     instructor: "Prof. Rajesh Kumar",
-  //     progress: 75,
-  //     category: "Education",
-  //     nextLesson: "Algebra Basics",
-  //     lastAccessed: "2 days ago",
-  //     image: "/math-course.jpg",
-  //     duration: "8 weeks",
-  //     rating: 4.8,
-  //     students: 1250,
-  //     modules: [
-  //       { id: 1, name: "Introduction", duration: "15 min", completed: true, resources: 2 },
-  //       { id: 2, name: "Arithmetic", duration: "45 min", completed: true, resources: 3 },
-  //       { id: 3, name: "Algebra Basics", duration: "1h 10min", completed: false, resources: 4 },
-  //       { id: 4, name: "Geometry", duration: "1h 30min", completed: false, resources: 5 }
-  //     ],
-  //     certificates: 1,
-  //     deadline: "2023-12-15"
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Health & Hygiene",
-  //     instructor: "Dr. Priya Sharma",
-  //     progress: 30,
-  //     category: "Health",
-  //     nextLesson: "Sanitation Practices",
-  //     lastAccessed: "1 week ago",
-  //     image: "/health-course.jpg",
-  //     duration: "6 weeks",
-  //     rating: 4.7,
-  //     students: 890,
-  //     modules: [
-  //       { id: 1, name: "Introduction to Hygiene", duration: "20 min", completed: true, resources: 2 },
-  //       { id: 2, name: "Personal Cleanliness", duration: "35 min", completed: false, resources: 3 },
-  //       { id: 3, name: "Sanitation Practices", duration: "50 min", completed: false, resources: 4 }
-  //     ],
-  //     certificates: 0,
-  //     deadline: "2023-11-30"
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "English Communication",
-  //     instructor: "Ms. Anjali Patel",
-  //     progress: 10,
-  //     category: "Language",
-  //     nextLesson: "Basic Grammar",
-  //     lastAccessed: "3 weeks ago",
-  //     image: "/english-course.jpg",
-  //     duration: "10 weeks",
-  //     rating: 4.9,
-  //     students: 2100,
-  //     modules: [
-  //       { id: 1, name: "Introduction", duration: "10 min", completed: true, resources: 1 },
-  //       { id: 2, name: "Basic Grammar", duration: "1h 5min", completed: false, resources: 5 },
-  //       { id: 3, name: "Conversation Skills", duration: "1h 20min", completed: false, resources: 6 }
-  //     ],
-  //     certificates: 0,
-  //     deadline: "2024-01-10"
-  //   }
-  // ];
+    fetchEnrolledCourses();
+  }, [navigate, token]);
 
   // Filter courses based on active filter and search query
   const filteredCourses = courses.filter(course => {
@@ -204,11 +132,12 @@ const EnrolledCoursesPage = () => {
 
   // Get the most recently accessed course for "Continue Learning"
   const continueLearning = courses.reduce((prev, current) =>
-    (prev.lastAccessed > current.lastAccessed) ? prev : current
+    (new Date(prev.lastAccessed) > new Date(current.lastAccessed) ? prev : current), 
+    courses[0]
   );
 
   // Toggle course expansion
-  const toggleCourseExpansion = (courseId: number) => {
+  const toggleCourseExpansion = (courseId: string) => {
     setExpandedCourse(expandedCourse === courseId ? null : courseId);
   };
 
@@ -218,7 +147,20 @@ const EnrolledCoursesPage = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-    if (error) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
+        <div className="animate-pulse flex flex-col items-center">
+          <FaGraduationCap className="text-orange-500 text-4xl mb-4 animate-bounce" />
+          <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-full bg-orange-500 animate-[progress_2s_ease-in-out_infinite]"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#0F0F0F] text-white">
         <div className="max-w-md p-6 bg-gray-800 rounded-lg text-center">
@@ -237,7 +179,6 @@ const EnrolledCoursesPage = () => {
       </div>
     );
   }
-
 
   return (
     <div className="bg-gray-900 text-white min-h-screen pb-20">
@@ -293,7 +234,7 @@ const EnrolledCoursesPage = () => {
         </section>
 
         {/* Continue Learning Section */}
-        {filteredCourses.length > 0 && (
+        {filteredCourses.length > 0 && continueLearning && (
           <section className="mb-8" data-aos="fade-up">
             <h2 className="text-xl font-bold mb-4 flex items-center">
               <FiPlay className="mr-2 text-orange-500" />
@@ -305,7 +246,7 @@ const EnrolledCoursesPage = () => {
             >
               <div className="flex items-start">
                 <img
-                  src={continueLearning.image}
+                  src={continueLearning.image || continueLearning.thumbnail}
                   alt={continueLearning.title}
                   className="w-20 h-20 rounded-lg object-cover mr-4"
                 />
@@ -335,7 +276,7 @@ const EnrolledCoursesPage = () => {
                       </span>
                       <span className="flex items-center text-gray-300">
                         <FiUsers className="mr-1" />
-                        {continueLearning.students.toLocaleString()}
+                        {/* {continueLearning.students.toLocaleString()} */}
                       </span>
                       <span className="flex items-center text-gray-300">
                         <FiStar className="text-yellow-400 mr-1" />
@@ -347,7 +288,6 @@ const EnrolledCoursesPage = () => {
                       className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded-lg text-sm flex items-center"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // navigate(`/CourseContent/${continueLearning.id}/learn`);
                         navigate("/CourseContent")
                       }}
                     >
@@ -386,18 +326,18 @@ const EnrolledCoursesPage = () => {
             <div className="space-y-4">
               {filteredCourses.map(course => (
                 <div
-                  key={course.id}
-                  className={`bg-gray-800 rounded-xl overflow-hidden border border-gray-700 transition-all ${expandedCourse === course.id ? 'shadow-lg' : 'shadow-md hover:shadow-lg'
+                  key={course._id}
+                  className={`bg-gray-800 rounded-xl overflow-hidden border border-gray-700 transition-all ${expandedCourse === course._id ? 'shadow-lg' : 'shadow-md hover:shadow-lg'
                     }`}
                   data-aos="zoom-in"
                 >
                   {/* Course Header */}
                   <div
                     className="p-4 flex items-start cursor-pointer"
-                    onClick={() => toggleCourseExpansion(course.id)}
+                    onClick={() => toggleCourseExpansion(course._id)}
                   >
                     <img
-                      src={course.image}
+                      src={course.image || course.thumbnail}
                       alt={course.title}
                       className="w-16 h-16 rounded-lg object-cover mr-4"
                     />
@@ -430,14 +370,14 @@ const EnrolledCoursesPage = () => {
                         <span className="text-gray-400">
                           {course.progress}% complete • Last accessed: {course.lastAccessed}
                         </span>
-                        <FiChevronRight className={`text-gray-500 transition-transform ${expandedCourse === course.id ? 'transform rotate-90' : ''
+                        <FiChevronRight className={`text-gray-500 transition-transform ${expandedCourse === course._id ? 'transform rotate-90' : ''
                           }`} />
                       </div>
                     </div>
                   </div>
 
                   {/* Expanded Course Content */}
-                  {expandedCourse === course.id && (
+                  {expandedCourse === course._id && (
                     <div className="border-t border-gray-700 p-4 animate-fadeIn">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div className="bg-gray-700/50 p-3 rounded-lg">
@@ -469,12 +409,11 @@ const EnrolledCoursesPage = () => {
                         Course Content
                       </h4>
                       <div className="space-y-2 mb-4">
-                        {course.modules.map(module => (
+                        {course.modules?.map((module) => (
                           <div
                             key={module.id}
                             className={`flex items-center p-3 rounded-lg ${module.completed ? 'bg-gray-700/30' : 'hover:bg-gray-700/50'
                               } cursor-pointer`}
-                            // onClick={() => navigate(`/course/${course.id}/module/${module.id}`)}
                             onClick={() => navigate("/CourseContent")}
                           >
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${module.completed ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'
@@ -498,15 +437,13 @@ const EnrolledCoursesPage = () => {
                       <div className="flex space-x-3">
                         <button
                           className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex-1 text-center"
-                          // onClick={() => navigate(`/course/${course.id}/learn`)}
-                          onClick={() => navigate("CousreContent")}
+                          onClick={() => navigate("/CourseContent")}
                         >
                           Continue Learning
                         </button>
                         <button
                           className="border border-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium flex-1 text-center"
-                          // onClick={() => navigate(`/course/${course.id}/resources`)}
-                          onClick={() => navigate("CousreContent")}
+                          onClick={() => navigate("/CourseContent")}
                         >
                           View Resources
                         </button>

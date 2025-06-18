@@ -1,4 +1,20 @@
 const mongoose = require("mongoose");
+
+// Define course progress sub-schema
+const courseProgressSchema = new mongoose.Schema({
+  completedVideos: [
+    {
+      videoId: { type: String, required: true },
+      watchedDuration: { type: Number, default: 0 }, // seconds watched
+      isCompleted: { type: Boolean, default: false },
+    }
+  ],
+  lastAccessed: { type: Date, default: Date.now },
+  currentVideoId: { type: String, default: null },
+  currentVideoProgress: { type: Number, default: 0 }, // seconds watched
+  completionPercentage: { type: Number, default: 0 }
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   // Core Identity Fields
   email: {
@@ -11,54 +27,52 @@ const userSchema = new mongoose.Schema({
   },
   firstName: { type: String, trim: true },
   lastName: { type: String, trim: true },
-  avatar: { type: String }, // URL for profile picture (Google OAuth or uploaded)
+  avatar: { type: String },
 
   // Authentication Fields
-  password: { 
+  password: {
     type: String,
-    select: false, // Never returned in queries unless explicitly requested
+    select: false,
     minlength: [8, "Password must be at least 8 characters"]
   },
-  googleId: { 
+  googleId: {
     type: String,
     unique: true,
-    sparse: true 
+    sparse: true
   },
-  emailVerified: { 
-    type: Boolean, 
-    default: false 
+  emailVerified: {
+    type: Boolean,
+    default: false
   },
+
   // Course Management
   enrolledCourses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Course",
     default: []
   }],
+
+  // Course Progress Map: courseId -> progress object
   progress: {
-    type: Map, // Key: courseId, Value: { completedVideos: [videoIds], lastAccessed: Date }
-    of: new mongoose.Schema({
-      completedVideos: [String],
-      lastAccessed: Date,
-      completionPercentage: { type: Number, default: 0 }
-    }),
+    type: Map,
+    of: courseProgressSchema,
     default: {}
   },
 
   // Roles & Timestamps
-  role: { 
-    type: String, 
-    enum: ["student", "instructor", "admin"], 
-    default: "student" 
+  role: {
+    type: String,
+    enum: ["student", "instructor", "admin"],
+    default: "student"
   }
-}, { 
+}, {
   timestamps: true,
-  toJSON: { virtuals: true }, // Include virtuals when converting to JSON
+  toJSON: { virtuals: true },
   toObject: { virtuals: true }
 });
 
-
-// Virtual for full name (not stored in DB)
-userSchema.virtual("fullName").get(function() {
+// Virtual for full name
+userSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`.trim();
 });
 
