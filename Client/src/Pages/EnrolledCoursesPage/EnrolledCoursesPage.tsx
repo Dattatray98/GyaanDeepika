@@ -7,47 +7,83 @@ import {
   FiUsers,
   FiStar,
   FiPlay,
-  FiHome,
   FiBook,
-  FiUser,
-  FiDownload,
-  FiAward,
   FiBarChart2,
-  FiCalendar
+  FiHome,
+  FiCompass,
+  FiUser,
+  FiMenu
 } from 'react-icons/fi';
 import { FaGraduationCap, FaRegCheckCircle, FaRegCircle } from 'react-icons/fa';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
-interface Module {
-  id: string;
+interface Instructor {
+  _id: string;
   name: string;
+  avatar?: string;
+  email?: string;
+}
+
+interface CourseContentItem {
+  _id: string;
+  type: string;
+  title: string;
   duration: string;
-  completed: boolean;
-  resources: number;
+  completed?: boolean;
+  preview?: boolean;
+  videoUrl?: string;
+  notes?: string;
+  resources?: string[];
+  quizzes?: any[];
+}
+
+interface CourseSection {
+  _id: string;
+  title: string;
+  description?: string;
+  duration: string;
+  lessons: number;
+  completed: number;
+  locked: boolean;
+  content: CourseContentItem[];
 }
 
 interface Course {
   _id: string;
-  id: string;
   title: string;
   description: string;
+  subtitle?: string;
   thumbnail: string;
-  image: string;
-  instructor: string;
-  price: string;
-  category: string;
-  progress: number;
-  lastAccessed: string;
-  duration: string;
-  rating: number;
-  students: number;
-  modules: Module[];
-  certificates: number;
-  deadline: string;
-  nextLesson: string;
+  instructor: Instructor;
+  price: number;
+  rating?: number;
+  totalStudents?: number;
+  duration?: string;
+  category?: string;
+  level?: string;
+  content: CourseSection[];
+  progress?: {
+    completionPercentage: number;
+    lastAccessed?: string;
+    currentVideoId?: string;
+    currentVideoProgress?: number;
+  };
+}
+
+const slideUp = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1 }
+};
+
+interface NavigationItem {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  path: string;
 }
 
 const EnrolledCoursesPage = () => {
@@ -56,11 +92,23 @@ const EnrolledCoursesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const { token } = useAuth();
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('my-learning');
   const [courses, setCourses] = useState<Course[]>([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Initialize animations
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) setSidebarOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     AOS.init({
       duration: 800,
@@ -68,94 +116,228 @@ const EnrolledCoursesPage = () => {
     });
   }, []);
 
-  // Set timeout to remove loading screen after 2 seconds
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    let abortController: AbortController;
+    let isMounted = true;
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
     const fetchEnrolledCourses = async () => {
+      abortController = new AbortController();
+      const startTime = Date.now();
+
       try {
         if (!token) {
-          throw new Error('Authentication required');
+          throw new Error('Authentication token is missing');
         }
 
-        const response = await axios.get('http://localhost:8000/api/courses/enrolled', {
+        setLoading(true);
+        setLoadingProgress(0);
+        setError('');
+
+        const response = await axios.get(`http://localhost:8000/api/courses/enrolled`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
-          validateStatus: (status) => status < 500
+          signal: abortController.signal,
+          onDownloadProgress: (progressEvent) => {
+            if (isMounted && progressEvent.total) {
+              const percentComplete = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              setLoadingProgress(percentComplete);
+            }
+          }
         });
 
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-          navigate('/login');
-          return;
+        if (!isMounted) return;
+
+        if (!response.data.success) {
+          throw new Error(response.data.error || 'Failed to fetch courses');
         }
 
-        if (response.data.error) {
-          throw new Error(response.data.error);
-        }
+        // Transform the data to match our interface
+        const coursesData = response.data.data.map((course: any) => ({
+          _id: course._id,
+          title: course.title,
+          description: course.description,
+          subtitle: course.subtitle,
+          thumbnail: course.thumbnail,
+          instructor: {
+            _id: course.instructor._id,
+            name: course.instructor.name,
+            avatar: course.instructor.avatar,
+            email: course.instructor.email
+          },
+          price: course.price,
+          rating: course.rating,
+          totalStudents: course.totalStudents,
+          duration: course.duration,
+          category: course.category,
+          level: course.level,
+          content: course.content,
+          progress: {
+            completionPercentage: course.totalProgress || 0,
+            lastAccessed: course.lastUpdated,
+            currentVideoId: null,
+            currentVideoProgress: 0
+          }
+        }));
 
-        setCourses(response.data);
-      } catch (err: unknown) {
-        if (err instanceof AxiosError) {
-          const errorMessage = (err.response?.data as { message?: string })?.message || err.message;
-          setError(errorMessage);
-          console.error('Fetch error:', err);
-        } else if (err instanceof Error) {
-          setError(err.message);
+        setCourses(coursesData);
+        setLoadingProgress(100);
+
+        const elapsed = Date.now() - startTime;
+        const remainingTime = Math.max(0, 800 - elapsed);
+
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+
+      } catch (err) {
+        if (!isMounted || axios.isCancel(err)) return;
+        
+        const errorMessage = axios.isAxiosError(err) 
+          ? err.response?.data?.error || err.message
+          : err instanceof Error 
+            ? err.message 
+            : 'Failed to load courses';
+        
+        setError(errorMessage);
+        console.error("Fetch error:", err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
         }
       }
-    }
-    fetchEnrolledCourses();
-  }, [navigate, token]);
+    };
 
-  // Filter courses based on active filter and search query
+    fetchEnrolledCourses();
+
+    return () => {
+      isMounted = false;
+      abortController?.abort();
+    };
+  }, [token]);
+
+  const handleCourseNavigation = (courseId: string) => {
+    navigate(`/CourseContent/${courseId}/content`);
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    target.src = '/placeholder-course.jpg';
+    target.onerror = null;
+  };
+
   const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.instructor.toLowerCase().includes(searchQuery.toLowerCase());
+    const title = course?.title?.toLowerCase() || '';
+    const instructor = course?.instructor?.name?.toLowerCase() || '';
+    const query = searchQuery.toLowerCase();
+
+    const matchesSearch = title.includes(query) || instructor.includes(query);
 
     const matchesFilter =
       activeFilter === 'all' ||
-      (activeFilter === 'in-progress' && course.progress > 0 && course.progress < 100) ||
-      (activeFilter === 'completed' && course.progress === 100) ||
-      (activeFilter === 'new' && course.progress === 0);
+      (activeFilter === 'in-progress' && (course?.progress?.completionPercentage || 0) > 0 && (course?.progress?.completionPercentage || 0) < 100) ||
+      (activeFilter === 'completed' && (course?.progress?.completionPercentage || 0) === 100) ||
+      (activeFilter === 'new' && (course?.progress?.completionPercentage || 0) === 0);
 
     return matchesSearch && matchesFilter;
   });
 
-  // Get the most recently accessed course for "Continue Learning"
-  const continueLearning = courses.reduce((prev, current) =>
-    (new Date(prev.lastAccessed) > new Date(current.lastAccessed) ? prev : current), 
-    courses[0]
-  );
+  const continueLearning = courses.length > 0
+    ? courses.reduce((prev, current) => {
+        const prevDate = prev.progress?.lastAccessed ? new Date(prev.progress.lastAccessed).getTime() : 0;
+        const currentDate = current.progress?.lastAccessed ? new Date(current.progress.lastAccessed).getTime() : 0;
+        return prevDate > currentDate ? prev : current;
+      })
+    : null;
 
-  // Toggle course expansion
   const toggleCourseExpansion = (courseId: string) => {
     setExpandedCourse(expandedCourse === courseId ? null : courseId);
   };
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Never accessed';
+    try {
+      const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    } catch {
+      return 'Invalid date';
+    }
   };
+
+  const calculateTotalDuration = (sections: CourseSection[]) => {
+    return sections.reduce((total, section) => {
+      return total + (parseInt(section.duration) || 0);
+    }, 0);
+  };
+
+  const countTotalLessons = (sections: CourseSection[]) => {
+    return sections.reduce((total, section) => {
+      return total + (section.content?.length || 0);
+    }, 0);
+  };
+
+  const countCompletedLessons = (sections: CourseSection[]) => {
+    return sections.reduce((total, section) => {
+      return total + (section.content?.filter(item => item.completed).length || 0);
+    }, 0);
+  };
+
+  const navItems: NavigationItem[] = [
+    { icon: <FiHome size={isMobile ? 20 : 16} />, label: 'Home', value: 'home', path: "/home" },
+    { icon: <FiCompass size={isMobile ? 20 : 16} />, label: 'Discover', value: 'discover', path: "/browse-courses" },
+    { icon: <FiBook size={isMobile ? 20 : 16} />, label: 'My Learning', value: 'my-learning', path: "/my-learning" },
+    { icon: <FiUser size={isMobile ? 20 : 16} />, label: 'Profile', value: 'profile', path: "/profile" }
+  ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
-        <div className="animate-pulse flex flex-col items-center">
-          <FaGraduationCap className="text-orange-500 text-4xl mb-4 animate-bounce" />
-          <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
-            <div className="h-full bg-orange-500 animate-[progress_2s_ease-in-out_infinite]"></div>
+        <motion.div
+          className="flex flex-col items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            animate={{
+              y: [0, -15, 0],
+              rotate: [0, 5, -5, 0]
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <FaGraduationCap className="text-orange-500 text-4xl mb-4" />
+          </motion.div>
+
+          <div className="w-48 h-2 bg-gray-800 rounded-full overflow-hidden mb-2">
+            <motion.div
+              className="h-full bg-orange-500"
+              initial={{ width: 0 }}
+              animate={{ width: `${loadingProgress}%` }}
+              transition={{
+                type: "spring",
+                damping: 15,
+                stiffness: 100,
+                duration: 0.5
+              }}
+            />
           </div>
-        </div>
+
+          <motion.p
+            className="text-gray-400 text-sm"
+            animate={{ opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            {loadingProgress < 30 && "Preparing courses..."}
+            {loadingProgress >= 30 && loadingProgress < 70 && "Loading content..."}
+            {loadingProgress >= 70 && loadingProgress < 100 && "Almost there..."}
+            {loadingProgress === 100 && "Finishing up..."}
+          </motion.p>
+        </motion.div>
       </div>
     );
   }
@@ -181,55 +363,106 @@ const EnrolledCoursesPage = () => {
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen pb-20">
-      {/* Header */}
-      <header className="bg-[#1D1D1D] p-4 sticky top-0 z-20 shadow-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <FaGraduationCap className="text-orange-500 text-2xl mr-2" />
-            <h1 className="font-bold text-lg">My Learning</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button className="p-2 rounded-full hover:bg-gray-700">
-              <FiSearch className="text-xl" />
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="flex bg-gray-900 text-white min-h-screen relative">
+      {/* Mobile Sidebar Toggle */}
+      {isMobile && (
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="fixed top-4 left-4 z-50 bg-gray-800 p-2 rounded-lg shadow-lg md:hidden"
+        >
+          <FiMenu size={24} className="text-orange-500" />
+        </button>
+      )}
+
+      {/* Sidebar */}
+      <AnimatePresence>
+        {(!isMobile || sidebarOpen) && (
+          <motion.aside
+            initial={isMobile ? { x: -300 } : { x: 0 }}
+            animate={isMobile ? { x: sidebarOpen ? 0 : -300 } : { x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className={`w-64 bg-[#1D1D1D] p-6 h-screen fixed md:sticky top-0 z-40 ${isMobile ? 'shadow-2xl' : ''}`}
+          >
+            <motion.div
+              className="flex items-center mb-8"
+              whileHover={{ scale: 1.05 }}
+            >
+              <FaGraduationCap className="text-orange-500 text-2xl mr-2" />
+              <h1 className="font-bold text-xl">GyaanDeepika</h1>
+            </motion.div>
+
+            <motion.nav
+              className="space-y-1 mb-8"
+              initial="hidden"
+              animate="visible"
+            >
+              {navItems.map((tab, index) => (
+                <motion.button
+                  key={tab.value}
+                  variants={slideUp}
+                  className={`flex items-center w-full p-3 rounded-lg transition-colors ${activeTab === tab.value ? 'bg-gray-800 text-orange-500' : 'text-gray-400 hover:bg-gray-800'
+                    }`}
+                  onClick={() => {
+                    setActiveTab(tab.value);
+                    navigate(tab.path);
+                    if (isMobile) setSidebarOpen(false);
+                  }}
+                  whileHover={{ x: 5 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <span className="mr-3">{tab.icon}</span>
+                  {tab.label}
+                </motion.button>
+              ))}
+            </motion.nav>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Overlay for mobile sidebar */}
+      {isMobile && sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* Main Content */}
-      <main className="p-4">
+      <main className={`flex-1 p-4 transition-all ${isMobile ? 'pt-16 pb-20' : 'md:ml-64'}`}>
         {/* Search and Filter Section */}
         <section className="mb-6" data-aos="fade-down">
-          <div className="relative mb-4">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search your courses..."
-              className="w-full pl-10 pr-4 py-3 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <div className="relative flex-1">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search your courses..."
+                className="w-full pl-10 pr-4 py-3 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
 
-          <div className="flex overflow-x-auto pb-2 space-x-2">
-            {[
-              { id: 'all', label: 'All Courses' },
-              { id: 'in-progress', label: 'In Progress' },
-              { id: 'completed', label: 'Completed' },
-              { id: 'new', label: 'Not Started' }
-            ].map(filter => (
-              <button
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium ${activeFilter === filter.id
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-              >
-                {filter.label}
-              </button>
-            ))}
+            <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide">
+              {[
+                { id: 'all', label: 'All Courses' },
+                { id: 'in-progress', label: 'In Progress' },
+                { id: 'completed', label: 'Completed' },
+                { id: 'new', label: 'Not Started' }
+              ].map(filter => (
+                <button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium ${activeFilter === filter.id
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    }`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -241,54 +474,57 @@ const EnrolledCoursesPage = () => {
               Continue Learning
             </h2>
             <div
-              className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-4 shadow-lg border border-gray-700 cursor-pointer transform hover:scale-[1.01] transition-transform"
-              onClick={() => navigate(`/CourseContent`)}
+              className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-4 shadow-lg border border-gray-700 cursor-pointer transition-transform hover:scale-[1.005]"
+              onClick={() => handleCourseNavigation(continueLearning._id)}
             >
-              <div className="flex items-start">
-                <img
-                  src={continueLearning.image || continueLearning.thumbnail}
-                  alt={continueLearning.title}
-                  className="w-20 h-20 rounded-lg object-cover mr-4"
-                />
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-2">
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <div className="w-full sm:w-1/4 aspect-video">
+                  <img
+                    src={continueLearning.thumbnail || '/placeholder-course.jpg'}
+                    alt={continueLearning.title || 'Course'}
+                    className="w-full h-full rounded-lg object-cover"
+                    onError={handleImageError}
+                  />
+                </div>
+                <div className="flex-1 w-full">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
                     <div>
-                      <h3 className="font-bold text-lg">{continueLearning.title}</h3>
-                      <p className="text-gray-400 text-sm">{continueLearning.instructor}</p>
+                      <h3 className="font-bold text-lg line-clamp-1">{continueLearning.title || 'Untitled Course'}</h3>
+                      <p className="text-gray-400 text-sm">{continueLearning.instructor.name || 'Unknown Instructor'}</p>
                     </div>
-                    <span className="bg-gray-700 text-orange-400 text-xs px-3 py-1 rounded-full">
-                      {continueLearning.category}
+                    <span className="bg-gray-700 text-orange-400 text-xs px-3 py-1 rounded-full self-start sm:self-auto">
+                      {continueLearning.category || 'Uncategorized'}
                     </span>
                   </div>
 
                   <div className="w-full bg-gray-700 rounded-full h-2.5 mb-3">
                     <div
                       className="bg-gradient-to-r from-orange-500 to-amber-300 h-2.5 rounded-full"
-                      style={{ width: `${continueLearning.progress}%` }}
+                      style={{ width: `${continueLearning.progress?.completionPercentage || 0}%` }}
                     ></div>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center space-x-4 text-sm">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm">
                       <span className="flex items-center text-gray-300">
                         <FiClock className="mr-1" />
-                        {continueLearning.duration}
+                        {continueLearning.duration || 'No duration'}
                       </span>
                       <span className="flex items-center text-gray-300">
                         <FiUsers className="mr-1" />
-                        {/* {continueLearning.students.toLocaleString()} */}
+                        {(continueLearning.totalStudents || 0).toLocaleString()} students
                       </span>
                       <span className="flex items-center text-gray-300">
                         <FiStar className="text-yellow-400 mr-1" />
-                        {continueLearning.rating}
+                        {continueLearning.rating?.toFixed(1) || '0.0'}
                       </span>
                     </div>
 
                     <button
-                      className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded-lg text-sm flex items-center"
+                      className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 sm:py-1 rounded-lg text-sm flex items-center justify-center transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate("/CourseContent")
+                        handleCourseNavigation(continueLearning._id);
                       }}
                     >
                       Continue <FiChevronRight className="ml-1" />
@@ -302,7 +538,7 @@ const EnrolledCoursesPage = () => {
 
         {/* All Enrolled Courses */}
         <section data-aos="fade-up">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-2">
             <h2 className="text-xl font-bold">Your Courses</h2>
             <span className="text-orange-500 text-sm">
               {filteredCourses.length} of {courses.length} courses
@@ -311,9 +547,11 @@ const EnrolledCoursesPage = () => {
 
           {filteredCourses.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-gray-500 mb-4">No courses match your filters</div>
+              <div className="text-gray-500 mb-4">
+                {searchQuery ? 'No courses match your search' : 'No courses match your filters'}
+              </div>
               <button
-                className="text-orange-500 hover:text-orange-400 font-medium"
+                className="text-orange-500 hover:text-orange-400 font-medium transition-colors"
                 onClick={() => {
                   setActiveFilter('all');
                   setSearchQuery('');
@@ -336,25 +574,26 @@ const EnrolledCoursesPage = () => {
                     className="p-4 flex items-start cursor-pointer"
                     onClick={() => toggleCourseExpansion(course._id)}
                   >
-                    <img
-                      src={course.image || course.thumbnail}
-                      alt={course.title}
-                      className="w-16 h-16 rounded-lg object-cover mr-4"
-                    />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-1">
-                        <div>
-                          <h3 className="font-bold">{course.title}</h3>
-                          <p className="text-gray-400 text-sm">{course.instructor}</p>
+                    <div className="w-16 h-16 min-w-[64px] rounded-lg overflow-hidden mr-4">
+                      <img
+                        src={course.thumbnail || '/placeholder-course.jpg'}
+                        alt={course.title || 'Course'}
+                        className="w-full h-full object-cover"
+                        onError={handleImageError}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-1 gap-2">
+                        <div className="min-w-0">
+                          <h3 className="font-bold truncate">{course.title || 'Untitled Course'}</h3>
+                          <p className="text-gray-400 text-sm truncate">{course.instructor.name || 'Unknown Instructor'}</p>
                         </div>
                         <div className="flex space-x-2">
-                          {course.certificates > 0 && (
-                            <span className="bg-amber-900/50 text-amber-300 text-xs px-2 py-1 rounded-full flex items-center">
-                              <FiAward className="mr-1" /> Certificate
-                            </span>
-                          )}
-                          <span className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded-full">
-                            {course.category}
+                          <span className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded-full shrink-0">
+                            {course.level || 'All Levels'}
+                          </span>
+                          <span className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded-full shrink-0">
+                            {course.category || 'Uncategorized'}
                           </span>
                         </div>
                       </div>
@@ -362,16 +601,18 @@ const EnrolledCoursesPage = () => {
                       <div className="w-full bg-gray-700 rounded-full h-2 my-2">
                         <div
                           className="bg-gradient-to-r from-orange-500 to-amber-300 h-2 rounded-full"
-                          style={{ width: `${course.progress}%` }}
+                          style={{ width: `${course.progress?.completionPercentage || 0}%` }}
                         ></div>
                       </div>
 
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-400">
-                          {course.progress}% complete • Last accessed: {course.lastAccessed}
+                        <span className="text-gray-400 truncate mr-2">
+                          {course.progress?.completionPercentage || 0}% complete • Last accessed: {formatDate(course.progress?.lastAccessed)}
                         </span>
-                        <FiChevronRight className={`text-gray-500 transition-transform ${expandedCourse === course._id ? 'transform rotate-90' : ''
-                          }`} />
+                        <FiChevronRight
+                          className={`text-gray-500 transition-transform min-w-4 ${expandedCourse === course._id ? 'transform rotate-90' : ''
+                            }`}
+                        />
                       </div>
                     </div>
                   </div>
@@ -379,27 +620,29 @@ const EnrolledCoursesPage = () => {
                   {/* Expanded Course Content */}
                   {expandedCourse === course._id && (
                     <div className="border-t border-gray-700 p-4 animate-fadeIn">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                         <div className="bg-gray-700/50 p-3 rounded-lg">
                           <div className="flex items-center text-gray-400 text-sm mb-1">
                             <FiBarChart2 className="mr-2" /> Progress
                           </div>
-                          <div className="font-bold text-lg">{course.progress}%</div>
+                          <div className="font-bold text-lg">{course.progress?.completionPercentage || 0}%</div>
                         </div>
 
                         <div className="bg-gray-700/50 p-3 rounded-lg">
                           <div className="flex items-center text-gray-400 text-sm mb-1">
-                            <FiCalendar className="mr-2" /> Deadline
-                          </div>
-                          <div className="font-bold text-lg">{formatDate(course.deadline)}</div>
-                        </div>
-
-                        <div className="bg-gray-700/50 p-3 rounded-lg">
-                          <div className="flex items-center text-gray-400 text-sm mb-1">
-                            <FiClock className="mr-2" /> Time Remaining
+                            <FiBook className="mr-2" /> Lessons
                           </div>
                           <div className="font-bold text-lg">
-                            {Math.ceil((new Date(course.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days
+                            {countCompletedLessons(course.content)} / {countTotalLessons(course.content)}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-700/50 p-3 rounded-lg">
+                          <div className="flex items-center text-gray-400 text-sm mb-1">
+                            <FiClock className="mr-2" /> Duration
+                          </div>
+                          <div className="font-bold text-lg">
+                            {calculateTotalDuration(course.content)} min
                           </div>
                         </div>
                       </div>
@@ -408,42 +651,58 @@ const EnrolledCoursesPage = () => {
                         <FiBook className="mr-2 text-orange-500" />
                         Course Content
                       </h4>
-                      <div className="space-y-2 mb-4">
-                        {course.modules?.map((module) => (
-                          <div
-                            key={module.id}
-                            className={`flex items-center p-3 rounded-lg ${module.completed ? 'bg-gray-700/30' : 'hover:bg-gray-700/50'
-                              } cursor-pointer`}
-                            onClick={() => navigate("/CourseContent")}
-                          >
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${module.completed ? 'bg-green-500/20 text-green-400' : 'bg-gray-600 text-gray-400'
-                              }`}>
-                              {module.completed ? <FaRegCheckCircle /> : <FaRegCircle />}
-                            </div>
-                            <div className="flex-1">
-                              <div className="font-medium">{module.name}</div>
-                              <div className="flex items-center text-xs text-gray-400 mt-1">
-                                <FiClock className="mr-1" />
-                                <span className="mr-3">{module.duration}</span>
-                                <FiDownload className="mr-1" />
-                                <span>{module.resources} resources</span>
+                      <div className="space-y-2 mb-4 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                        {course.content?.length ? (
+                          course.content.map(section => (
+                            <div key={section._id} className="bg-gray-700/30 rounded-lg p-3">
+                              <div className="flex items-center justify-between mb-2">
+                                <h5 className="font-medium">{section.title}</h5>
+                                <span className="text-xs text-gray-400">
+                                  {section.completed}/{section.content.length} completed
+                                </span>
+                              </div>
+                              <div className="space-y-2">
+                                {section.content.map(item => (
+                                  <div
+                                    key={item._id}
+                                    className={`flex items-center p-2 rounded transition-colors ${item.completed ? 'bg-green-500/10' : 'hover:bg-gray-600/50'
+                                      } cursor-pointer`}
+                                    onClick={() => navigate(`/CourseContent/${course._id}/content/${item._id}`)}
+                                  >
+                                    <div
+                                      className={`w-6 h-6 rounded-full flex items-center justify-center mr-2 ${item.completed ? 'text-green-400' : 'text-gray-400'
+                                        }`}
+                                    >
+                                      {item.completed ? <FaRegCheckCircle /> : <FaRegCircle />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm truncate">{item.title}</div>
+                                      <div className="flex items-center text-xs text-gray-400 mt-1">
+                                        <FiClock className="mr-1 min-w-4" />
+                                        <span>{item.duration}</span>
+                                      </div>
+                                    </div>
+                                    <FiChevronRight className="text-gray-500 min-w-4" />
+                                  </div>
+                                ))}
                               </div>
                             </div>
-                            <FiChevronRight className="text-gray-500" />
-                          </div>
-                        ))}
+                          ))
+                        ) : (
+                          <div className="text-gray-500 text-center py-4">No content available</div>
+                        )}
                       </div>
 
-                      <div className="flex space-x-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <button
-                          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex-1 text-center"
-                          onClick={() => navigate("/CourseContent")}
+                          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 sm:py-2 rounded-lg font-medium flex-1 text-center transition-colors"
+                          onClick={() => handleCourseNavigation(course._id)}
                         >
                           Continue Learning
                         </button>
                         <button
-                          className="border border-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium flex-1 text-center"
-                          onClick={() => navigate("/CourseContent")}
+                          className="border border-gray-600 hover:bg-gray-700 text-white px-4 py-3 sm:py-2 rounded-lg font-medium flex-1 text-center transition-colors"
+                          onClick={() => navigate(`/CourseContent/${course._id}/resources`)}
                         >
                           View Resources
                         </button>
@@ -457,30 +716,25 @@ const EnrolledCoursesPage = () => {
         </section>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#1D1D1D] flex justify-around py-3 border-t border-gray-800 z-10">
-        <Link
-          to="/home"
-          className="flex flex-col items-center p-2 text-gray-400 hover:text-white"
-        >
-          <FiHome className="text-xl" />
-          <span className="text-xs mt-1">Home</span>
-        </Link>
-        <Link
-          to="/courses"
-          className="flex flex-col items-center p-2 text-orange-500"
-        >
-          <FiBook className="text-xl" />
-          <span className="text-xs mt-1">My Courses</span>
-        </Link>
-        <Link
-          to="/profile"
-          className="flex flex-col items-center p-2 text-gray-400 hover:text-white"
-        >
-          <FiUser className="text-xl" />
-          <span className="text-xs mt-1">Profile</span>
-        </Link>
-      </nav>
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-[#1D1D1D] flex justify-around py-3 border-t border-gray-800 z-10">
+          {navItems.map(item => (
+            <button
+              key={item.value}
+              onClick={() => {
+                setActiveTab(item.value);
+                navigate(item.path);
+              }}
+              className={`flex flex-col items-center p-2 transition-colors rounded-lg ${activeTab === item.value ? 'text-orange-500 bg-gray-800' : 'text-gray-400 hover:text-white'
+                }`}
+            >
+              {item.icon}
+              <span className="text-xs mt-1">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      )}
     </div>
   );
 };

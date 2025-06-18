@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  CheckCircle, 
-  Clock, 
-  Users, 
-  Star, 
-  BookOpen, 
-  FileText, 
-  Download, 
-  Share2, 
+import {
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Users,
+  Star,
+  BookOpen,
+  FileText,
+  Download,
+  Share2,
   Bookmark,
   Award,
   Target,
@@ -23,19 +23,106 @@ import {
   Search,
   Filter,
   Grid,
-  List} from 'lucide-react';
+  List
+} from 'lucide-react';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+
+interface Instructor {
+  _id: string;
+  name: string;
+  avatar?: string;
+  bio?: string;
+  rating?: number;
+  students?: number;
+}
+
+interface Quiz {
+  question: string;
+  options: string[];
+  correctAnswer: string;
+}
+
+interface CourseContentItem {
+  _id: string;
+  type: 'video' | 'reading' | 'quiz' | 'assignment';
+  title: string;
+  duration: string;
+  completed: boolean;
+  preview?: boolean;
+  videoUrl?: string;
+  notes?: string;
+  resources?: string[];
+  quizzes?: Quiz[];
+}
+
+interface CourseSection {
+  _id: string;
+  title: string;
+  description?: string;
+  duration?: string;
+  lessons?: number;
+  completed?: number;
+  locked?: boolean;
+  content: CourseContentItem[];
+}
+
+interface Resource {
+  _id: string;
+  title: string;
+  type: string;
+  size: string;
+  downloadUrl: string;
+}
+
+interface Announcement {
+  _id: string;
+  title: string;
+  content: string;
+  date: string;
+  important: boolean;
+}
+
+interface Course {
+  _id: string;
+  title: string;
+  description: string;
+  subtitle?: string;
+  thumbnail: string;
+  instructor: Instructor;
+  rating?: number;
+  totalStudents?: number;
+  duration?: string;
+  level?: string;
+  language?: string;
+  lastUpdated?: string;
+  category?: string;
+  price?: number;
+  learningOutcomes?: string[];
+  requirements?: string[];
+  content: CourseSection[];
+  resources?: Resource[];
+  announcements?: Announcement[];
+  totalProgress?: number;
+  completedLessons?: number;
+  totalLessons?: number;
+  estimatedTime?: string;
+}
 
 const CourseContentPage = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState('content');
-  const [expandedSections, setExpandedSections] = useState<string[]>(['section-1']);
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [searchTerm, setSearchTerm] = useState('');
-  const [] = useState('all');
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [courseData, setCourseData] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -47,295 +134,105 @@ const CourseContentPage = () => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Sample course data
-  const courseData = {
-    id: courseId,
-    title: "Mathematics Basics",
-    subtitle: "Master the fundamentals of mathematics with practical examples",
-    instructor: {
-      name: "Dr. Sarah Johnson",
-      avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
-      bio: "Mathematics Professor with 15+ years of teaching experience",
-      rating: 4.9,
-      students: 12500
-    },
-    thumbnail: "https://images.pexels.com/photos/6238025/pexels-photo-6238025.jpeg",
-    rating: 4.7,
-    totalStudents: 1842,
-    duration: "8 weeks",
-    level: "Beginner",
-    language: "English",
-    lastUpdated: "December 2024",
-    category: "Education",
-    price: "Free",
-    description: "This comprehensive mathematics course covers all fundamental concepts from basic arithmetic to introductory algebra. Perfect for students looking to build a strong foundation in mathematics.",
-    learningOutcomes: [
-      "Master basic arithmetic operations",
-      "Understand algebraic expressions and equations",
-      "Solve linear and quadratic equations",
-      "Apply mathematical concepts to real-world problems",
-      "Develop problem-solving skills"
-    ],
-    requirements: [
-      "Basic reading and writing skills",
-      "Access to calculator (optional)",
-      "Willingness to practice regularly"
-    ],
-    totalProgress: 35,
-    completedLessons: 7,
-    totalLessons: 20,
-    estimatedTime: "2-3 hours per week"
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        if(!courseId){
+          throw new Error("missing coures id")
+        }
+
+        if(!token){
+          throw new Error("missing authentication token")
+        }
+        
+        if (!courseId || !token) {
+          throw new Error('Missing course ID or authentication token');
+        }
+
+        const response = await axios.get(`http://localhost:8000/enrolled/courses/${courseId}/content`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        console.log("API response:", response.data);
+
+
+        const courseData = response.data?.data;
+        console.log("this is course data ", courseData);
+
+      if (!courseData || !courseData._id || !courseData.title) {
+        throw new Error('Invalid course data structure');
+      }
+
+        setCourseData(response.data.data);
+
+        if (response.data.data.course?.content?.length) {
+          setExpandedSections([response.data.data.course.content[0]._id]);
+        }
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          const errorMessage = err.response?.data?.message || err.message || 'Request failed';
+          setError(errorMessage);
+          console.error('Axios error:', errorMessage);
+        } else if (err instanceof Error) {
+          setError(err.message);
+          console.error('Error:', err.message);
+        } else {
+          setError('An unknown error occurred');
+          console.error('Unknown error:', err);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourseData();
+  }, [courseId, token]);
+
+  const fetchVideoContent = async (contentId: string) => {
+    try {
+      if (!courseId || !token) return null;
+
+      const response = await axios.get(
+        `http://localhost:8000/enrolled/courses/${courseId}/content/${contentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      return response.data.data.content;
+    } catch (err) {
+      console.error('Error fetching video content:', err);
+      return null;
+    }
   };
 
-  const courseSections = [
-    {
-      id: 'section-1',
-      title: 'Getting Started',
-      description: 'Introduction to basic mathematical concepts',
-      duration: '45 min',
-      lessons: 4,
-      completed: 4,
-      content: [
-        {
-          id: '1',
-          type: 'video',
-          title: 'Welcome to Mathematics',
-          duration: '5:30',
-          completed: true,
-          preview: true
-        },
-        {
-          id: '2',
-          type: 'video',
-          title: 'Number Systems Overview',
-          duration: '12:45',
-          completed: true,
-          preview: false
-        },
-        {
-          id: '3',
-          type: 'reading',
-          title: 'Mathematical Notation Guide',
-          duration: '15 min read',
-          completed: true,
-          preview: false
-        },
-        {
-          id: '4',
-          type: 'quiz',
-          title: 'Basic Concepts Quiz',
-          duration: '10 questions',
-          completed: true,
-          preview: false
-        }
-      ]
-    },
-    {
-      id: 'section-2',
-      title: 'Arithmetic Operations',
-      description: 'Master addition, subtraction, multiplication, and division',
-      duration: '2.5 hours',
-      lessons: 6,
-      completed: 3,
-      content: [
-        {
-          id: '5',
-          type: 'video',
-          title: 'Addition and Subtraction',
-          duration: '18:20',
-          completed: true,
-          preview: false
-        },
-        {
-          id: '6',
-          type: 'video',
-          title: 'Multiplication Techniques',
-          duration: '22:15',
-          completed: true,
-          preview: false
-        },
-        {
-          id: '7',
-          type: 'video',
-          title: 'Division Methods',
-          duration: '19:45',
-          completed: true,
-          preview: false
-        },
-        {
-          id: '8',
-          type: 'assignment',
-          title: 'Practice Problems Set 1',
-          duration: '30 min',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '9',
-          type: 'video',
-          title: 'Order of Operations',
-          duration: '16:30',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '10',
-          type: 'quiz',
-          title: 'Arithmetic Quiz',
-          duration: '15 questions',
-          completed: false,
-          preview: false
-        }
-      ]
-    },
-    {
-      id: 'section-3',
-      title: 'Introduction to Algebra',
-      description: 'Learn variables, expressions, and basic equations',
-      duration: '3 hours',
-      lessons: 8,
-      completed: 0,
-      locked: false,
-      content: [
-        {
-          id: '11',
-          type: 'video',
-          title: 'What is Algebra?',
-          duration: '14:20',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '12',
-          type: 'video',
-          title: 'Variables and Constants',
-          duration: '16:45',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '13',
-          type: 'video',
-          title: 'Algebraic Expressions',
-          duration: '20:30',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '14',
-          type: 'reading',
-          title: 'Expression Simplification Rules',
-          duration: '20 min read',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '15',
-          type: 'video',
-          title: 'Solving Linear Equations',
-          duration: '25:15',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '16',
-          type: 'assignment',
-          title: 'Algebra Practice Set',
-          duration: '45 min',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '17',
-          type: 'video',
-          title: 'Word Problems in Algebra',
-          duration: '18:40',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '18',
-          type: 'quiz',
-          title: 'Algebra Fundamentals Quiz',
-          duration: '20 questions',
-          completed: false,
-          preview: false
-        }
-      ]
-    },
-    {
-      id: 'section-4',
-      title: 'Advanced Topics',
-      description: 'Quadratic equations and systems of equations',
-      duration: '2 hours',
-      lessons: 2,
-      completed: 0,
-      locked: true,
-      content: [
-        {
-          id: '19',
-          type: 'video',
-          title: 'Quadratic Equations',
-          duration: '28:30',
-          completed: false,
-          preview: false
-        },
-        {
-          id: '20',
-          type: 'video',
-          title: 'Systems of Equations',
-          duration: '32:15',
-          completed: false,
-          preview: false
-        }
-      ]
-    }
-  ];
+  const toggleBookmark = async () => {
+    try {
+      if (!courseId || !token) return;
 
-  const resources = [
-    {
-      id: 1,
-      title: 'Mathematics Formula Sheet',
-      type: 'PDF',
-      size: '2.4 MB',
-      downloadUrl: '#'
-    },
-    {
-      id: 2,
-      title: 'Practice Problem Solutions',
-      type: 'PDF',
-      size: '1.8 MB',
-      downloadUrl: '#'
-    },
-    {
-      id: 3,
-      title: 'Calculator Guide',
-      type: 'PDF',
-      size: '950 KB',
-      downloadUrl: '#'
+      await axios.post(
+        `http://localhost:8000/enrolled/courses/${courseId}/bookmark`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setIsBookmarked(!isBookmarked);
+    } catch (err) {
+      console.error('Error toggling bookmark:', err);
     }
-  ];
-
-  const announcements = [
-    {
-      id: 1,
-      title: 'New Practice Problems Added',
-      content: 'Additional practice problems have been added to Section 2',
-      date: '2 days ago',
-      important: true
-    },
-    {
-      id: 2,
-      title: 'Live Q&A Session',
-      content: 'Join us for a live Q&A session this Friday at 3 PM',
-      date: '1 week ago',
-      important: false
-    }
-  ];
+  };
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionId) 
+    setExpandedSections(prev =>
+      prev.includes(sectionId)
         ? prev.filter(id => id !== sectionId)
         : [...prev, sectionId]
     );
@@ -361,36 +258,105 @@ const CourseContentPage = () => {
     }
   };
 
-  const handleContentClick = (content: any, _id: string) => {
+  const handleContentClick = async (content: CourseContentItem, sectionId: string) => {
+    if (!courseData) return;
+
     if (content.type === 'video') {
-      navigate(`/courses/${courseId}/video/${content.id}`);
+      const videoContent = await fetchVideoContent(content._id);
+      if (videoContent) {
+        navigate(`/courses/${courseId}/video/${content._id}`, {
+          state: {
+            videoContent,
+            courseTitle: courseData.title,
+            sectionTitle: courseData.content.find(s => s._id === sectionId)?.title
+          }
+        });
+      }
+    } else if (content.type === 'quiz') {
+      navigate(`/courses/${courseId}/quiz/${content._id}`);
     }
-    // Handle other content types as needed
   };
 
-  const filteredSections = courseSections.filter(section => {
+  const filteredSections = courseData?.content?.filter(section => {
     if (searchTerm) {
       return section.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             section.content.some(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        section.content.some(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()));
     }
     return true;
-  });
+  }) || [];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <div className="animate-pulse flex flex-col items-center">
+          <GraduationCap className="text-orange-500 text-4xl mb-4 animate-bounce" />
+          <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-full bg-orange-500 animate-[progress_2s_ease-in-out_infinite]"></div>
+          </div>
+          <p className="mt-4 text-gray-400">Loading course content...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
+        <div className="max-w-md p-6 bg-gray-800 rounded-lg text-center">
+          <h2 className="text-2xl font-bold text-orange-500 mb-4">Error Loading Course</h2>
+          <p className="mb-4">{error}</p>
+          <div className="flex space-x-4 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Browse Courses
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!courseData) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
+        <div className="max-w-md p-6 bg-gray-800 rounded-lg text-center">
+          <h2 className="text-2xl font-bold text-orange-500 mb-4">Course Not Found</h2>
+          <p className="mb-6">The requested course could not be found or you don't have access.</p>
+          <button
+            onClick={() => navigate('/BrowseCourses')}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Browse Courses
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Mobile View
   if (isMobile) {
     return (
       <div className="bg-gray-900 text-white min-h-screen">
         {/* Mobile Header */}
         <header className="bg-gray-800 p-4 sticky top-0 z-10">
           <div className="flex items-center justify-between mb-4">
-            <button 
+            <button
               onClick={() => navigate(-1)}
               className="text-white hover:text-orange-500"
             >
               <ArrowLeft className="w-6 h-6" />
             </button>
-            <h1 className="font-bold text-lg flex-1 mx-4 text-center">{courseData.title}</h1>
+            <h1 className="font-bold text-lg flex-1 mx-4 text-center truncate">{courseData.title}</h1>
             <button
-              onClick={() => setIsBookmarked(!isBookmarked)}
+              onClick={toggleBookmark}
               className={`${isBookmarked ? 'text-orange-500' : 'text-gray-400'}`}
             >
               <Bookmark className="w-6 h-6" />
@@ -408,10 +374,10 @@ const CourseContentPage = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === tab.id 
-                    ? 'bg-orange-500 text-white' 
+                  activeTab === tab.id
+                    ? 'bg-orange-500 text-white'
                     : 'text-gray-300 hover:text-white'
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -427,16 +393,16 @@ const CourseContentPage = () => {
               <div className="bg-gray-800 rounded-lg p-4 mb-6">
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="font-bold">Your Progress</h3>
-                  <span className="text-orange-500 font-medium">{courseData.totalProgress}%</span>
+                  <span className="text-orange-500 font-medium">{courseData.totalProgress || 0}%</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                  <div 
-                    className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${courseData.totalProgress}%` }}
+                  <div
+                    className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${courseData.totalProgress || 0}%` }}
                   ></div>
                 </div>
                 <p className="text-sm text-gray-400">
-                  {courseData.completedLessons} of {courseData.totalLessons} lessons completed
+                  {courseData.completedLessons || 0} of {courseData.totalLessons || 0} lessons completed
                 </p>
               </div>
 
@@ -455,9 +421,9 @@ const CourseContentPage = () => {
               {/* Course Sections */}
               <div className="space-y-4">
                 {filteredSections.map((section) => (
-                  <div key={section.id} className="bg-gray-800 rounded-lg overflow-hidden">
+                  <div key={section._id} className="bg-gray-800 rounded-lg overflow-hidden">
                     <button
-                      onClick={() => toggleSection(section.id)}
+                      onClick={() => toggleSection(section._id)}
                       className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-700 transition-colors"
                     >
                       <div className="flex-1">
@@ -467,29 +433,31 @@ const CourseContentPage = () => {
                         </div>
                         <p className="text-sm text-gray-400 mb-2">{section.description}</p>
                         <div className="flex items-center text-xs text-gray-500">
-                          <span>{section.lessons} lessons</span>
+                          <span>{section.content.length} lessons</span>
                           <span className="mx-2">•</span>
                           <span>{section.duration}</span>
                           <span className="mx-2">•</span>
-                          <span>{section.completed}/{section.lessons} completed</span>
+                          <span>
+                            {section.content.filter(item => item.completed).length}/{section.content.length} completed
+                          </span>
                         </div>
                       </div>
-                      {expandedSections.includes(section.id) ? 
-                        <ChevronDown className="w-5 h-5 text-gray-400" /> : 
+                      {expandedSections.includes(section._id) ?
+                        <ChevronDown className="w-5 h-5 text-gray-400" /> :
                         <ChevronRight className="w-5 h-5 text-gray-400" />
                       }
                     </button>
 
-                    {expandedSections.includes(section.id) && (
+                    {expandedSections.includes(section._id) && (
                       <div className="border-t border-gray-700">
                         {section.content.map((content, index) => (
                           <button
-                            key={content.id}
-                            onClick={() => !section.locked && handleContentClick(content, section.id)}
+                            key={content._id}
+                            onClick={() => !section.locked && handleContentClick(content, section._id)}
                             disabled={section.locked}
                             className={`w-full p-4 text-left flex items-center hover:bg-gray-700 transition-colors ${
                               section.locked ? 'opacity-50 cursor-not-allowed' : ''
-                            } ${index !== section.content.length - 1 ? 'border-b border-gray-700' : ''}`}
+                              } ${index !== section.content.length - 1 ? 'border-b border-gray-700' : ''}`}
                           >
                             <div className={`mr-3 ${getContentTypeColor(content.type)}`}>
                               {getContentIcon(content.type)}
@@ -524,40 +492,40 @@ const CourseContentPage = () => {
             <div className="space-y-6">
               {/* Course Info */}
               <div className="bg-gray-800 rounded-lg p-4">
-                <img 
-                  src={courseData.thumbnail} 
+                <img
+                  src={courseData.thumbnail}
                   alt={courseData.title}
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
                 <h2 className="text-xl font-bold mb-2">{courseData.title}</h2>
                 <p className="text-gray-400 mb-4">{courseData.subtitle}</p>
-                
+
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
                       <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                      <span className="font-medium">{courseData.rating}</span>
+                      <span className="font-medium">{courseData.rating || 0}</span>
                     </div>
                     <p className="text-xs text-gray-400">Rating</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
                       <Users className="w-4 h-4 text-blue-400 mr-1" />
-                      <span className="font-medium">{courseData.totalStudents}</span>
+                      <span className="font-medium">{courseData.totalStudents || 0}</span>
                     </div>
                     <p className="text-xs text-gray-400">Students</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
                       <Clock className="w-4 h-4 text-green-400 mr-1" />
-                      <span className="font-medium">{courseData.duration}</span>
+                      <span className="font-medium">{courseData.duration || 'N/A'}</span>
                     </div>
                     <p className="text-xs text-gray-400">Duration</p>
                   </div>
                   <div className="text-center">
                     <div className="flex items-center justify-center mb-1">
                       <BarChart3 className="w-4 h-4 text-purple-400 mr-1" />
-                      <span className="font-medium">{courseData.level}</span>
+                      <span className="font-medium">{courseData.level || 'N/A'}</span>
                     </div>
                     <p className="text-xs text-gray-400">Level</p>
                   </div>
@@ -570,19 +538,19 @@ const CourseContentPage = () => {
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-bold mb-3">Instructor</h3>
                 <div className="flex items-center">
-                  <img 
-                    src={courseData.instructor.avatar} 
+                  <img
+                    src={courseData.instructor.avatar || 'https://via.placeholder.com/150'}
                     alt={courseData.instructor.name}
                     className="w-12 h-12 rounded-full object-cover mr-3"
                   />
                   <div className="flex-1">
                     <h4 className="font-medium">{courseData.instructor.name}</h4>
-                    <p className="text-sm text-gray-400">{courseData.instructor.bio}</p>
+                    <p className="text-sm text-gray-400">{courseData.instructor.bio || 'No bio available'}</p>
                     <div className="flex items-center mt-1 text-xs text-gray-400">
                       <Star className="w-3 h-3 text-yellow-400 mr-1" />
-                      <span>{courseData.instructor.rating}</span>
+                      <span>{courseData.instructor.rating || 0}</span>
                       <span className="mx-2">•</span>
-                      <span>{courseData.instructor.students} students</span>
+                      <span>{courseData.instructor.students || 0} students</span>
                     </div>
                   </div>
                 </div>
@@ -592,13 +560,18 @@ const CourseContentPage = () => {
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-bold mb-3">What you'll learn</h3>
                 <ul className="space-y-2">
-                  {courseData.learningOutcomes.map((outcome, index) => (
+                  {(courseData.learningOutcomes || []).slice(0, 3).map((outcome, index) => (
                     <li key={index} className="flex items-start">
                       <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                       <span className="text-sm text-gray-300">{outcome}</span>
                     </li>
                   ))}
                 </ul>
+                {(courseData.learningOutcomes || []).length > 3 && (
+                  <button className="text-orange-500 text-sm mt-2 hover:text-orange-400">
+                    Show all {courseData.learningOutcomes?.length} outcomes
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -609,8 +582,8 @@ const CourseContentPage = () => {
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-bold mb-4">Course Resources</h3>
                 <div className="space-y-3">
-                  {resources.map(resource => (
-                    <div key={resource.id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
+                  {(courseData.resources || []).map(resource => (
+                    <div key={resource._id} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg">
                       <div className="flex items-center">
                         <FileText className="w-5 h-5 text-blue-400 mr-3" />
                         <div>
@@ -630,10 +603,10 @@ const CourseContentPage = () => {
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="font-bold mb-4">Announcements</h3>
                 <div className="space-y-3">
-                  {announcements.map(announcement => (
-                    <div key={announcement.id} className={`p-3 rounded-lg ${
+                  {(courseData.announcements || []).map(announcement => (
+                    <div key={announcement._id} className={`p-3 rounded-lg ${
                       announcement.important ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-gray-700'
-                    }`}>
+                      }`}>
                       <div className="flex items-start justify-between mb-1">
                         <h4 className="font-medium text-sm">{announcement.title}</h4>
                         {announcement.important && (
@@ -653,13 +626,14 @@ const CourseContentPage = () => {
     );
   }
 
+  // Desktop View
   return (
     <div className="bg-gray-900 text-white min-h-screen">
       {/* Desktop Header */}
       <header className="bg-gray-800 p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <button 
+            <button
               onClick={() => navigate(-1)}
               className="text-white hover:text-orange-500 mr-4"
             >
@@ -675,10 +649,10 @@ const CourseContentPage = () => {
           </div>
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => setIsBookmarked(!isBookmarked)}
+              onClick={toggleBookmark}
               className={`p-2 rounded-lg transition-colors ${
                 isBookmarked ? 'bg-orange-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-              }`}
+                }`}
             >
               <Bookmark className="w-5 h-5" />
             </button>
@@ -692,27 +666,27 @@ const CourseContentPage = () => {
         <div className="grid grid-cols-5 gap-6 mb-6">
           <div className="bg-gray-700 rounded-lg p-4 text-center">
             <Star className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-            <p className="font-bold">{courseData.rating}</p>
+            <p className="font-bold">{courseData.rating || 0}</p>
             <p className="text-sm text-gray-400">Rating</p>
           </div>
           <div className="bg-gray-700 rounded-lg p-4 text-center">
             <Users className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-            <p className="font-bold">{courseData.totalStudents}</p>
+            <p className="font-bold">{courseData.totalStudents || 0}</p>
             <p className="text-sm text-gray-400">Students</p>
           </div>
           <div className="bg-gray-700 rounded-lg p-4 text-center">
             <Clock className="w-6 h-6 text-green-400 mx-auto mb-2" />
-            <p className="font-bold">{courseData.duration}</p>
+            <p className="font-bold">{courseData.duration || 'N/A'}</p>
             <p className="text-sm text-gray-400">Duration</p>
           </div>
           <div className="bg-gray-700 rounded-lg p-4 text-center">
             <BarChart3 className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-            <p className="font-bold">{courseData.level}</p>
+            <p className="font-bold">{courseData.level || 'N/A'}</p>
             <p className="text-sm text-gray-400">Level</p>
           </div>
           <div className="bg-gray-700 rounded-lg p-4 text-center">
             <Award className="w-6 h-6 text-orange-400 mx-auto mb-2" />
-            <p className="font-bold">{courseData.price}</p>
+            <p className="font-bold">{courseData.price || 'Free'}</p>
             <p className="text-sm text-gray-400">Price</p>
           </div>
         </div>
@@ -721,17 +695,17 @@ const CourseContentPage = () => {
         <div className="bg-gray-700 rounded-lg p-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-medium">Your Progress</h3>
-            <span className="text-orange-500 font-bold">{courseData.totalProgress}%</span>
+            <span className="text-orange-500 font-bold">{courseData.totalProgress || 0}%</span>
           </div>
           <div className="w-full bg-gray-600 rounded-full h-3 mb-2">
-            <div 
-              className="bg-orange-500 h-3 rounded-full transition-all duration-300" 
-              style={{ width: `${courseData.totalProgress}%` }}
+            <div
+              className="bg-orange-500 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${courseData.totalProgress || 0}%` }}
             ></div>
           </div>
           <p className="text-sm text-gray-400">
-            {courseData.completedLessons} of {courseData.totalLessons} lessons completed • 
-            Estimated time remaining: {courseData.estimatedTime}
+            {courseData.completedLessons || 0} of {courseData.totalLessons || 0} lessons completed •
+            Estimated time remaining: {courseData.estimatedTime || 'N/A'}
           </p>
         </div>
       </header>
@@ -765,7 +739,7 @@ const CourseContentPage = () => {
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'list' ? 'bg-orange-500 text-white' : 'bg-gray-800 hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -773,7 +747,7 @@ const CourseContentPage = () => {
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-lg transition-colors ${
                   viewMode === 'grid' ? 'bg-orange-500 text-white' : 'bg-gray-800 hover:bg-gray-700'
-                }`}
+                  }`}
               >
                 <Grid className="w-4 h-4" />
               </button>
@@ -783,9 +757,9 @@ const CourseContentPage = () => {
           {/* Course Sections */}
           <div className="space-y-6">
             {filteredSections.map((section) => (
-              <div key={section.id} className="bg-gray-800 rounded-xl overflow-hidden">
+              <div key={section._id} className="bg-gray-800 rounded-xl overflow-hidden">
                 <button
-                  onClick={() => toggleSection(section.id)}
+                  onClick={() => toggleSection(section._id)}
                   className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-700 transition-colors"
                 >
                   <div className="flex-1">
@@ -793,39 +767,39 @@ const CourseContentPage = () => {
                       <h3 className="text-xl font-bold mr-3">{section.title}</h3>
                       {section.locked && <Lock className="w-5 h-5 text-gray-400" />}
                       <div className="ml-auto flex items-center space-x-4 text-sm text-gray-400">
-                        <span>{section.lessons} lessons</span>
+                        <span>{section.content.length} lessons</span>
                         <span>{section.duration}</span>
                         <span className="text-orange-500 font-medium">
-                          {section.completed}/{section.lessons} completed
+                          {section.content.filter(item => item.completed).length}/{section.content.length} completed
                         </span>
                       </div>
                     </div>
                     <p className="text-gray-400">{section.description}</p>
                     <div className="w-full bg-gray-700 rounded-full h-2 mt-3">
-                      <div 
-                        className="bg-orange-500 h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${(section.completed / section.lessons) * 100}%` }}
+                      <div
+                        className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(section.content.filter(item => item.completed).length / section.content.length) * 100}%` }}
                       ></div>
                     </div>
                   </div>
-                  {expandedSections.includes(section.id) ? 
-                    <ChevronDown className="w-6 h-6 text-gray-400 ml-4" /> : 
+                  {expandedSections.includes(section._id) ?
+                    <ChevronDown className="w-6 h-6 text-gray-400 ml-4" /> :
                     <ChevronRight className="w-6 h-6 text-gray-400 ml-4" />
                   }
                 </button>
 
-                {expandedSections.includes(section.id) && (
+                {expandedSections.includes(section._id) && (
                   <div className="border-t border-gray-700">
                     {viewMode === 'list' ? (
                       <div className="divide-y divide-gray-700">
                         {section.content.map((content) => (
                           <button
-                            key={content.id}
-                            onClick={() => !section.locked && handleContentClick(content, section.id)}
+                            key={content._id}
+                            onClick={() => !section.locked && handleContentClick(content, section._id)}
                             disabled={section.locked}
                             className={`w-full p-4 text-left flex items-center hover:bg-gray-700 transition-colors ${
                               section.locked ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
+                              }`}
                           >
                             <div className={`mr-4 ${getContentTypeColor(content.type)}`}>
                               {getContentIcon(content.type)}
@@ -840,7 +814,9 @@ const CourseContentPage = () => {
                                   Preview
                                 </span>
                               )}
-                              <span className={`text-xs px-2 py-1 rounded ${getContentTypeColor(content.type)} bg-opacity-20`}>
+                              <span className={`text-xs px-2 py-1 rounded ${
+                                getContentTypeColor(content.type)
+                                } bg-opacity-20`}>
                                 {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
                               </span>
                               {content.completed ? (
@@ -856,12 +832,12 @@ const CourseContentPage = () => {
                       <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {section.content.map((content) => (
                           <button
-                            key={content.id}
-                            onClick={() => !section.locked && handleContentClick(content, section.id)}
+                            key={content._id}
+                            onClick={() => !section.locked && handleContentClick(content, section._id)}
                             disabled={section.locked}
                             className={`p-4 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition-colors ${
                               section.locked ? 'opacity-50 cursor-not-allowed' : ''
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center justify-between mb-3">
                               <div className={`${getContentTypeColor(content.type)}`}>
@@ -876,7 +852,9 @@ const CourseContentPage = () => {
                             <h4 className="font-medium mb-2">{content.title}</h4>
                             <p className="text-sm text-gray-400 mb-2">{content.duration}</p>
                             <div className="flex items-center justify-between">
-                              <span className={`text-xs px-2 py-1 rounded ${getContentTypeColor(content.type)} bg-opacity-20`}>
+                              <span className={`text-xs px-2 py-1 rounded ${
+                                getContentTypeColor(content.type)
+                                } bg-opacity-20`}>
                                 {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
                               </span>
                               {content.preview && (
@@ -902,8 +880,8 @@ const CourseContentPage = () => {
           <div className="bg-gray-700 rounded-lg p-4 mb-6">
             <h3 className="font-bold mb-3">Instructor</h3>
             <div className="flex items-center mb-3">
-              <img 
-                src={courseData.instructor.avatar} 
+              <img
+                src={courseData.instructor.avatar || 'https://via.placeholder.com/150'}
                 alt={courseData.instructor.name}
                 className="w-12 h-12 rounded-full object-cover mr-3"
               />
@@ -911,29 +889,29 @@ const CourseContentPage = () => {
                 <h4 className="font-medium">{courseData.instructor.name}</h4>
                 <div className="flex items-center text-sm text-gray-400">
                   <Star className="w-3 h-3 text-yellow-400 mr-1" />
-                  <span>{courseData.instructor.rating}</span>
+                  <span>{courseData.instructor.rating || 0}</span>
                   <span className="mx-2">•</span>
-                  <span>{courseData.instructor.students} students</span>
+                  <span>{courseData.instructor.students || 0} students</span>
                 </div>
               </div>
             </div>
-            <p className="text-sm text-gray-400">{courseData.instructor.bio}</p>
+            <p className="text-sm text-gray-400">{courseData.instructor.bio || 'No bio available'}</p>
           </div>
 
           {/* Learning Outcomes */}
           <div className="bg-gray-700 rounded-lg p-4 mb-6">
             <h3 className="font-bold mb-3">What you'll learn</h3>
             <ul className="space-y-2">
-              {courseData.learningOutcomes.slice(0, 3).map((outcome, index) => (
+              {(courseData.learningOutcomes || []).slice(0, 3).map((outcome, index) => (
                 <li key={index} className="flex items-start">
                   <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-sm text-gray-300">{outcome}</span>
                 </li>
               ))}
             </ul>
-            {courseData.learningOutcomes.length > 3 && (
+            {(courseData.learningOutcomes || []).length > 3 && (
               <button className="text-orange-500 text-sm mt-2 hover:text-orange-400">
-                Show all {courseData.learningOutcomes.length} outcomes
+                Show all {courseData.learningOutcomes?.length} outcomes
               </button>
             )}
           </div>
@@ -942,8 +920,8 @@ const CourseContentPage = () => {
           <div className="bg-gray-700 rounded-lg p-4 mb-6">
             <h3 className="font-bold mb-3">Resources</h3>
             <div className="space-y-2">
-              {resources.map(resource => (
-                <div key={resource.id} className="flex items-center justify-between p-2 hover:bg-gray-600 rounded">
+              {(courseData.resources || []).map(resource => (
+                <div key={resource._id} className="flex items-center justify-between p-2 hover:bg-gray-600 rounded">
                   <div className="flex items-center">
                     <FileText className="w-4 h-4 text-blue-400 mr-2" />
                     <span className="text-sm">{resource.title}</span>
@@ -960,10 +938,10 @@ const CourseContentPage = () => {
           <div className="bg-gray-700 rounded-lg p-4">
             <h3 className="font-bold mb-3">Announcements</h3>
             <div className="space-y-3">
-              {announcements.map(announcement => (
-                <div key={announcement.id} className={`p-3 rounded ${
+              {(courseData.announcements || []).map(announcement => (
+                <div key={announcement._id} className={`p-3 rounded ${
                   announcement.important ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-gray-600'
-                }`}>
+                  }`}>
                   <div className="flex items-start justify-between mb-1">
                     <h4 className="font-medium text-sm">{announcement.title}</h4>
                     {announcement.important && (

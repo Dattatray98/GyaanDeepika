@@ -12,7 +12,8 @@ import Settings from "./Pages/Settings/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import OAuthRedirect from "./Pages/Auth/OAuthRedirect";
 import VideoPlayerPage from "./Pages/LearningPage/VideoPlayerPage";
-import VideoUploadPage from "./Pages/LearningPage/VideoUploadPage";
+import Test from "./Pages/test/Test.tsx";
+
 
 function App() {
   return (
@@ -29,11 +30,11 @@ function App() {
             <Route path="/home" element={<HomePage />} />
             <Route path="/ProfilePage" element={<ProfilePage />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/CourseContent" element={<CourseContent />} />
+            <Route path="/CourseContent/:courseId/content" element={<CourseContent />} />
             <Route path="/EnrolledCoursesPage" element={<EnrolledCoursesPage />} />
             <Route path="/BrowseCousre" element={<BrowseCourses />} />
             <Route path="/VideoPlayerPage" element={<VideoPlayerPage/>} />
-            <Route path="/VideoUploadPage" element={<VideoUploadPage />} />
+            <Route path="/Test" element={<Test />} />
           </Route>
 
           {/* Fallback Route */}

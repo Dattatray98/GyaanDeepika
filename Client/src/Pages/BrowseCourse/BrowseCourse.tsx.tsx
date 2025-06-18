@@ -6,17 +6,28 @@ import { FiSearch, FiClock, FiArrowRight } from 'react-icons/fi';
 import { FaGraduationCap } from 'react-icons/fa';
 import Footer from '../LandingPage/Footer';
 import { motion } from 'framer-motion';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+
+interface Instructor {
+  _id: string;
+  name: string;
+  avatar?: string;
+}
 
 interface Course {
   _id: string;
   title: string;
   description: string;
+  subtitle?: string;
   thumbnail: string;
-  instructor: string;
-  price: string;
-  category: string;
+  instructor: Instructor;
+  price: number;
+  category?: string;
+  level?: string;
+  duration?: string;
+  rating?: number;
+  totalStudents?: number;
 }
 
 const BrowseCourses = () => {
@@ -24,6 +35,7 @@ const BrowseCourses = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedLevel, setSelectedLevel] = useState('All');
   const [error, setError] = useState('');
 
   const { token } = useAuth();
@@ -46,12 +58,12 @@ const BrowseCourses = () => {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, token]);
 
   useEffect(() => {
     const fetchUnenrolledCourses = async () => {
       try {
-
+        setLoading(true);
         if (!token) {
           throw new Error('Authentication required');
         }
@@ -70,28 +82,51 @@ const BrowseCourses = () => {
           return;
         }
 
-        if (response.data.error) {
-          throw new Error(response.data.error);
+        if (!response.data.success) {
+          throw new Error(response.data.error || 'Failed to fetch courses');
         }
 
-        setCourses(response.data);
-        
-      } catch (err: unknown) {
-        if (err instanceof AxiosError) {
-          const errorMessage = (err.response?.data as { message?: string })?.message || err.message;
+        // Transform the data to match our interface
+        const formattedCourses = response.data.data.map((course: any) => ({
+          _id: course._id,
+          title: course.title,
+          description: course.description,
+          subtitle: course.subtitle,
+          thumbnail: course.thumbnail,
+          instructor: {
+            _id: course.instructor._id,
+            name: course.instructor.name,
+            avatar: course.instructor.avatar
+          },
+          price: course.price,
+          category: course.category,
+          level: course.level,
+          duration: course.duration,
+          rating: course.rating,
+          totalStudents: course.totalStudents
+        }));
 
+        setCourses(formattedCourses);
+        setError('');
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          const errorMessage = err.response?.data?.error || err.message || 'Failed to fetch courses';
           setError(errorMessage);
-          console.error('Fetch error:', err);
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred');
         }
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchUnenrolledCourses();
-  }, [navigate]);
+  }, [navigate, token]);
 
   const handleEnroll = async (courseId: string) => {
     try {
-
       if (!token) {
         alert("Please login first.");
         return;
@@ -109,26 +144,38 @@ const BrowseCourses = () => {
 
       if (response.status === 200) {
         alert("Successfully enrolled!");
-        // 👇 Redirect to the course content page
+        // Remove the enrolled course from the list
+        setCourses(prev => prev.filter(course => course._id !== courseId));
         navigate(`/courses/${courseId}/content`);
       } else {
         alert("Enrollment failed.");
       }
-
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong during enrollment.");
+      const errorMessage = axios.isAxiosError(err)
+        ? err.response?.data?.error || err.message
+        : 'Something went wrong during enrollment';
+      alert(errorMessage);
     }
   };
 
   const categories = ['All', 'Programming', 'Design', 'Business', 'Language', 'Other'];
+  const levels = ['All', 'Beginner', 'Intermediate', 'Advanced'];
 
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
       course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || course.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+      course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (course.subtitle && course.subtitle.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const matchesCategory = 
+      selectedCategory === 'All' || 
+      (course.category && course.category.toLowerCase() === selectedCategory.toLowerCase());
+
+    const matchesLevel = 
+      selectedLevel === 'All' || 
+      (course.level && course.level.toLowerCase() === selectedLevel.toLowerCase());
+
+    return matchesSearch && matchesCategory && matchesLevel;
   });
 
   if (loading) {
@@ -218,7 +265,7 @@ const BrowseCourses = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
+            <div className="flex flex-wrap justify-center gap-3 mb-4">
               {categories.map(category => (
                 <motion.button
                   key={category}
@@ -231,6 +278,22 @@ const BrowseCourses = () => {
                     }`}
                 >
                   {category}
+                </motion.button>
+              ))}
+            </div>
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              {levels.map(level => (
+                <motion.button
+                  key={level}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedLevel(level)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedLevel === level
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    }`}
+                >
+                  {level}
                 </motion.button>
               ))}
             </div>
@@ -262,17 +325,44 @@ const BrowseCourses = () => {
                       <span className="bg-gray-700 text-orange-400 text-xs px-3 py-1 rounded-full">
                         {course.category || 'General'}
                       </span>
-                      <span className="bg-gray-700 text-gray-300 text-xs px-3 py-1 rounded-full">
-                        ${course.price || 'Free'}
-                      </span>
+                      <div className="flex flex-col items-end">
+                        <span className="bg-gray-700 text-gray-300 text-xs px-3 py-1 rounded-full mb-1">
+                          {course.price > 0 ? `$${course.price.toFixed(2)}` : 'Free'}
+                        </span>
+                        <span className="bg-gray-700 text-blue-300 text-xs px-3 py-1 rounded-full">
+                          {course.level || 'Beginner'}
+                        </span>
+                      </div>
                     </div>
                     <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">{course.description}</p>
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                      {course.subtitle || course.description}
+                    </p>
+                    <div className="flex flex-wrap justify-between text-sm text-gray-400 mb-4 gap-2">
+                      <div className="flex items-center">
+                        <img 
+                          src={course.instructor.avatar || 'https://via.placeholder.com/150'} 
+                          alt={course.instructor.name}
+                          className="w-6 h-6 rounded-full mr-2"
+                        />
+                        <span>{course.instructor.name}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <FaGraduationCap className="mr-1" />
+                        <span>{course.totalStudents || 0} students</span>
+                      </div>
+                    </div>
                     <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
                       <div className="flex items-center">
                         <FiClock className="mr-1" />
-                        <span>Instructor: {course.instructor || 'Staff'}</span>
+                        <span>{course.duration || 'Flexible'}</span>
                       </div>
+                      {course.rating && (
+                        <div className="flex items-center">
+                          <span className="text-yellow-400 mr-1">★</span>
+                          <span>{course.rating.toFixed(1)}</span>
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={() => handleEnroll(course._id)}
@@ -292,6 +382,7 @@ const BrowseCourses = () => {
                 onClick={() => {
                   setSearchTerm('');
                   setSelectedCategory('All');
+                  setSelectedLevel('All');
                 }}
                 className="mt-4 text-orange-400 hover:underline"
               >
