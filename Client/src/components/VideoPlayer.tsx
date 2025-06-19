@@ -1,3 +1,4 @@
+// VideoPlayer.tsx (no changes needed)
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Play, 

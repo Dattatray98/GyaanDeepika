@@ -30,6 +30,7 @@ interface Course {
   totalStudents?: number;
 }
 
+
 const BrowseCourses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,6 +133,13 @@ const BrowseCourses = () => {
         return;
       }
 
+      if(!courseId){
+        console.log("course id not found ")
+      }
+      else{
+        console.log("course id found ", courseId)
+      }
+
       const response = await axios.post(
         `http://localhost:8000/api/courses/enroll/${courseId}`,
         {},
@@ -146,7 +154,7 @@ const BrowseCourses = () => {
         alert("Successfully enrolled!");
         // Remove the enrolled course from the list
         setCourses(prev => prev.filter(course => course._id !== courseId));
-        navigate(`/courses/${courseId}/content`);
+        navigate(`/EnrolledCourses`);
       } else {
         alert("Enrollment failed.");
       }

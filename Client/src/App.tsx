@@ -33,7 +33,7 @@ function App() {
             <Route path="/CourseContent/:courseId/content" element={<CourseContent />} />
             <Route path="/EnrolledCoursesPage" element={<EnrolledCoursesPage />} />
             <Route path="/BrowseCousre" element={<BrowseCourses />} />
-            <Route path="/VideoPlayerPage" element={<VideoPlayerPage/>} />
+            <Route path="/courses/:courseId/content/:contentId" element={<VideoPlayerPage />} />
             <Route path="/Test" element={<Test />} />
           </Route>
 

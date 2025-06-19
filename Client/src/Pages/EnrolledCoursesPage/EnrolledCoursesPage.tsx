@@ -133,7 +133,7 @@ const EnrolledCoursesPage = () => {
         setLoadingProgress(0);
         setError('');
 
-        const response = await axios.get(`http://localhost:8000/api/courses/enrolled`, {
+        const response = await axios.get(`http://localhost:8000/api/enrolled/enrolled`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'

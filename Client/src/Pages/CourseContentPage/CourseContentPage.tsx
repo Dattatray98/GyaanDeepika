@@ -100,13 +100,16 @@ interface Course {
   price?: number;
   learningOutcomes?: string[];
   requirements?: string[];
-  content: CourseSection[];
+  content?: CourseSection[];
   resources?: Resource[];
   announcements?: Announcement[];
   totalProgress?: number;
   completedLessons?: number;
   totalLessons?: number;
   estimatedTime?: string;
+  course?: {
+    content?: CourseSection[];
+  };
 }
 
 const CourseContentPage = () => {
@@ -139,38 +142,26 @@ const CourseContentPage = () => {
       try {
         setLoading(true);
         setError('');
-        if(!courseId){
-          throw new Error("missing coures id")
-        }
-
-        if(!token){
-          throw new Error("missing authentication token")
-        }
-        
         if (!courseId || !token) {
           throw new Error('Missing course ID or authentication token');
         }
 
-        const response = await axios.get(`http://localhost:8000/enrolled/courses/${courseId}/content`, {
+        const response = await axios.get(`http://localhost:8000/api/enrolled/${courseId}/content`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
 
-        console.log("API response:", response.data);
+        const courseData = response.data?.data?.course || response.data?.data;
 
+        if (!courseData || !courseData.courseTitle || !courseData.courseDescription) {
+          throw new Error('Invalid course data structure');
+        }
+        setCourseData(courseData);
 
-        const courseData = response.data?.data;
-        console.log("this is course data ", courseData);
-
-      if (!courseData || !courseData._id || !courseData.title) {
-        throw new Error('Invalid course data structure');
-      }
-
-        setCourseData(response.data.data);
-
-        if (response.data.data.course?.content?.length) {
-          setExpandedSections([response.data.data.course.content[0]._id]);
+        const content = courseData.content || courseData.course?.content;
+        if (content?.length) {
+          setExpandedSections([content[0]._id]);
         }
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
@@ -192,31 +183,12 @@ const CourseContentPage = () => {
     fetchCourseData();
   }, [courseId, token]);
 
-  const fetchVideoContent = async (contentId: string) => {
-    try {
-      if (!courseId || !token) return null;
-
-      const response = await axios.get(
-        `http://localhost:8000/enrolled/courses/${courseId}/content/${contentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      return response.data.data.content;
-    } catch (err) {
-      console.error('Error fetching video content:', err);
-      return null;
-    }
-  };
-
   const toggleBookmark = async () => {
     try {
       if (!courseId || !token) return;
 
       await axios.post(
-        `http://localhost:8000/enrolled/courses/${courseId}/bookmark`,
+        `http://localhost:8000/api/enrolled/${courseId}/bookmark`,
         null,
         {
           headers: {
@@ -259,31 +231,47 @@ const CourseContentPage = () => {
   };
 
   const handleContentClick = async (content: CourseContentItem, sectionId: string) => {
-    if (!courseData) return;
+    if (!courseData || !courseId) return;
 
     if (content.type === 'video') {
-      const videoContent = await fetchVideoContent(content._id);
-      if (videoContent) {
-        navigate(`/courses/${courseId}/video/${content._id}`, {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/enrolled/${courseId}/content/${content._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        const videoContent = response.data.data;
+
+        navigate(`/courses/${courseId}/content/${content._id}`, {
           state: {
             videoContent,
             courseTitle: courseData.title,
-            sectionTitle: courseData.content.find(s => s._id === sectionId)?.title
+            sectionTitle: courseData.content?.find(s => s._id === sectionId)?.title || ''
           }
         });
+      } catch (err) {
+        console.error('Error fetching video content:', err);
       }
     } else if (content.type === 'quiz') {
       navigate(`/courses/${courseId}/quiz/${content._id}`);
+    } else if (content.type === 'reading') {
+      navigate(`/courses/${courseId}/reading/${content._id}`);
+    } else if (content.type === 'assignment') {
+      navigate(`/courses/${courseId}/assignment/${content._id}`);
     }
   };
 
-  const filteredSections = courseData?.content?.filter(section => {
+  const filteredSections = (courseData?.content || courseData?.course?.content || []).filter(section => {
     if (searchTerm) {
       return section.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        section.content.some(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()));
+        (section.content || []).some(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()));
     }
     return true;
-  }) || [];
+  });
 
   if (loading) {
     return (
@@ -373,8 +361,7 @@ const CourseContentPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === tab.id
+                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${activeTab === tab.id
                     ? 'bg-orange-500 text-white'
                     : 'text-gray-300 hover:text-white'
                   }`}
@@ -433,12 +420,12 @@ const CourseContentPage = () => {
                         </div>
                         <p className="text-sm text-gray-400 mb-2">{section.description}</p>
                         <div className="flex items-center text-xs text-gray-500">
-                          <span>{section.content.length} lessons</span>
+                          <span>{section.content?.length || 0} lessons</span>
                           <span className="mx-2">•</span>
                           <span>{section.duration}</span>
                           <span className="mx-2">•</span>
                           <span>
-                            {section.content.filter(item => item.completed).length}/{section.content.length} completed
+                            {(section.content?.filter(item => item.completed).length || 0)}/{section.content?.length || 0} completed
                           </span>
                         </div>
                       </div>
@@ -450,14 +437,14 @@ const CourseContentPage = () => {
 
                     {expandedSections.includes(section._id) && (
                       <div className="border-t border-gray-700">
-                        {section.content.map((content, index) => (
+                        {section.content?.map((content, index) => (
                           <button
                             key={content._id}
                             onClick={() => !section.locked && handleContentClick(content, section._id)}
                             disabled={section.locked}
-                            className={`w-full p-4 text-left flex items-center hover:bg-gray-700 transition-colors ${
-                              section.locked ? 'opacity-50 cursor-not-allowed' : ''
-                              } ${index !== section.content.length - 1 ? 'border-b border-gray-700' : ''}`}
+                            className={`w-full p-4 text-left flex items-center hover:bg-gray-700 transition-colors ${section.locked ? 'opacity-50 cursor-not-allowed' : ''
+                              } ${index !== (section.content?.length || 0) - 1 ? 'border-b border-gray-700' : ''
+                              }`}
                           >
                             <div className={`mr-3 ${getContentTypeColor(content.type)}`}>
                               {getContentIcon(content.type)}
@@ -604,8 +591,9 @@ const CourseContentPage = () => {
                 <h3 className="font-bold mb-4">Announcements</h3>
                 <div className="space-y-3">
                   {(courseData.announcements || []).map(announcement => (
-                    <div key={announcement._id} className={`p-3 rounded-lg ${
-                      announcement.important ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-gray-700'
+                    <div key={announcement._id} className={`p-3 rounded-lg ${announcement.important
+                        ? 'bg-orange-500/10 border border-orange-500/20'
+                        : 'bg-gray-700'
                       }`}>
                       <div className="flex items-start justify-between mb-1">
                         <h4 className="font-medium text-sm">{announcement.title}</h4>
@@ -650,8 +638,7 @@ const CourseContentPage = () => {
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleBookmark}
-              className={`p-2 rounded-lg transition-colors ${
-                isBookmarked ? 'bg-orange-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+              className={`p-2 rounded-lg transition-colors ${isBookmarked ? 'bg-orange-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                 }`}
             >
               <Bookmark className="w-5 h-5" />
@@ -737,16 +724,14 @@ const CourseContentPage = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list' ? 'bg-orange-500 text-white' : 'bg-gray-800 hover:bg-gray-700'
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-orange-500 text-white' : 'bg-gray-800 hover:bg-gray-700'
                   }`}
               >
                 <List className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid' ? 'bg-orange-500 text-white' : 'bg-gray-800 hover:bg-gray-700'
+                className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-orange-500 text-white' : 'bg-gray-800 hover:bg-gray-700'
                   }`}
               >
                 <Grid className="w-4 h-4" />
@@ -767,10 +752,10 @@ const CourseContentPage = () => {
                       <h3 className="text-xl font-bold mr-3">{section.title}</h3>
                       {section.locked && <Lock className="w-5 h-5 text-gray-400" />}
                       <div className="ml-auto flex items-center space-x-4 text-sm text-gray-400">
-                        <span>{section.content.length} lessons</span>
+                        <span>{section.content?.length || 0} lessons</span>
                         <span>{section.duration}</span>
                         <span className="text-orange-500 font-medium">
-                          {section.content.filter(item => item.completed).length}/{section.content.length} completed
+                          {(section.content?.filter(item => item.completed).length || 0)}/{section.content?.length || 0} completed
                         </span>
                       </div>
                     </div>
@@ -778,7 +763,7 @@ const CourseContentPage = () => {
                     <div className="w-full bg-gray-700 rounded-full h-2 mt-3">
                       <div
                         className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(section.content.filter(item => item.completed).length / section.content.length) * 100}%` }}
+                        style={{ width: `${((section.content?.filter(item => item.completed).length || 0) / (section.content?.length || 1) * 100)}%` }}
                       ></div>
                     </div>
                   </div>
@@ -792,13 +777,12 @@ const CourseContentPage = () => {
                   <div className="border-t border-gray-700">
                     {viewMode === 'list' ? (
                       <div className="divide-y divide-gray-700">
-                        {section.content.map((content) => (
+                        {section.content?.map((content) => (
                           <button
                             key={content._id}
                             onClick={() => !section.locked && handleContentClick(content, section._id)}
                             disabled={section.locked}
-                            className={`w-full p-4 text-left flex items-center hover:bg-gray-700 transition-colors ${
-                              section.locked ? 'opacity-50 cursor-not-allowed' : ''
+                            className={`w-full p-4 text-left flex items-center hover:bg-gray-700 transition-colors ${section.locked ? 'opacity-50 cursor-not-allowed' : ''
                               }`}
                           >
                             <div className={`mr-4 ${getContentTypeColor(content.type)}`}>
@@ -814,8 +798,7 @@ const CourseContentPage = () => {
                                   Preview
                                 </span>
                               )}
-                              <span className={`text-xs px-2 py-1 rounded ${
-                                getContentTypeColor(content.type)
+                              <span className={`text-xs px-2 py-1 rounded ${getContentTypeColor(content.type)
                                 } bg-opacity-20`}>
                                 {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
                               </span>
@@ -830,13 +813,12 @@ const CourseContentPage = () => {
                       </div>
                     ) : (
                       <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {section.content.map((content) => (
+                        {section.content?.map((content) => (
                           <button
                             key={content._id}
                             onClick={() => !section.locked && handleContentClick(content, section._id)}
                             disabled={section.locked}
-                            className={`p-4 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition-colors ${
-                              section.locked ? 'opacity-50 cursor-not-allowed' : ''
+                            className={`p-4 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition-colors ${section.locked ? 'opacity-50 cursor-not-allowed' : ''
                               }`}
                           >
                             <div className="flex items-center justify-between mb-3">
@@ -852,8 +834,7 @@ const CourseContentPage = () => {
                             <h4 className="font-medium mb-2">{content.title}</h4>
                             <p className="text-sm text-gray-400 mb-2">{content.duration}</p>
                             <div className="flex items-center justify-between">
-                              <span className={`text-xs px-2 py-1 rounded ${
-                                getContentTypeColor(content.type)
+                              <span className={`text-xs px-2 py-1 rounded ${getContentTypeColor(content.type)
                                 } bg-opacity-20`}>
                                 {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
                               </span>
@@ -939,8 +920,9 @@ const CourseContentPage = () => {
             <h3 className="font-bold mb-3">Announcements</h3>
             <div className="space-y-3">
               {(courseData.announcements || []).map(announcement => (
-                <div key={announcement._id} className={`p-3 rounded ${
-                  announcement.important ? 'bg-orange-500/10 border border-orange-500/20' : 'bg-gray-600'
+                <div key={announcement._id} className={`p-3 rounded ${announcement.important
+                    ? 'bg-orange-500/10 border border-orange-500/20'
+                    : 'bg-gray-600'
                   }`}>
                   <div className="flex items-start justify-between mb-1">
                     <h4 className="font-medium text-sm">{announcement.title}</h4>

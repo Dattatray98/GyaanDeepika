@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import {
     ArrowLeft,
     BookOpen,
@@ -23,17 +24,41 @@ import VideoPlayer from '../../components/VideoPlayer';
 import { motion } from 'framer-motion';
 import { FaGraduationCap } from 'react-icons/fa';
 
+interface CourseContent {
+    _id: string;
+    title: string;
+    description: string;
+    videoUrl: string;
+    duration: number;
+    isCompleted: boolean;
+    contentType: string;
+    content?: string;
+}
+
+interface CourseData {
+    _id: string;
+    title: string;
+    instructor: string;
+    rating: number;
+    students: number;
+    category: string;
+    description: string;
+    contents: CourseContent[];
+}
+
 const VideoPlayerPage = () => {
-    const { courseId, videoId } = useParams();
+    const { courseId, contentId } = useParams<{ courseId: string; contentId: string }>();
     const navigate = useNavigate();
     const [isMobile, setIsMobile] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [isLiked, setIsLiked] = useState(false);
-    const [] = useState(false);
     const [notes, setNotes] = useState('');
     const [videoProgress, setVideoProgress] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [courseData, setCourseData] = useState<CourseData | null>(null);
+    const [currentContent, setCurrentContent] = useState<CourseContent | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const checkScreenSize = () => {
@@ -45,20 +70,95 @@ const VideoPlayerPage = () => {
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
+    useEffect(() => {
+        const fetchCourseContent = async () => {
+            try {
+                setLoading(true);
+                if (!courseId || !contentId) {
+                    throw new Error('Course ID or Content ID is missing');
+                }
+                else{
+                    console.log(`/courses/${courseId}/content/${contentId}`)
+                }
 
+                const response = await axios.get(`http://localhost:8000/api/enrolled/${courseId}/content/${contentId}`);
+                
+                setCourseData(response.data.course);
+                setCurrentContent(response.data.content);
+                setLoading(false);
+            } catch (err) {
+                setError(axios.isAxiosError(err) 
+                    ? err.response?.data.message || err.message 
+                    : err instanceof Error ? err.message : 'An unknown error occurred');
+                setLoading(false);
+            }
+        };
 
+        fetchCourseContent();
+    }, [courseId, contentId]);
 
-
-    // Set timeout to remove loading screen after 2.5 seconds
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false);
-        }, 2000); // 2500ms = 2.5 seconds
+        }, 2000);
 
-        return () => clearTimeout(timer); // cleanup on unmount
+        return () => clearTimeout(timer);
     }, []);
 
-    // Loading Screen
+    const formatDuration = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
+
+    const handleVideoProgress = (currentTime: number, duration: number) => {
+        const progress = (currentTime / duration) * 100;
+        setVideoProgress(progress);
+    };
+
+    const handleVideoEnd = () => {
+        if (!courseData || !contentId) return;
+        
+        const currentIndex = courseData.contents.findIndex(c => c._id === contentId);
+        if (currentIndex < courseData.contents.length - 1) {
+            const nextcontent = courseData.contents[currentIndex + 1];
+            navigate(`/courses/${courseId}/content/${nextcontent._id}`);
+            
+        }
+    };
+
+    const navigateToContent = (contentId: string) => {
+        navigate(`/courses/${courseId}/content/${contentId}`);
+    };
+
+    const getCurrentContentIndex = () => {
+        if (!courseData || !contentId) return -1;
+        return courseData.contents.findIndex(c => c._id === contentId);
+    };
+
+    const canGoToPrevious = () => {
+        return getCurrentContentIndex() > 0;
+    };
+
+    const canGoToNext = () => {
+        if (!courseData) return false;
+        return getCurrentContentIndex() < courseData.contents.length - 1;
+    };
+
+    const goToPrevious = () => {
+        const currentIndex = getCurrentContentIndex();
+        if (currentIndex > 0 && courseData) {
+            navigateToContent(courseData.contents[currentIndex - 1]._id);
+        }
+    };
+
+    const goToNext = () => {
+        const currentIndex = getCurrentContentIndex();
+        if (currentIndex < (courseData?.contents.length || 0) - 1 && courseData) {
+            navigateToContent(courseData.contents[currentIndex + 1]._id);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
@@ -106,125 +206,33 @@ const VideoPlayerPage = () => {
         );
     }
 
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-[#0F0F0F] text-white">
+                <div className="text-center p-6 bg-gray-800 rounded-lg max-w-md">
+                    <h2 className="text-2xl font-bold mb-4 text-orange-500">Error</h2>
+                    <p className="mb-6">{error}</p>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="bg-orange-500 hover:bg-orange-600 px-6 py-2 rounded-lg font-medium transition-colors"
+                    >
+                        Go Back
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
-    // Sample data - in real app, this would come from API
-    const courseData = {
-        id: courseId,
-        title: "Mathematics Basics",
-        instructor: "Dr. Sarah Johnson",
-        rating: 4.7,
-        students: 1842,
-        category: "Education",
-        description: "Master the fundamentals of mathematics with practical examples and exercises."
-    };
+    if (!courseData || !currentContent) {
+        return null;
+    }
 
-    const currentVideo = {
-        id: videoId,
-        title: "Introduction to Algebra",
-        duration: "12:45",
-        videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4", // Sample video URL
-        description: "Learn the basics of algebraic expressions and equations in this comprehensive introduction.",
-        completed: false
-    };
-
-    const courseVideos = [
-        {
-            id: "1",
-            title: "Introduction to Algebra",
-            duration: "12:45",
-            completed: true,
-            current: videoId === "1"
-        },
-        {
-            id: "2",
-            title: "Linear Equations",
-            duration: "15:30",
-            completed: false,
-            current: videoId === "2"
-        },
-        {
-            id: "3",
-            title: "Quadratic Functions",
-            duration: "18:20",
-            completed: false,
-            current: videoId === "3"
-        },
-        {
-            id: "4",
-            title: "Systems of Equations",
-            duration: "14:15",
-            completed: false,
-            current: videoId === "4"
-        }
-    ];
-
-    const relatedCourses = [
-        {
-            id: "2",
-            title: "Advanced Mathematics",
-            instructor: "Prof. John Smith",
-            rating: 4.8,
-            students: 892,
-            thumbnail: "https://images.pexels.com/photos/6238025/pexels-photo-6238025.jpeg"
-        },
-        {
-            id: "3",
-            title: "Statistics Fundamentals",
-            instructor: "Dr. Emily Davis",
-            rating: 4.6,
-            students: 1205,
-            thumbnail: "https://images.pexels.com/photos/590022/pexels-photo-590022.jpg"
-        }
-    ];
-
-    const handleVideoProgress = (currentTime: number, duration: number) => {
-        const progress = (currentTime / duration) * 100;
-        setVideoProgress(progress);
-    };
-
-    const handleVideoEnd = () => {
-        // Mark video as completed and move to next video
-        const currentIndex = courseVideos.findIndex(v => v.id === videoId);
-        if (currentIndex < courseVideos.length - 1) {
-            const nextVideo = courseVideos[currentIndex + 1];
-            navigate(`/courses/${courseId}/video/${nextVideo.id}`);
-        }
-    };
-
-    const navigateToVideo = (newVideoId: string) => {
-        navigate(`/courses/${courseId}/video/${newVideoId}`);
-    };
-
-    const getCurrentVideoIndex = () => {
-        return courseVideos.findIndex(v => v.id === videoId);
-    };
-
-    const canGoToPrevious = () => {
-        return getCurrentVideoIndex() > 0;
-    };
-
-    const canGoToNext = () => {
-        return getCurrentVideoIndex() < courseVideos.length - 1;
-    };
-
-    const goToPrevious = () => {
-        const currentIndex = getCurrentVideoIndex();
-        if (currentIndex > 0) {
-            navigateToVideo(courseVideos[currentIndex - 1].id);
-        }
-    };
-
-    const goToNext = () => {
-        const currentIndex = getCurrentVideoIndex();
-        if (currentIndex < courseVideos.length - 1) {
-            navigateToVideo(courseVideos[currentIndex + 1].id);
-        }
-    };
+    const completedContents = courseData.contents.filter(c => c.isCompleted).length;
+    const completionPercentage = Math.round((completedContents / courseData.contents.length) * 100);
 
     if (isMobile) {
         return (
             <div className="bg-gray-900 text-white min-h-screen">
-                {/* Mobile Header */}
                 <header className="bg-gray-800 p-4 flex items-center justify-between">
                     <button
                         onClick={() => navigate(-1)}
@@ -232,26 +240,24 @@ const VideoPlayerPage = () => {
                     >
                         <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h1 className="font-medium text-sm flex-1 mx-4 truncate">{currentVideo.title}</h1>
+                    <h1 className="font-medium text-sm flex-1 mx-4 truncate">{currentContent.title}</h1>
                     <button className="text-white hover:text-orange-500">
                         <MoreVertical className="w-6 h-6" />
                     </button>
                 </header>
 
-                {/* Video Player */}
                 <div className="relative">
                     <VideoPlayer
-                        videoUrl={currentVideo.videoUrl}
-                        title={currentVideo.title}
+                        videoUrl={currentContent.videoUrl}
+                        title={currentContent.title}
                         onTimeUpdate={handleVideoProgress}
                         onVideoEnd={handleVideoEnd}
                     />
                 </div>
 
-                {/* Video Info */}
                 <div className="p-4">
-                    <h2 className="text-xl font-bold mb-2">{currentVideo.title}</h2>
-                    <p className="text-gray-400 text-sm mb-4">{currentVideo.description}</p>
+                    <h2 className="text-xl font-bold mb-2">{currentContent.title}</h2>
+                    <p className="text-gray-400 text-sm mb-4">{currentContent.description}</p>
 
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center space-x-4">
@@ -272,17 +278,16 @@ const VideoPlayerPage = () => {
                                 <Share2 className="w-5 h-5" />
                             </button>
                         </div>
-                        <span className="text-sm text-gray-400">{currentVideo.duration}</span>
+                        <span className="text-sm text-gray-400">{formatDuration(currentContent.duration)}</span>
                     </div>
 
-                    {/* Navigation */}
                     <div className="flex items-center justify-between mb-6">
                         <button
                             onClick={goToPrevious}
                             disabled={!canGoToPrevious()}
                             className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${canGoToPrevious()
-                                    ? 'bg-gray-800 hover:bg-gray-700 text-white'
-                                    : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                ? 'bg-gray-800 hover:bg-gray-700 text-white'
+                                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
                                 }`}
                         >
                             <ChevronLeft className="w-4 h-4" />
@@ -290,15 +295,15 @@ const VideoPlayerPage = () => {
                         </button>
 
                         <span className="text-sm text-gray-400">
-                            {getCurrentVideoIndex() + 1} of {courseVideos.length}
+                            {getCurrentContentIndex() + 1} of {courseData.contents.length}
                         </span>
 
                         <button
                             onClick={goToNext}
                             disabled={!canGoToNext()}
                             className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${canGoToNext()
-                                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                                    : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
                                 }`}
                         >
                             <span>Next</span>
@@ -306,31 +311,30 @@ const VideoPlayerPage = () => {
                         </button>
                     </div>
 
-                    {/* Course Videos List */}
                     <div className="bg-gray-800 rounded-lg p-4">
                         <h3 className="font-bold mb-4">Course Content</h3>
                         <div className="space-y-3">
-                            {courseVideos.map((video, index) => (
+                            {courseData.contents.map((content, index) => (
                                 <button
-                                    key={video.id}
-                                    onClick={() => navigateToVideo(video.id)}
-                                    className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${video.current ? 'bg-orange-500/20 border border-orange-500/30' : 'hover:bg-gray-700'
+                                    key={content._id}
+                                    onClick={() => navigateToContent(content._id)}
+                                    className={`w-full flex items-center p-3 rounded-lg text-left transition-colors ${content._id === contentId ? 'bg-orange-500/20 border border-orange-500/30' : 'hover:bg-gray-700'
                                         }`}
                                 >
                                     <div className="flex items-center mr-3">
-                                        {video.completed ? (
+                                        {content.isCompleted ? (
                                             <CheckCircle className="w-5 h-5 text-green-500" />
-                                        ) : video.current ? (
+                                        ) : content._id === contentId ? (
                                             <Play className="w-5 h-5 text-orange-500" />
                                         ) : (
                                             <div className="w-5 h-5 rounded-full border-2 border-gray-400"></div>
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className={`font-medium ${video.current ? 'text-orange-500' : 'text-white'}`}>
-                                            {index + 1}. {video.title}
+                                        <h4 className={`font-medium ${content._id === contentId ? 'text-orange-500' : 'text-white'}`}>
+                                            {index + 1}. {content.title}
                                         </h4>
-                                        <p className="text-sm text-gray-400">{video.duration}</p>
+                                        <p className="text-sm text-gray-400">{formatDuration(content.duration)}</p>
                                     </div>
                                 </button>
                             ))}
@@ -343,7 +347,6 @@ const VideoPlayerPage = () => {
 
     return (
         <div className="bg-gray-900 text-white min-h-screen">
-            {/* Desktop Header */}
             <header className="bg-gray-800 p-6 flex items-center justify-between">
                 <div className="flex items-center">
                     <button
@@ -372,24 +375,21 @@ const VideoPlayerPage = () => {
             </header>
 
             <div className="flex">
-                {/* Main Content */}
                 <main className="flex-1 p-6">
-                    {/* Video Player */}
                     <div className="mb-6">
                         <VideoPlayer
-                            videoUrl={currentVideo.videoUrl}
-                            title={currentVideo.title}
+                            videoUrl={currentContent.videoUrl}
+                            title={currentContent.title}
                             onTimeUpdate={handleVideoProgress}
                             onVideoEnd={handleVideoEnd}
                         />
                     </div>
 
-                    {/* Video Info & Controls */}
                     <div className="bg-gray-800 rounded-lg p-6 mb-6">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex-1">
-                                <h2 className="text-2xl font-bold mb-2">{currentVideo.title}</h2>
-                                <p className="text-gray-400 mb-4">{currentVideo.description}</p>
+                                <h2 className="text-2xl font-bold mb-2">{currentContent.title}</h2>
+                                <p className="text-gray-400 mb-4">{currentContent.description}</p>
                             </div>
                             <div className="flex items-center space-x-3 ml-6">
                                 <button
@@ -416,7 +416,6 @@ const VideoPlayerPage = () => {
                             </div>
                         </div>
 
-                        {/* Progress Bar */}
                         <div className="mb-4">
                             <div className="flex justify-between text-sm text-gray-400 mb-2">
                                 <span>Your Progress</span>
@@ -430,14 +429,13 @@ const VideoPlayerPage = () => {
                             </div>
                         </div>
 
-                        {/* Navigation */}
                         <div className="flex items-center justify-between">
                             <button
                                 onClick={goToPrevious}
                                 disabled={!canGoToPrevious()}
                                 className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors ${canGoToPrevious()
-                                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                                        : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                                     }`}
                             >
                                 <ChevronLeft className="w-5 h-5" />
@@ -445,15 +443,15 @@ const VideoPlayerPage = () => {
                             </button>
 
                             <span className="text-gray-400">
-                                Lesson {getCurrentVideoIndex() + 1} of {courseVideos.length}
+                                Lesson {getCurrentContentIndex() + 1} of {courseData.contents.length}
                             </span>
 
                             <button
                                 onClick={goToNext}
                                 disabled={!canGoToNext()}
                                 className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors ${canGoToNext()
-                                        ? 'bg-orange-500 hover:bg-orange-600 text-white'
-                                        : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
                                     }`}
                             >
                                 <span>Next Lesson</span>
@@ -462,7 +460,6 @@ const VideoPlayerPage = () => {
                         </div>
                     </div>
 
-                    {/* Tabs */}
                     <div className="bg-gray-800 rounded-lg">
                         <div className="flex border-b border-gray-700">
                             {[
@@ -474,8 +471,8 @@ const VideoPlayerPage = () => {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center space-x-2 px-6 py-4 font-medium transition-colors ${activeTab === tab.id
-                                            ? 'text-orange-500 border-b-2 border-orange-500'
-                                            : 'text-gray-400 hover:text-white'
+                                        ? 'text-orange-500 border-b-2 border-orange-500'
+                                        : 'text-gray-400 hover:text-white'
                                         }`}
                                 >
                                     {tab.icon}
@@ -488,13 +485,13 @@ const VideoPlayerPage = () => {
                             {activeTab === 'overview' && (
                                 <div>
                                     <h3 className="font-bold text-lg mb-4">About this lesson</h3>
-                                    <p className="text-gray-300 mb-6">{currentVideo.description}</p>
+                                    <p className="text-gray-300 mb-6">{currentContent.description}</p>
 
                                     <div className="grid grid-cols-3 gap-4 mb-6">
                                         <div className="bg-gray-700 rounded-lg p-4 text-center">
                                             <Clock className="w-6 h-6 text-orange-500 mx-auto mb-2" />
                                             <p className="text-sm text-gray-400">Duration</p>
-                                            <p className="font-medium">{currentVideo.duration}</p>
+                                            <p className="font-medium">{formatDuration(currentContent.duration)}</p>
                                         </div>
                                         <div className="bg-gray-700 rounded-lg p-4 text-center">
                                             <Users className="w-6 h-6 text-orange-500 mx-auto mb-2" />
@@ -508,36 +505,12 @@ const VideoPlayerPage = () => {
                                         </div>
                                     </div>
 
-                                    <h4 className="font-bold mb-4">Related Courses</h4>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {relatedCourses.map(course => (
-                                            <div
-                                                key={course.id}
-                                                className="bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-colors cursor-pointer"
-                                                onClick={() => navigate(`/courses/${course.id}`)}
-                                            >
-                                                <img
-                                                    src={course.thumbnail}
-                                                    alt={course.title}
-                                                    className="w-full h-32 object-cover"
-                                                />
-                                                <div className="p-4">
-                                                    <h5 className="font-medium mb-1">{course.title}</h5>
-                                                    <p className="text-sm text-gray-400 mb-2">by {course.instructor}</p>
-                                                    <div className="flex items-center justify-between text-sm text-gray-400">
-                                                        <span className="flex items-center">
-                                                            <Star className="w-3 h-3 text-yellow-400 mr-1" />
-                                                            {course.rating}
-                                                        </span>
-                                                        <span className="flex items-center">
-                                                            <Users className="w-3 h-3 mr-1" />
-                                                            {course.students}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                    {currentContent.content && (
+                                        <div className="prose prose-invert max-w-none">
+                                            <h4 className="font-bold mb-4">Lesson Content</h4>
+                                            <div dangerouslySetInnerHTML={{ __html: currentContent.content }} />
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -570,7 +543,7 @@ const VideoPlayerPage = () => {
                                                     <p className="text-xs text-gray-400">2 hours ago</p>
                                                 </div>
                                             </div>
-                                            <p className="text-gray-300">Great explanation of algebraic concepts! Really helped me understand the fundamentals.</p>
+                                            <p className="text-gray-300">Great explanation of concepts! Really helped me understand the material better.</p>
                                         </div>
 
                                         <div className="bg-gray-700 rounded-lg p-4">
@@ -581,7 +554,7 @@ const VideoPlayerPage = () => {
                                                     <p className="text-xs text-gray-400">5 hours ago</p>
                                                 </div>
                                             </div>
-                                            <p className="text-gray-300">Could you provide more examples for quadratic equations? I'm still struggling with those.</p>
+                                            <p className="text-gray-300">Could you provide more examples? I'm still struggling with some parts.</p>
                                         </div>
 
                                         <div className="mt-6">
@@ -600,34 +573,33 @@ const VideoPlayerPage = () => {
                     </div>
                 </main>
 
-                {/* Sidebar */}
                 <aside className="w-80 bg-gray-800 p-6 sticky top-0 h-screen overflow-y-auto">
                     <h3 className="font-bold text-lg mb-6">Course Content</h3>
 
                     <div className="space-y-3">
-                        {courseVideos.map((video, index) => (
+                        {courseData.contents.map((content, index) => (
                             <button
-                                key={video.id}
-                                onClick={() => navigateToVideo(video.id)}
-                                className={`w-full flex items-center p-4 rounded-lg text-left transition-colors ${video.current
-                                        ? 'bg-orange-500/20 border border-orange-500/30'
-                                        : 'hover:bg-gray-700'
+                                key={content._id}
+                                onClick={() => navigateToContent(content._id)}
+                                className={`w-full flex items-center p-4 rounded-lg text-left transition-colors ${content._id === contentId
+                                    ? 'bg-orange-500/20 border border-orange-500/30'
+                                    : 'hover:bg-gray-700'
                                     }`}
                             >
                                 <div className="flex items-center mr-4">
-                                    {video.completed ? (
+                                    {content.isCompleted ? (
                                         <CheckCircle className="w-6 h-6 text-green-500" />
-                                    ) : video.current ? (
+                                    ) : content._id === contentId ? (
                                         <Play className="w-6 h-6 text-orange-500" />
                                     ) : (
                                         <div className="w-6 h-6 rounded-full border-2 border-gray-400"></div>
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <h4 className={`font-medium mb-1 ${video.current ? 'text-orange-500' : 'text-white'}`}>
-                                        {index + 1}. {video.title}
+                                    <h4 className={`font-medium mb-1 ${content._id === contentId ? 'text-orange-500' : 'text-white'}`}>
+                                        {index + 1}. {content.title}
                                     </h4>
-                                    <p className="text-sm text-gray-400">{video.duration}</p>
+                                    <p className="text-sm text-gray-400">{formatDuration(content.duration)}</p>
                                 </div>
                             </button>
                         ))}
@@ -636,11 +608,11 @@ const VideoPlayerPage = () => {
                     <div className="mt-8 p-4 bg-gray-700 rounded-lg">
                         <h4 className="font-medium mb-2">Course Progress</h4>
                         <div className="flex justify-between text-sm text-gray-400 mb-2">
-                            <span>1 of {courseVideos.length} completed</span>
-                            <span>25%</span>
+                            <span>{completedContents} of {courseData.contents.length} completed</span>
+                            <span>{completionPercentage}%</span>
                         </div>
                         <div className="w-full bg-gray-600 rounded-full h-2">
-                            <div className="bg-orange-500 h-2 rounded-full w-1/4"></div>
+                            <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${completionPercentage}%` }}></div>
                         </div>
                     </div>
                 </aside>
