@@ -1,29 +1,36 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const Summary = require("../models/Summary");
 const Course = require("../models/Course");
 const generateSummary = require("../services/generateSummary");
+const { verifyToken } = require("../middleware/auth");
 
-// Middleware to simulate logged-in user (Replace with actual auth middleware)
-const mockUserMiddleware = (req, res, next) => {
-  req.user = { id: "685151fce035ef445de572cb" }; // Replace with JWT middleware
-  next();
-};
-
-router.use(mockUserMiddleware);
+// 🔒 Protect all routes
+router.use(verifyToken);
 
 /**
  * @route POST /api/summary/generate/:courseId/:contentId
- * @desc Generate summary for a specific video content
  */
 router.post("/generate/:courseId/:contentId", async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { courseId, contentId } = req.params;
+  const { courseId, contentId } = req.params;
+  const userId = req.user.id;
 
-    // Check if summary already exists
+  console.log("🧪 Summary Generation Request:");
+  console.log("  ➤ courseId:", courseId);
+  console.log("  ➤ contentId:", contentId);
+  console.log("  ➤ userId:", userId);
+
+  try {
+    // Optional: Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(contentId)) {
+      return res.status(400).json({ success: false, message: "Invalid courseId or contentId format." });
+    }
+
+    // ✅ Check if summary already exists
     const existing = await Summary.findOne({ userId, courseId, contentId });
     if (existing) {
+      console.log("✅ Summary already exists.");
       return res.status(200).json({
         success: true,
         message: "Summary already exists",
@@ -31,69 +38,82 @@ router.post("/generate/:courseId/:contentId", async (req, res) => {
       });
     }
 
-    // Get the course and find the specific content item
+    // ✅ Fetch course
     const course = await Course.findById(courseId);
-    if (!course) return res.status(404).json({ success: false, message: "Course not found" });
+    if (!course) {
+      console.log("❌ Course not found");
+      return res.status(404).json({ success: false, message: "Course not found" });
+    }
 
-    const contentItem = course.content.find(item => item._id.toString() === contentId);
-    if (!contentItem)
-      return res.status(404).json({ success: false, message: "Content not found in course" });
+    // ✅ Find the transcript in nested content
+    let transcript = null;
+    for (const section of course.content) {
+      for (const item of section.content) {
+        if (item._id.toString() === contentId) {
+          console.log("✅ Found matching content item");
+          transcript = item.transcript || item.Transcript || null;
+          break;
+        }
+      }
+      if (transcript) break;
+    }
 
-    if (!contentItem.Transcript)
-      return res.status(404).json({ success: false, message: "Transcript not available" });
+    if (!transcript) {
+      console.log("❌ Transcript not found in content");
+      return res.status(404).json({ success: false, message: "Transcript not found for this content item" });
+    }
 
-    // Generate summary from transcript
-    const summaryText = await generateSummary(contentItem.Transcript);
-    if (!summaryText)
-      return res.status(500).json({ success: false, message: "Failed to generate summary" });
+    // ✅ Generate summary using AI service
+    const summaryText = await generateSummary(transcript);
+    if (!summaryText) {
+      return res.status(500).json({ success: false, message: "Summary generation failed" });
+    }
 
-    // Save summary
+    // ✅ Save to database
     const summary = await Summary.create({ userId, courseId, contentId, summaryText });
 
-    res.status(201).json({
+    console.log("✅ Summary generated and saved");
+    return res.status(201).json({
       success: true,
-      message: "Summary generated and saved successfully",
+      message: "Summary generated successfully",
       data: summary,
     });
   } catch (err) {
-    console.error("Summary generation error:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    console.error("❌ Summary generation error:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Internal server error",
+    });
   }
 });
 
 /**
  * @route GET /api/summary/:courseId/:contentId
- * @desc Fetch summary for a specific video content
  */
 router.get("/:courseId/:contentId", async (req, res) => {
   try {
-    const userId = req.user.id;
     const { courseId, contentId } = req.params;
+    const userId = req.user.id;
 
     const summary = await Summary.findOne({ userId, courseId, contentId });
     if (!summary) {
       return res.status(404).json({ success: false, message: "Summary not found" });
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Summary fetched successfully",
-      data: summary,
-    });
+    return res.status(200).json({ success: true, data: summary });
   } catch (err) {
-    console.error("Fetch summary error:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    console.error("❌ Fetch summary error:", err.message);
+    return res.status(500).json({ success: false, message: err.message || "Internal server error" });
   }
 });
 
 /**
  * @route PATCH /api/summary/complete/:courseId/:contentId
- * @desc Mark summary as completed (triggers TTL deletion after 2 days)
  */
 router.patch("/complete/:courseId/:contentId", async (req, res) => {
   try {
-    const userId = req.user.id;
     const { courseId, contentId } = req.params;
+    const userId = req.user.id;
 
     const summary = await Summary.findOneAndUpdate(
       { userId, courseId, contentId },
@@ -105,14 +125,14 @@ router.patch("/complete/:courseId/:contentId", async (req, res) => {
       return res.status(404).json({ success: false, message: "Summary not found" });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Summary marked as completed. It will auto-delete in 2 days.",
       data: summary,
     });
   } catch (err) {
-    console.error("Error marking summary completed:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    console.error("❌ Error marking summary complete:", err.message);
+    return res.status(500).json({ success: false, message: err.message || "Internal server error" });
   }
 });
 

@@ -10,7 +10,7 @@
     "start": "nodemon Server.js"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.828.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.830.0",
     "@aws-sdk/client-rekognition": "^3.828.0",
     "@aws-sdk/client-s3": "^3.832.0",
     "@aws-sdk/client-transcribe": "^3.830.0",

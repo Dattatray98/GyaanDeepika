@@ -1,37 +1,59 @@
-// services/generateSummary.js
+const {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+} = require("@aws-sdk/client-bedrock-runtime");
 
-const { InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
-const bedrockClient = require("../config/aws");
+const bedrockClient = new BedrockRuntimeClient({
+  region: "us-east-1", // ✅ Your AWS region
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
-const generateSummaryFromTranscript = async (transcriptText) => {
+async function generateSummaryFromTranscript(transcript) {
+  const messages = [
+    {
+      role: "user",
+      content: `Please summarize the following transcript:\n\n${transcript}`,
+    },
+  ];
+
   const input = {
-    modelId: "anthropic.claude-3-sonnet-20240229",
+    modelId: "anthropic.claude-3-sonnet-20240229-v1:0",
     contentType: "application/json",
     accept: "application/json",
     body: JSON.stringify({
-      messages: [
-        {
-          role: "user",
-          content: `You are a helpful teaching assistant. Summarize this video transcript into simple, clear bullet points:\n\n${transcriptText}`,
-        },
-      ],
-      max_tokens: 1000,
+      anthropic_version: "bedrock-2023-05-31",
+      messages: messages,
+      max_tokens: 500,
+      temperature: 0.5,
     }),
   };
 
+  const command = new InvokeModelCommand(input);
+
   try {
-    const command = new InvokeModelCommand(input);
     const response = await bedrockClient.send(command);
-    const rawBody = await response.body.transformToString();
-    const parsed = JSON.parse(rawBody);
 
-    const summary = parsed.content[0]?.text || null;
+    const responseBody = await streamToString(response.body);
+    const parsed = JSON.parse(responseBody);
 
-    return summary;
+    return parsed.content?.[0]?.text || null;
   } catch (error) {
-    console.error("❌ Claude summary generation failed:", error);
+    console.error("Claude summary generation failed:", error);
     return null;
   }
-};
+}
+
+// Helper: convert stream to string
+function streamToString(stream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on("data", (chunk) => chunks.push(chunk));
+    stream.on("error", reject);
+    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+  });
+}
 
 module.exports = generateSummaryFromTranscript;
