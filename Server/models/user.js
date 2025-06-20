@@ -4,13 +4,13 @@ const mongoose = require("mongoose");
 const courseProgressSchema = new mongoose.Schema({
   completedVideos: [
     {
-      videoId: { type: String, required: true },
+      contentId: { type: String, required: true },
       watchedDuration: { type: Number, default: 0 }, // seconds watched
       isCompleted: { type: Boolean, default: false },
     }
   ],
   lastAccessed: { type: Date, default: Date.now },
-  currentVideoId: { type: String, default: null },
+  currentcontentId: { type: String, default: null },
   currentVideoProgress: { type: Number, default: 0 }, // seconds watched
   completionPercentage: { type: Number, default: 0 }
 }, { _id: false });

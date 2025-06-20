@@ -17,6 +17,7 @@ const courseContentItemSchema = new mongoose.Schema({
     type: String,
     required: function () { return this.type === 'video'; }
   },
+  transcript:{type: String},
   notes: { type: String },
   resources: [{ type: String }],
   quizzes: [quizSchema]

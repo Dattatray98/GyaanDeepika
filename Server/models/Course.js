@@ -14,7 +14,7 @@ const courseSchema = new mongoose.Schema({
     default: "https://via.placeholder.com/300x200"
   },
   instructor: {
-    _id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+    _id: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User', auto: true},
     name: { type: String, required: true, trim: true },
     avatar: { type: String, default: "https://via.placeholder.com/150" },
     bio: { type: String, trim: true },

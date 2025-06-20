@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { MdOutlineSummarize } from "react-icons/md";
 import {
     ArrowLeft,
     BookOpen,
@@ -23,6 +24,7 @@ import {
 import VideoPlayer from '../../components/VideoPlayer';
 import { motion } from 'framer-motion';
 import { FaGraduationCap } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 
 interface CourseContent {
     _id: string;
@@ -46,8 +48,22 @@ interface CourseData {
     contents: CourseContent[];
 }
 
+interface ApiResponse {
+    course: CourseData;
+    content: CourseContent;
+}
+
+interface SummaryResponse {
+    data: {
+        summaryText: string;
+    };
+}
+
 const VideoPlayerPage = () => {
-    const { courseId, contentId } = useParams<{ courseId: string; contentId: string }>();
+    const { courseId, contentId } = useParams<{
+        courseId: string;
+        contentId: string;
+    }>();
     const navigate = useNavigate();
     const [isMobile, setIsMobile] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
@@ -59,6 +75,10 @@ const VideoPlayerPage = () => {
     const [courseData, setCourseData] = useState<CourseData | null>(null);
     const [currentContent, setCurrentContent] = useState<CourseContent | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { token } = useAuth();
+    const [summaryText, setSummaryText] = useState('');
+    const [summaryLoading, setSummaryLoading] = useState(false);
+    const [summaryError, setSummaryError] = useState('');
 
     useEffect(() => {
         const checkScreenSize = () => {
@@ -74,36 +94,64 @@ const VideoPlayerPage = () => {
         const fetchCourseContent = async () => {
             try {
                 setLoading(true);
+                setError(null);
+
                 if (!courseId || !contentId) {
                     throw new Error('Course ID or Content ID is missing');
-                }
-                else{
-                    console.log(`/courses/${courseId}/content/${contentId}`)
+
                 }
 
-                const response = await axios.get(`http://localhost:8000/api/enrolled/${courseId}/content/${contentId}`);
-                
+                console.log("courseId = ", courseId, "contentId = ", contentId)  
+
+                const response = await axios.get<ApiResponse>(
+                    `http://localhost:8000/api/enrolled/${courseId}/content/${contentId}`,
+                    {
+                        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+                    }
+                );
+
                 setCourseData(response.data.course);
                 setCurrentContent(response.data.content);
-                setLoading(false);
             } catch (err) {
-                setError(axios.isAxiosError(err) 
-                    ? err.response?.data.message || err.message 
-                    : err instanceof Error ? err.message : 'An unknown error occurred');
+                const errorMessage = axios.isAxiosError(err)
+                    ? err.response?.data?.message || err.message
+                    : err instanceof Error
+                        ? err.message
+                        : 'An unknown error occurred';
+                setError(errorMessage);
+            } finally {
                 setLoading(false);
             }
         };
 
         fetchCourseContent();
-    }, [courseId, contentId]);
+    }, [courseId, contentId, token]);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 2000);
 
-        return () => clearTimeout(timer);
-    }, []);
+
+    const handleGenerateSummary = async () => {
+        setSummaryLoading(true);
+        setSummaryError('');
+
+        try {
+            const response = await axios.post<SummaryResponse>(
+                `http://localhost:8000/api/summary/generate/${courseId}/${contentId}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setSummaryText(response.data.data.summaryText);
+        } catch (error) {
+            console.error(error);
+            setSummaryError("Failed to generate summary.");
+        } finally {
+            setSummaryLoading(false);
+        }
+    };
+
 
     const formatDuration = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
@@ -118,12 +166,11 @@ const VideoPlayerPage = () => {
 
     const handleVideoEnd = () => {
         if (!courseData || !contentId) return;
-        
+
         const currentIndex = courseData.contents.findIndex(c => c._id === contentId);
         if (currentIndex < courseData.contents.length - 1) {
-            const nextcontent = courseData.contents[currentIndex + 1];
-            navigate(`/courses/${courseId}/content/${nextcontent._id}`);
-            
+            const nextContent = courseData.contents[currentIndex + 1];
+            navigate(`/courses/${courseId}/content/${nextContent._id}`);
         }
     };
 
@@ -158,6 +205,7 @@ const VideoPlayerPage = () => {
             navigateToContent(courseData.contents[currentIndex + 1]._id);
         }
     };
+
 
     if (loading) {
         return (
@@ -460,12 +508,13 @@ const VideoPlayerPage = () => {
                         </div>
                     </div>
 
-                    <div className="bg-gray-800 rounded-lg">
+                    <div className="bg-gray-800 rounded-lg min-h-[40vh]">
                         <div className="flex border-b border-gray-700">
                             {[
                                 { id: 'overview', label: 'Overview', icon: <BookOpen className="w-4 h-4" /> },
                                 { id: 'notes', label: 'Notes', icon: <FileText className="w-4 h-4" /> },
-                                { id: 'discussion', label: 'Discussion', icon: <MessageSquare className="w-4 h-4" /> }
+                                { id: 'discussion', label: 'Discussion', icon: <MessageSquare className="w-4 h-4" /> },
+                                { id: 'Video Summary', label: 'Video Summary', icon: <MdOutlineSummarize className='w-4 h-4' /> }
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -567,6 +616,31 @@ const VideoPlayerPage = () => {
                                             </button>
                                         </div>
                                     </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'Video Summary' && (
+                                <div className="p-4 bg-zinc-900 text-white rounded-lg shadow-md w-full">
+                                    <h3 className="font-bold text-lg mb-4">Video Summary</h3>
+
+                                    <button
+                                        onClick={handleGenerateSummary}
+                                        disabled={summaryLoading}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50"
+                                    >
+                                        {summaryLoading ? "Generating..." : "Generate Summary"}
+                                    </button>
+
+                                    {summaryError && (
+                                        <p className="text-red-400 mt-2">{summaryError}</p>
+                                    )}
+
+                                    {summaryText && (
+                                        <div className="mt-4 border-t pt-3">
+                                            <h4 className="text-white font-semibold mb-2">AI Summary:</h4>
+                                            <p className="whitespace-pre-line text-gray-100">{summaryText}</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

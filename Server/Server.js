@@ -31,7 +31,9 @@ app.use("/users", require("./Routes/user"));
 app.use("/auth", require("./Routes/auth"));
 app.use("/api/courses", require("./Routes/course"))
 app.use("/api/enrolled", require("./Routes/EnrolledCourse"))
-
+app.use('/api', require("./Routes/uploadRoute"));
+app.use('/api', require("./Routes/transcribeRoute"));
+app.use("/api/summary", require("./Routes/summaryRoute"));
 app.get("/", (req, res) => {
   res.send("🎓 GyaanDeepika Backend is Live");
 });
