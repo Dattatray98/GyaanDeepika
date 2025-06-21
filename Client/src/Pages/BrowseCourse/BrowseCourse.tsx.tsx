@@ -48,8 +48,8 @@ const BrowseCourses = () => {
         if (!token) {
           throw new Error('Authentication required');
         }
-
-        const response = await axios.get('http://localhost:8000/api/courses/unenrolled', {
+        const api = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${api}/api/courses/unenrolled`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -113,15 +113,15 @@ const BrowseCourses = () => {
         return;
       }
 
-      if(!courseId){
+      if (!courseId) {
         console.log("course id not found ")
       }
-      else{
+      else {
         console.log("course id found ", courseId)
       }
-
+      const api = import.meta.env.VITE_API_URL;
       const response = await axios.post(
-        `http://localhost:8000/api/courses/enroll/${courseId}`,
+        `${api}/api/courses/enroll/${courseId}`,
         {},
         {
           headers: {
@@ -155,12 +155,12 @@ const BrowseCourses = () => {
       course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (course.subtitle && course.subtitle.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesCategory = 
-      selectedCategory === 'All' || 
+    const matchesCategory =
+      selectedCategory === 'All' ||
       (course.category && course.category.toLowerCase() === selectedCategory.toLowerCase());
 
-    const matchesLevel = 
-      selectedLevel === 'All' || 
+    const matchesLevel =
+      selectedLevel === 'All' ||
       (course.level && course.level.toLowerCase() === selectedLevel.toLowerCase());
 
     return matchesSearch && matchesCategory && matchesLevel;
@@ -285,8 +285,8 @@ const BrowseCourses = () => {
                     </p>
                     <div className="flex flex-wrap justify-between text-sm text-gray-400 mb-4 gap-2">
                       <div className="flex items-center">
-                        <img 
-                          src={course.instructor.avatar || 'https://via.placeholder.com/150'} 
+                        <img
+                          src={course.instructor.avatar || 'https://via.placeholder.com/150'}
                           alt={course.instructor.name}
                           className="w-6 h-6 rounded-full mr-2"
                         />

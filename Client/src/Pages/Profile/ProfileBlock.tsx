@@ -23,7 +23,8 @@ const ProfileBlock: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:8000/users/me", {
+        const api = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${api}/users/me`, {
           headers: {
             Authorization: `Bearer ${token}` // Send token with request
           }

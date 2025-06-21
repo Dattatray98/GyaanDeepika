@@ -46,8 +46,8 @@ const MobileView = () => {
 
                 setLoading(true);
                 setError('');
-
-                const response = await axios.get('http://localhost:8000/api/enrolled/enrolled', {
+const api = import.meta.env.VITE_API_URL;
+                const response = await axios.get(`${api}/api/enrolled/enrolled`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json',

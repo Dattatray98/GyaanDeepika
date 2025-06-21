@@ -57,8 +57,8 @@ const MobileView = () => {
                 if (!courseId || !token) {
                     throw new Error('Missing course ID or authentication token');
                 }
-
-                const response = await axios.get(`http://localhost:8000/api/enrolled/${courseId}/content`, {
+                const api = import.meta.env.VITE_API_URL;
+                const response = await axios.get(`${api}/api/enrolled/${courseId}/content`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -98,9 +98,9 @@ const MobileView = () => {
     const toggleBookmark = async () => {
         try {
             if (!courseId || !token) return;
-
+            const api = import.meta.env.VITE_API_URL;
             await axios.post(
-                `http://localhost:8000/api/enrolled/${courseId}/bookmark`,
+                `${api}/api/enrolled/${courseId}/bookmark`,
                 null,
                 {
                     headers: {
@@ -147,8 +147,9 @@ const MobileView = () => {
 
         if (content.type === 'video') {
             try {
+                const api = import.meta.env.VITE_API_URL;
                 const response = await axios.get(
-                    `http://localhost:8000/api/enrolled/${courseId}/content/${content._id}`,
+                    `${api}/api/enrolled/${courseId}/content/${content._id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`

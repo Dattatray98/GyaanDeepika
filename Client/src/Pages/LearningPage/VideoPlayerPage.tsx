@@ -107,9 +107,9 @@ const VideoPlayerPage = () => {
                 }
 
                 console.log("courseId = ", courseId, "contentId = ", contentId)
-
+                const api = import.meta.env.VITE_API_URL;
                 const response = await axios.get<ApiResponse>(
-                    `http://localhost:8000/api/enrolled/${courseId}/content/${contentId}`,
+                    `${api}/api/enrolled/${courseId}/content/${contentId}`,
                     {
                         headers: token ? { Authorization: `Bearer ${token}` } : undefined
                     }
@@ -139,8 +139,9 @@ const VideoPlayerPage = () => {
         setSummaryError('');
 
         try {
+            const api = import.meta.env.VITE_API_URL;
             const response = await axios.post<SummaryResponse>(
-                `http://localhost:8000/api/summary/generate/${courseId}/${contentId}`,
+                `${api}/api/summary/generate/${courseId}/${contentId}`,
                 {},
                 {
                     headers: {
@@ -170,7 +171,8 @@ const VideoPlayerPage = () => {
         setUserQuestion('');
 
         try {
-            const response = await axios.post('http://localhost:8000/api/qa/ask', {
+            const api = import.meta.env.VITE_API_URL;
+            const response = await axios.post(`${api}/api/qa/ask`, {
                 question: userQuestion,
                 courseId,     // 🔄 must be passed from props or context
                 contentId,    // 🔄 must be passed from props or context
@@ -677,8 +679,8 @@ const VideoPlayerPage = () => {
                                             >
                                                 <div
                                                     className={`max-w-[80%] p-4 rounded-xl whitespace-pre-wrap break-words shadow-md ${msg.sender === 'user'
-                                                            ? 'bg-blue-600 text-white rounded-br-none'
-                                                            : 'bg-zinc-800 text-gray-100 border border-zinc-700 rounded-bl-none'
+                                                        ? 'bg-blue-600 text-white rounded-br-none'
+                                                        : 'bg-zinc-800 text-gray-100 border border-zinc-700 rounded-bl-none'
                                                         }`}
                                                 >
                                                     <div className="text-xs font-semibold mb-1 text-gray-400">

@@ -33,9 +33,9 @@ const DeskTopView = () => {
 
         const token = localStorage.getItem('token');
         if (!token) throw new Error('No auth token found');
-
+        const api = import.meta.env.VITE_API_URL;
         // 1. Fetch user data
-        const userResponse = await axios.get<UserData>('http://localhost:8000/users/me', {
+        const userResponse = await axios.get<UserData>(`${api}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
           signal: abortController.signal,
         });
@@ -43,7 +43,7 @@ const DeskTopView = () => {
         setUserData(userResponse.data);
 
         // 2. Fetch enrolled courses
-        const enrolledResponse = await axios.get('http://localhost:8000/api/enrolled/enrolled', {
+        const enrolledResponse = await axios.get(`${api}/api/enrolled/enrolled`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const DeskTopView = () => {
 
         // 3. Fetch recommended courses
         const recommendedResponse = await axios.get<{ courses: Course[] }>(
-          'http://localhost:8000/api/courses/unenrolled',
+          `${api}/api/courses/unenrolled`,
           {
             headers: { Authorization: `Bearer ${token}` },
             signal: abortController.signal,
@@ -79,7 +79,7 @@ const DeskTopView = () => {
           const announcementsPromises = enrolledCoursesData.map((course: any) =>
             axios
               .get<{ announcements: Announcement[] }>(
-                `http://localhost:8000/api/enrolled/${course._id}/content`,
+                `${api}/api/enrolled/${course._id}/content`,
                 {
                   headers: { Authorization: `Bearer ${token}` },
                   signal: abortController.signal,
@@ -130,8 +130,9 @@ const DeskTopView = () => {
     }
 
     try {
+      const api = import.meta.env.VITE_API_URL;
       const response = await axios.get<Course[]>(
-        `http://localhost:8000/api/courses/search?query=${query}`,
+        `${api}/api/courses/search?query=${query}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -211,7 +212,7 @@ const DeskTopView = () => {
       animate="visible"
       className="bg-gray-900 text-white min-h-screen flex"
     >
-      <Sidebar 
+      <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         enrolledCourses={enrolledCourses}

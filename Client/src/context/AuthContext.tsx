@@ -41,8 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       localStorage.setItem('token', token);
       setToken(token);
-      
-      const response = await axios.get(`http://localhost:8000/users/me`, {
+
+      const api = import.meta.env.VITE_API_URL;
+      const response = await axios.get(`${api}/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -78,7 +79,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(`http://localhost:8000/users/login`, { email, password });
+      const api = import.meta.env.VITE_API_URL;
+      const response = await axios.post(`${api}/users/login`, { email, password });
       await handleToken(response.data.token);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
@@ -92,7 +94,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post(`http://localhost:8000/users/signup`, userData);
+      const api = import.meta.env.VITE_API_URL;
+      const response = await axios.post(`${api}/users/signup`, userData);
       await handleToken(response.data.token);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed');
@@ -103,7 +106,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const googleLogin = () => {
-    window.location.href = `http://localhost:8000/auth/google`;
+    const api = import.meta.env.VITE_API_URL;
+    window.location.href = `${api}/auth/google`;
   };
 
   const logout = () => {

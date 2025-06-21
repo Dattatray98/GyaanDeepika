@@ -48,8 +48,8 @@ const DesktopView = () => {
 
                 setLoading(true);
                 setError('');
-
-                const response = await axios.get('http://localhost:8000/api/enrolled/enrolled', {
+                const api = import.meta.env.VITE_API_URL;
+                const response = await axios.get(`${api}/api/enrolled/enrolled`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -250,8 +250,8 @@ const DesktopView = () => {
                                     key={filter.id}
                                     onClick={() => setActiveFilter(filter.id)}
                                     className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium ${activeFilter === filter.id
-                                            ? 'bg-orange-500 text-white'
-                                            : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                                        ? 'bg-orange-500 text-white'
+                                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                                         }`}
                                     data-aos="fade-down"
                                     data-aos-delay={index * 50}
