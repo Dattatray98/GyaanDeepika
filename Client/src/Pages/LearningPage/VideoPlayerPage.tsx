@@ -22,9 +22,9 @@ import {
     FileText
 } from 'lucide-react';
 import VideoPlayer from '../../components/VideoPlayer';
-import { motion } from 'framer-motion';
-import { FaBrain, FaGraduationCap } from 'react-icons/fa';
+import { FaBrain } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
+import Loading from '../../components/Common/Loading';
 
 interface CourseContent {
     _id: string;
@@ -261,50 +261,7 @@ const VideoPlayerPage = () => {
 
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
-                <motion.div
-                    className="animate-pulse flex flex-col items-center"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <motion.div
-                        animate={{
-                            y: [0, -20, 0],
-                            rotate: [0, 10, -10, 0]
-                        }}
-                        transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                    >
-                        <FaGraduationCap className="text-orange-500 text-4xl mb-4" />
-                    </motion.div>
-                    <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
-                        <motion.div
-                            className="h-full bg-orange-500"
-                            initial={{ width: 0 }}
-                            animate={{ width: "100%" }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                repeatType: "reverse",
-                                ease: "easeInOut"
-                            }}
-                        />
-                    </div>
-                    <motion.p
-                        className="mt-4 text-gray-400"
-                        animate={{ opacity: [0.5, 1, 0.5] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                    >
-                        Loading GyaanDeepika...
-                    </motion.p>
-                </motion.div>
-            </div>
-        );
+        return (<Loading />);
     }
 
     if (error) {
@@ -493,6 +450,14 @@ const VideoPlayerPage = () => {
                                 <p className="text-gray-400 mb-4">{currentContent.description}</p>
                             </div>
                             <div className="flex items-center space-x-3 ml-6">
+                                <button
+                                    onClick={() => setIsLiked(!isLiked)}
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isLiked ? 'bg-orange-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                        }`}
+                                >
+                                    <ThumbsUp className="w-4 h-4" />
+                                    <span>Mark as Completed</span>
+                                </button>
                                 <button
                                     onClick={() => setIsLiked(!isLiked)}
                                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isLiked ? 'bg-orange-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
@@ -699,12 +664,12 @@ const VideoPlayerPage = () => {
                             )}
 
                             {activeTab === 'Ask Question' && (
-                                <div className="flex flex-col gap-4 p-4 bg-zinc-900 text-white rounded-lg shadow-md max-h-[500px] overflow-y-auto w-full">
+                                <div className="flex flex-col gap-4 p-4 bg-zinc-900 text-white rounded-lg shadow-md max-h-[70vh] overflow-y-auto w-full">
 
                                     <h3 className="font-bold text-xl mb-2">💬 Ask AI About This Video</h3>
 
                                     {/* Chat Messages */}
-                                    <div className="flex flex-col gap-4 overflow-y-auto min-h-[70vh]">
+                                    <div className="flex flex-col gap-4 overflow-y-auto ">
                                         {chatHistory.map((msg, index) => (
                                             <div
                                                 key={index}

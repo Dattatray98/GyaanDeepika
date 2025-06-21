@@ -8,28 +8,8 @@ import Footer from '../LandingPage/Footer';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
-
-interface Instructor {
-  _id: string;
-  name: string;
-  avatar?: string;
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  subtitle?: string;
-  thumbnail: string;
-  instructor: Instructor;
-  price: number;
-  category?: string;
-  level?: string;
-  duration?: string;
-  rating?: number;
-  totalStudents?: number;
-}
-
+import Loading from '../../components/Common/Loading';
+import type { Course } from '../../components/Common/Types';
 
 const BrowseCourses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -187,50 +167,7 @@ const BrowseCourses = () => {
   });
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
-        <motion.div
-          className="animate-pulse flex flex-col items-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.div
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, 10, -10, 0]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <FaGraduationCap className="text-orange-500 text-4xl mb-4" />
-          </motion.div>
-          <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-orange-500"
-              initial={{ width: 0 }}
-              animate={{ width: "100%" }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut"
-              }}
-            />
-          </div>
-          <motion.p
-            className="mt-4 text-gray-400"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            Loading Courses...
-          </motion.p>
-        </motion.div>
-      </div>
-    );
+    return (<Loading />);
   }
 
   if (error) {
