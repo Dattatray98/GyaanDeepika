@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
-import Login from './Login';
-import SignUp from './SignUp';
+import Login from './Login.tsx';
+import SignUp from './SignUp.tsx';
 import { motion } from 'framer-motion';
 import { FaGraduationCap } from 'react-icons/fa';
 

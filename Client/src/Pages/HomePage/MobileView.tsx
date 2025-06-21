@@ -4,8 +4,8 @@ import { FiSearch, FiUsers, FiStar, FiHome, FiCompass, FiBook, FiUser, FiBell, F
 import { FaGraduationCap } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import Loading from "../../components/Common/Loading";
-import type { UserData, Course, Announcement } from '../../components/Common/Types';
+import Loading from "../../components/Common/Loading.tsx";
+import type { UserData, Course, Announcement } from '../../components/Common/Types.ts';
 
 const MobileView = () => {
   const [, setIsMobile] = useState(window.innerWidth < 768);

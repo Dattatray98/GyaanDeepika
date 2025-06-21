@@ -5,7 +5,7 @@ import {
 } from "react-icons/fi";
 import { FaGraduationCap } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext"; // Make sure this path is correct
+import { useAuth } from "../../context/AuthContext.tsx"; // Make sure this path is correct
 
 const Settings = () => {
   const [isMobile, setIsMobile] = useState(false);

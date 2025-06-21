@@ -21,10 +21,10 @@ import {
     Clock,
     FileText
 } from 'lucide-react';
-import VideoPlayer from '../../components/VideoPlayer';
+import VideoPlayer from '../../components/VideoPlayer.tsx';
 import { FaBrain } from 'react-icons/fa';
-import { useAuth } from '../../context/AuthContext';
-import Loading from '../../components/Common/Loading';
+import { useAuth } from '../../context/AuthContext.tsx';
+import Loading from '../../components/Common/Loading.tsx';
 
 interface CourseContent {
     _id: string;

@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiSearch, FiBookmark, FiUsers, FiStar, FiBell } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import Loading from "../../components/Common/Loading";
-import type { UserData, Course, Announcement } from '../../components/Common/Types';
-import Sidebar from '../../components/Common/SideBar';
+import Loading from "../../components/Common/Loading.tsx";
+import type { UserData, Course, Announcement } from '../../components/Common/Types.ts';
+import Sidebar from '../../components/Common/SideBar.tsx';
 
 const DeskTopView = () => {
   const [activeTab, setActiveTab] = useState('home');

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import MobileView from './MobileView';
-import DeskTopView from '../HomePage/DeskTopView';
-import DesktopView from './DesktopView';
+import MobileView from './MobileView.tsx';
+import DeskTopView from '../HomePage/DeskTopView.tsx';
+import DesktopView from './DesktopView.tsx';
 import AOS from "aos";
 const EnrolledCoursesPage = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

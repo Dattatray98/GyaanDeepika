@@ -4,12 +4,12 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { FiSearch, FiClock, FiArrowRight } from 'react-icons/fi';
 import { FaGraduationCap } from 'react-icons/fa';
-import Footer from '../LandingPage/Footer';
+import Footer from '../LandingPage/Footer.tsx';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { useAuth } from '../../context/AuthContext';
-import Loading from '../../components/Common/Loading';
-import type { Course } from '../../components/Common/Types';
+import { useAuth } from '../../context/AuthContext.tsx';
+import Loading from '../../components/Common/Loading.tsx';
+import type { Course } from '../../components/Common/Types.ts';
 
 const BrowseCourses = () => {
   const [courses, setCourses] = useState<Course[]>([]);

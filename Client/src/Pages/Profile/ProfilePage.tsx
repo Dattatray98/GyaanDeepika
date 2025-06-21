@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaGraduationCap } from "react-icons/fa";
 import { FiHome, FiCompass, FiBook, FiUser } from "react-icons/fi";
-import CourseBlock from "./CourseBlock";
-import ProfileBlock from "./ProfileBlock";
-import Loading from "../../components/Common/Loading";
-import Sidebar from "../../components/Common/SideBar";
+import CourseBlock from "./CourseBlock.tsx";
+import ProfileBlock from "./ProfileBlock.tsx";
+import Loading from "../../components/Common/Loading.tsx";
+import Sidebar from "../../components/Common/SideBar.tsx";
 
 const ProfilePage = () => {
   const [isMobile, setIsMobile] = useState(false);

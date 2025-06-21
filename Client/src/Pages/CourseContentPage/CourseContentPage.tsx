@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import MobileView from './MobileView';
-import DesktopView from './DesktopView';
+import MobileView from './MobileView.tsx';
+import DesktopView from './DesktopView.tsx';
 import AOS from "aos"
 
 const CourseContentPage = () => {

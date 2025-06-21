@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import Navbar from './Navbar';
-import HeroSection from "./HeroSection"
-import AboutSection from './AboutSection';
-import ServicesSection from './ServicesSection';
-import TestimonialsSection from './TestimonialsSection';
-import CallToAction from './CallToAction';
-import Footer from './Footer';
-import Loading from '../../components/Common/Loading';
+import Navbar from './Navbar.tsx';
+import HeroSection from "./HeroSection.tsx"
+import AboutSection from './AboutSection.tsx';
+import ServicesSection from './ServicesSection.tsx';
+import TestimonialsSection from './TestimonialsSection.tsx';
+import CallToAction from './CallToAction.tsx';
+import Footer from './Footer.tsx';
+import Loading from '../../components/Common/Loading.tsx';
 const LandingPage = () => {
   useEffect(() => {
     AOS.init({

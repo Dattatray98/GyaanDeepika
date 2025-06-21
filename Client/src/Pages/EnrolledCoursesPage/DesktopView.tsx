@@ -15,8 +15,8 @@ import { FaGraduationCap } from 'react-icons/fa';
 import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import type { Course, CourseSection } from '../../components/Common/Types';
-import Sidebar from '../../components/Common/SideBar';
+import type { Course, CourseSection } from '../../components/Common/Types.ts';
+import Sidebar from '../../components/Common/SideBar.tsx';
 
 const DesktopView = () => {
     const [activeFilter, setActiveFilter] = useState('all');

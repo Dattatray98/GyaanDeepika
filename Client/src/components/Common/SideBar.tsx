@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FaGraduationCap } from 'react-icons/fa';
 import { FiBook, FiCompass, FiHome, FiSettings } from 'react-icons/fi';
-import type { Course } from './Types';
+import type { Course } from './Types.ts';
 
 // Animation variants (can be moved to a separate animations file)
 const sidebarAnimations = {
@@ -47,10 +47,10 @@ const Sidebar = ({
 
     const navItems: NavItem[] = [
         { icon: <FiHome />, label: 'Home', value: 'home', path: "/home" },
-        { icon: <FiCompass />, label: 'Discover', value: 'discover', path: "/browse-courses" },
-        { icon: <FiBook />, label: 'My Learning', value: 'learning', path: "/my-learning" },
+        { icon: <FiCompass />, label: 'Discover', value: 'discover', path: "/BrowseCousre" },
+        { icon: <FiBook />, label: 'My Learning', value: 'learning', path: "/courses/:courseId/content/:contentId" },
         { icon: <FiBook />, label: 'Upload', value: 'upload', path: "/upload" },
-        { icon: <FiSettings />, label: "Settings", value: "settings", path: "/Settings" }
+        { icon: <FiSettings />, label: "Settings", value: "settings", path: "/settings" }
   ];
 
 const handleNavigation = (path: string, value: string) => {

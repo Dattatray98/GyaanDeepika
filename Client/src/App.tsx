@@ -1,17 +1,17 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AuthProvider } from './context/AuthContext';
-import LandingPage from "./Pages/LandingPage/LandingPage";
-import BrowseCourses from "./Pages/BrowseCourse/BrowseCourse.tsx.tsx";
-import HomePage from "./Pages/HomePage/HomePage";
-import EnrolledCoursesPage from "./Pages/EnrolledCoursesPage/EnrolledCoursesPage";
-import Auth from "./Pages/Auth/auth";
-import CourseContent from "./Pages/CourseContentPage/CourseContentPage";
-import ProfilePage from "./Pages/Profile/ProfilePage";
-import Settings from "./Pages/Settings/Settings";
-import ProtectedRoute from "./components/ProtectedRoute";
-import OAuthRedirect from "./Pages/Auth/OAuthRedirect";
-import VideoPlayerPage from "./Pages/LearningPage/VideoPlayerPage";
+import { AuthProvider } from './context/AuthContext.tsx';
+import LandingPage from "./Pages/LandingPage/LandingPage.tsx";
+import BrowseCourses from "./Pages/BrowseCourse/BrowseCourse.tsx";
+import HomePage from "./Pages/HomePage/HomePage.tsx";
+import EnrolledCoursesPage from "./Pages/EnrolledCoursesPage/EnrolledCoursesPage.tsx";
+import Auth from "./Pages/Auth/auth.tsx";
+import CourseContent from "./Pages/CourseContentPage/CourseContentPage.tsx";
+import ProfilePage from "./Pages/Profile/ProfilePage.tsx";
+import Settings from "./Pages/Settings/Settings.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import OAuthRedirect from "./Pages/Auth/OAuthRedirect.tsx";
+import VideoPlayerPage from "./Pages/LearningPage/VideoPlayerPage.tsx";
 import Test from "./Pages/test/Test.tsx";
 
 

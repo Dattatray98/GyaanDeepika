@@ -20,9 +20,9 @@ import {
     Search
 } from 'lucide-react';
 import axios from 'axios';
-import { useAuth } from '../../context/AuthContext';
-import Loading from '../../components/Common/Loading';
-import type { Course, CourseContentItem, } from '../../components/Common/Types';
+import { useAuth } from '../../context/AuthContext.tsx';
+import Loading from '../../components/Common/Loading.tsx';
+import type { Course, CourseContentItem, } from '../../components/Common/Types.ts';
 
 
 const MobileView = () => {

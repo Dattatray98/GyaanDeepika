@@ -14,7 +14,7 @@ import { FaGraduationCap } from 'react-icons/fa';
 import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import type { Course, CourseSection } from '../../components/Common/Types';
+import type { Course, CourseSection } from '../../components/Common/Types.ts';
 
 const MobileView = () => {
     const [activeFilter, setActiveFilter] = useState('all');

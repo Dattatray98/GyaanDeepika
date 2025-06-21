@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import DeskTopView from './DeskTopView';
-import MobileView from './MobileView';
+import DeskTopView from './DeskTopView.tsx';
+import MobileView from './MobileView.tsx';
 
 const HomePage = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);

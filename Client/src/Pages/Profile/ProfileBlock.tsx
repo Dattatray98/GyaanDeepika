@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FiUser } from "react-icons/fi";
-import { useAuth } from "../../context/AuthContext"; // Adjust path as needed
+import { useAuth } from "../../context/AuthContext.tsx"; // Adjust path as needed
 
 interface User {
   _id: string;
