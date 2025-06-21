@@ -5,14 +5,14 @@ import LandingPage from "./Pages/LandingPage/LandingPage.tsx";
 import BrowseCourses from "./Pages/BrowseCourse/BrowseCourse.tsx";
 import HomePage from "./Pages/HomePage/HomePage.tsx";
 import EnrolledCoursesPage from "./Pages/EnrolledCoursesPage/EnrolledCoursesPage.tsx";
-import Auth from "./Pages/Auth/auth.tsx";
+import Auth from "./Pages/Auth/Auth.tsx";
 import CourseContent from "./Pages/CourseContentPage/CourseContentPage.tsx";
 import ProfilePage from "./Pages/Profile/ProfilePage.tsx";
 import Settings from "./Pages/Settings/Settings.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import OAuthRedirect from "./Pages/Auth/OAuthRedirect.tsx";
 import VideoPlayerPage from "./Pages/LearningPage/VideoPlayerPage.tsx";
-import Test from "./Pages/test/Test.tsx";
+import Test from "./Pages/Test/Test.tsx";
 
 
 function App() {

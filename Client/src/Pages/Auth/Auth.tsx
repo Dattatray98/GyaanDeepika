@@ -4,7 +4,7 @@ import SignUp from './SignUp.tsx';
 import { motion } from 'framer-motion';
 import { FaGraduationCap } from 'react-icons/fa';
 
-const auth = () => {
+const Auth = () => {
   const { type } = useParams();
 
   return (
@@ -72,4 +72,4 @@ const auth = () => {
   );
 };
 
-export default auth;
+export default Auth;
