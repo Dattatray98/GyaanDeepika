@@ -116,106 +116,97 @@ const EnrolledCoursesPage = () => {
     });
   }, []);
 
-  useEffect(() => {
-    let abortController: AbortController;
-    let isMounted = true;
+ useEffect(() => {
+  let isMounted = true;
+  const abortController = new AbortController();
 
-    const fetchEnrolledCourses = async () => {
-      abortController = new AbortController();
-      const startTime = Date.now();
+  const fetchEnrolledCourses = async () => {
+    const startTime = Date.now();
 
-      try {
-        if (!token) {
-          throw new Error('Authentication token is missing');
-        }
+    try {
+      if (!token) throw new Error('Authentication token is missing');
 
-        setLoading(true);
-        setLoadingProgress(0);
-        setError('');
+      setLoading(true);
+      setLoadingProgress(0);
+      setError('');
 
-        const response = await axios.get(`http://localhost:8000/api/enrolled/enrolled`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          signal: abortController.signal,
-          onDownloadProgress: (progressEvent) => {
-            if (isMounted && progressEvent.total) {
-              const percentComplete = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
-              );
-              setLoadingProgress(percentComplete);
-            }
+      const response = await axios.get('http://localhost:8000/api/enrolled/enrolled', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        signal: abortController.signal,
+        onDownloadProgress: (progressEvent) => {
+          if (isMounted && progressEvent.total) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setLoadingProgress(percent);
           }
-        });
+        },
+      });
 
-        if (!isMounted) return;
+      if (!isMounted) return;
 
-        if (!response.data.success) {
-          throw new Error(response.data.error || 'Failed to fetch courses');
-        }
-
-        // Transform the data to match our interface
-        const coursesData = response.data.data.map((course: any) => ({
-          _id: course._id,
-          title: course.title,
-          description: course.description,
-          subtitle: course.subtitle,
-          thumbnail: course.thumbnail,
-          instructor: {
-            _id: course.instructor._id,
-            name: course.instructor.name,
-            avatar: course.instructor.avatar,
-            email: course.instructor.email
-          },
-          price: course.price,
-          rating: course.rating,
-          totalStudents: course.totalStudents,
-          duration: course.duration,
-          category: course.category,
-          level: course.level,
-          content: course.content,
-          progress: {
-            completionPercentage: course.totalProgress || 0,
-            lastAccessed: course.lastUpdated,
-            currentVideoId: null,
-            currentVideoProgress: 0
-          }
-        }));
-
-        setCourses(coursesData);
-        setLoadingProgress(100);
-
-        const elapsed = Date.now() - startTime;
-        const remainingTime = Math.max(0, 800 - elapsed);
-
-        await new Promise(resolve => setTimeout(resolve, remainingTime));
-
-      } catch (err) {
-        if (!isMounted || axios.isCancel(err)) return;
-        
-        const errorMessage = axios.isAxiosError(err) 
-          ? err.response?.data?.error || err.message
-          : err instanceof Error 
-            ? err.message 
-            : 'Failed to load courses';
-        
-        setError(errorMessage);
-        console.error("Fetch error:", err);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to fetch courses');
       }
-    };
 
-    fetchEnrolledCourses();
+      const coursesData = response.data.data.map((course: any) => ({
+        _id: course._id,
+        title: course.title,
+        description: course.description,
+        subtitle: course.subtitle,
+        thumbnail: course.thumbnail,
+        instructor: {
+          _id: course.instructor._id,
+          name: course.instructor.name,
+          avatar: course.instructor.avatar,
+          email: course.instructor.email,
+        },
+        price: course.price,
+        rating: course.rating,
+        totalStudents: course.totalStudents,
+        duration: course.duration,
+        category: course.category,
+        level: course.level,
+        content: course.content,
+        progress: {
+          completionPercentage: course.totalProgress || 0,
+          lastAccessed: course.lastUpdated,
+          currentVideoId: null,
+          currentVideoProgress: 0,
+        },
+      }));
 
-    return () => {
-      isMounted = false;
-      abortController?.abort();
-    };
-  }, [token]);
+      setCourses(coursesData);
+      setLoadingProgress(100);
+
+      // Minimum loading time of 800ms
+      const elapsed = Date.now() - startTime;
+      const delay = Math.max(0, 800 - elapsed);
+      await new Promise((res) => setTimeout(res, delay));
+    } catch (err) {
+      if (!isMounted || axios.isCancel(err)) return;
+
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.error || err.message
+        : err instanceof Error
+        ? err.message
+        : 'Failed to load courses';
+
+      console.error('Fetch error:', err);
+      setError(message);
+    } finally {
+      if (isMounted) setLoading(false);
+    }
+  };
+
+  fetchEnrolledCourses();
+
+  return () => {
+    isMounted = false;
+    abortController.abort();
+  };
+}, [token]);
 
   const handleCourseNavigation = (courseId: string) => {
     navigate(`/CourseContent/${courseId}/content`);

@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import VideoPlayer from '../../components/VideoPlayer';
 import { motion } from 'framer-motion';
-import { FaGraduationCap } from 'react-icons/fa';
+import { FaBrain, FaGraduationCap } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
 interface CourseContent {
@@ -79,6 +79,11 @@ const VideoPlayerPage = () => {
     const [summaryText, setSummaryText] = useState('');
     const [summaryLoading, setSummaryLoading] = useState(false);
     const [summaryError, setSummaryError] = useState('');
+    const [userQuestion, setUserQuestion] = useState('');
+    const [chatHistory, setChatHistory] = useState<{ sender: 'user' | 'ai'; text: string }[]>([]);
+    const [qaError, setQaError] = useState('');
+    const [qaLoading, setQaLoading] = useState(false);
+
 
     useEffect(() => {
         const checkScreenSize = () => {
@@ -101,7 +106,7 @@ const VideoPlayerPage = () => {
 
                 }
 
-                console.log("courseId = ", courseId, "contentId = ", contentId)  
+                console.log("courseId = ", courseId, "contentId = ", contentId)
 
                 const response = await axios.get<ApiResponse>(
                     `http://localhost:8000/api/enrolled/${courseId}/content/${contentId}`,
@@ -151,6 +156,54 @@ const VideoPlayerPage = () => {
             setSummaryLoading(false);
         }
     };
+
+    const handleAskQuestion = async () => {
+        if (!userQuestion.trim()) {
+            setQaError("Please enter a question");
+            return;
+        }
+
+        // Push user's question to chat
+        setChatHistory((prev) => [...prev, { sender: 'user', text: userQuestion }]);
+        setQaLoading(true);
+        setQaError('');
+        setUserQuestion('');
+
+        try {
+            const response = await axios.post('http://localhost:8000/api/qa/ask', {
+                question: userQuestion,
+                courseId,     // 🔄 must be passed from props or context
+                contentId,    // 🔄 must be passed from props or context
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 'Authorization': `Bearer ${yourAuthToken}`,
+                },
+            });
+
+            const answer = response.data?.answer;
+            if (answer) {
+                setChatHistory((prev) => [...prev, { sender: 'ai', text: answer }]);
+            } else {
+                setQaError("Unexpected response format from server.");
+            }
+        } catch (error: unknown) {
+            let errorMessage = "Something went wrong.";
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    errorMessage = error.response.data?.message || `Server error: ${error.response.status}`;
+                } else if (error.request) {
+                    errorMessage = "No response from server. Please check your connection.";
+                }
+            }
+            setQaError(errorMessage);
+        } finally {
+            setQaLoading(false);
+        }
+    };
+
+
+
 
 
     const formatDuration = (seconds: number) => {
@@ -514,7 +567,8 @@ const VideoPlayerPage = () => {
                                 { id: 'overview', label: 'Overview', icon: <BookOpen className="w-4 h-4" /> },
                                 { id: 'notes', label: 'Notes', icon: <FileText className="w-4 h-4" /> },
                                 { id: 'discussion', label: 'Discussion', icon: <MessageSquare className="w-4 h-4" /> },
-                                { id: 'Video Summary', label: 'Video Summary', icon: <MdOutlineSummarize className='w-4 h-4' /> }
+                                { id: 'Video Summary', label: 'Video Summary', icon: <MdOutlineSummarize className='w-4 h-4' /> },
+                                { id: 'Ask Question', label: 'Ask Question', icon: <FaBrain className='w-4 h-4' /> }
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -643,6 +697,59 @@ const VideoPlayerPage = () => {
                                     )}
                                 </div>
                             )}
+
+                            {activeTab === 'Ask Question' && (
+                                <div className="flex flex-col gap-4 p-4 bg-zinc-900 text-white rounded-lg shadow-md max-h-[500px] overflow-y-auto w-full">
+
+                                    <h3 className="font-bold text-xl mb-2">💬 Ask AI About This Video</h3>
+
+                                    {/* Chat Messages */}
+                                    <div className="flex flex-col gap-4 overflow-y-auto min-h-[70vh]">
+                                        {chatHistory.map((msg, index) => (
+                                            <div
+                                                key={index}
+                                                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div
+                                                    className={`max-w-[80%] p-4 rounded-xl whitespace-pre-wrap break-words shadow-md ${msg.sender === 'user'
+                                                            ? 'bg-blue-600 text-white rounded-br-none'
+                                                            : 'bg-zinc-800 text-gray-100 border border-zinc-700 rounded-bl-none'
+                                                        }`}
+                                                >
+                                                    <div className="text-xs font-semibold mb-1 text-gray-400">
+                                                        {msg.sender === 'user' ? 'You' : 'AI'}
+                                                    </div>
+                                                    <div className="text-sm leading-relaxed">{msg.text}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Input Box */}
+                                    <div className="mt-auto flex flex-col gap-2">
+                                        <textarea
+                                            placeholder="Ask your question about the video..."
+                                            className="w-full p-3 bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-blue-500 focus:outline-none resize-none"
+                                            rows={2}
+                                            value={userQuestion}
+                                            onChange={(e) => setUserQuestion(e.target.value)}
+                                        />
+
+                                        <div className="flex justify-between items-center">
+                                            <button
+                                                onClick={handleAskQuestion}
+                                                disabled={qaLoading || !userQuestion.trim()}
+                                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-all disabled:opacity-50"
+                                            >
+                                                {qaLoading ? "Thinking..." : "Send"}
+                                            </button>
+                                            {qaError && <p className="text-red-400 text-sm">{qaError}</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+
                         </div>
                     </div>
                 </main>
@@ -690,8 +797,8 @@ const VideoPlayerPage = () => {
                         </div>
                     </div>
                 </aside>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

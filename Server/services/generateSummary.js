@@ -4,56 +4,53 @@ const {
 } = require("@aws-sdk/client-bedrock-runtime");
 
 const bedrockClient = new BedrockRuntimeClient({
-  region: "us-east-1", // ✅ Your AWS region
+  region: "eu-north-1", // ✅ Region for Nova models
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
-async function generateSummaryFromTranscript(transcript) {
-  const messages = [
-    {
-      role: "user",
-      content: `Please summarize the following transcript:\n\n${transcript}`,
-    },
-  ];
+async function generateSummary(transcript) {
+  const prompt = `Summarize the following transcript:\n\n${transcript}`;
 
-  const input = {
-    modelId: "anthropic.claude-3-sonnet-20240229-v1:0",
+  const command = new InvokeModelCommand({
+    modelId: "amazon.nova-lite-v1:0fdsf",
     contentType: "application/json",
     accept: "application/json",
     body: JSON.stringify({
-      anthropic_version: "bedrock-2023-05-31",
-      messages: messages,
-      max_tokens: 500,
-      temperature: 0.5,
+      inferenceConfig: {
+        max_new_tokens: 500,
+      },
+      messages: [
+        {
+          role: "user",
+          content: [{ text: prompt }],
+        },
+      ],
     }),
-  };
-
-  const command = new InvokeModelCommand(input);
+  });
 
   try {
     const response = await bedrockClient.send(command);
+    const responseString = await response.body.transformToString();
 
-    const responseBody = await streamToString(response.body);
-    const parsed = JSON.parse(responseBody);
+    const parsed = JSON.parse(responseString);
 
-    return parsed.content?.[0]?.text || null;
+    // ✅ Correct extraction for Nova Lite output structure
+    const summaryText = parsed.output?.message?.content?.[0]?.text?.trim() || null;
+
+    if (!summaryText) {
+      console.warn("⚠️ Bedrock returned empty or unexpected response:", parsed);
+    } else {
+      console.log("🧠 Generated summaryText:", summaryText);
+    }
+
+    return summaryText;
   } catch (error) {
-    console.error("Claude summary generation failed:", error);
+    console.error("❌ Nova summary generation failed:", error);
     return null;
   }
 }
 
-// Helper: convert stream to string
-function streamToString(stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    stream.on("data", (chunk) => chunks.push(chunk));
-    stream.on("error", reject);
-    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-  });
-}
-
-module.exports = generateSummaryFromTranscript;
+module.exports = generateSummary;

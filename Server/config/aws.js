@@ -11,17 +11,15 @@ const s3Client = new S3Client({
 });
 
 
+const { BedrockRuntimeClient} = require("@aws-sdk/client-bedrock-runtime");
 
-const { BedrockRuntimeClient } = require("@aws-sdk/client-bedrock-runtime");
-
-// Create Bedrock client (Claude 3 Sonnet is only in us-east-1)
+// ✅ Use Titan (available in free tier)
 const bedrockClient = new BedrockRuntimeClient({
-  region: "us-east-1", // Required for Claude models
+  region: "us-east-1", // Titan also runs in us-east-1
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
-
 
 module.exports = { s3Client, bedrockClient };

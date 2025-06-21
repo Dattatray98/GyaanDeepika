@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "../../context/AuthContext";
-
+import { useNavigate } from "react-router-dom";
 const SignUp = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -35,6 +36,7 @@ const SignUp = () => {
         mobile: formData.mobile,
         password: formData.password
       });
+      navigate("/home");
     } catch (err) {
       // Error handled in AuthContext
     }

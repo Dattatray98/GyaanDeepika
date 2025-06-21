@@ -14,20 +14,24 @@ router.use(verifyToken);
  */
 router.post("/generate/:courseId/:contentId", async (req, res) => {
   const { courseId, contentId } = req.params;
-  const userId = req.user.id;
+  const userId = req.user?.id;
 
   console.log("🧪 Summary Generation Request:");
   console.log("  ➤ courseId:", courseId);
   console.log("  ➤ contentId:", contentId);
   console.log("  ➤ userId:", userId);
 
+  if (!userId) {
+    console.error("❌ User ID is missing from request");
+    return res.status(401).json({ success: false, message: "Unauthorized: User ID missing." });
+  }
+
   try {
-    // Optional: Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(courseId) || !mongoose.Types.ObjectId.isValid(contentId)) {
       return res.status(400).json({ success: false, message: "Invalid courseId or contentId format." });
     }
 
-    // ✅ Check if summary already exists
+    // Check for existing summary
     const existing = await Summary.findOne({ userId, courseId, contentId });
     if (existing) {
       console.log("✅ Summary already exists.");
@@ -38,14 +42,14 @@ router.post("/generate/:courseId/:contentId", async (req, res) => {
       });
     }
 
-    // ✅ Fetch course
+    // Find course
     const course = await Course.findById(courseId);
     if (!course) {
       console.log("❌ Course not found");
       return res.status(404).json({ success: false, message: "Course not found" });
     }
 
-    // ✅ Find the transcript in nested content
+    // Extract transcript
     let transcript = null;
     for (const section of course.content) {
       for (const item of section.content) {
@@ -59,18 +63,30 @@ router.post("/generate/:courseId/:contentId", async (req, res) => {
     }
 
     if (!transcript) {
-      console.log("❌ Transcript not found in content");
+      console.log("❌ Transcript not found");
       return res.status(404).json({ success: false, message: "Transcript not found for this content item" });
     }
 
-    // ✅ Generate summary using AI service
+    // Generate Summary
     const summaryText = await generateSummary(transcript);
+    console.log("🧠 Generated summaryText:", summaryText); // Log output
+
     if (!summaryText) {
       return res.status(500).json({ success: false, message: "Summary generation failed" });
     }
 
-    // ✅ Save to database
-    const summary = await Summary.create({ userId, courseId, contentId, summaryText });
+    // Save to DB
+    let summary;
+    try {
+      summary = await Summary.create({ userId, courseId, contentId, summaryText });
+    } catch (dbError) {
+      console.error("❌ Error saving summary to DB:", dbError.message);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to save summary",
+        error: dbError.message,
+      });
+    }
 
     console.log("✅ Summary generated and saved");
     return res.status(201).json({
@@ -79,10 +95,11 @@ router.post("/generate/:courseId/:contentId", async (req, res) => {
       data: summary,
     });
   } catch (err) {
-    console.error("❌ Summary generation error:", err.message);
+    console.error("❌ Summary generation error:", err);
     return res.status(500).json({
       success: false,
       message: err.message || "Internal server error",
+      stack: process.env.NODE_ENV !== "production" ? err.stack : undefined,
     });
   }
 });
@@ -93,7 +110,11 @@ router.post("/generate/:courseId/:contentId", async (req, res) => {
 router.get("/:courseId/:contentId", async (req, res) => {
   try {
     const { courseId, contentId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
 
     const summary = await Summary.findOne({ userId, courseId, contentId });
     if (!summary) {
@@ -113,7 +134,11 @@ router.get("/:courseId/:contentId", async (req, res) => {
 router.patch("/complete/:courseId/:contentId", async (req, res) => {
   try {
     const { courseId, contentId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
 
     const summary = await Summary.findOneAndUpdate(
       { userId, courseId, contentId },

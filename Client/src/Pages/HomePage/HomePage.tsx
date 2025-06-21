@@ -66,9 +66,10 @@ type Announcement = {
 };
 
 const HomePage = () => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [activeTab, setActiveTab] = useState('home');
   const [loading, setLoading] = useState(true);
+  const [, setLoadingProgress] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
@@ -81,91 +82,134 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkScreenSize = () => {
+    const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-
-    return () => {
-      window.removeEventListener('resize', checkScreenSize);
-    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+    const abortController = new AbortController();
+    const startTime = Date.now();
+
     const fetchData = async () => {
       try {
         setLoading(true);
-        setError(null);
+        setLoadingProgress(0);
+        setError('');
 
-        // Fetch user data
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No auth token found');
+
+        // 1. Fetch user data
         const userResponse = await axios.get<UserData>('http://localhost:8000/users/me', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+          headers: { Authorization: `Bearer ${token}` },
+          signal: abortController.signal,
         });
+        if (!isMounted) return;
         setUserData(userResponse.data);
 
-        // Fetch enrolled courses with progress
-        const enrolledResponse = await axios.get<{ courses: Course[] }>( // Note the response structure
-          'http://localhost:8000/api/enrolled/enrolled',
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
+        // 2. Fetch enrolled courses
+        const enrolledResponse = await axios.get('http://localhost:8000/api/enrolled/enrolled', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          signal: abortController.signal,
+          onDownloadProgress: (progressEvent) => {
+            if (isMounted && progressEvent.total) {
+              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              setLoadingProgress(percent);
             }
-          }
-        );
+          },
+        });
+        if (!isMounted) return;
 
-        // Check if enrolledResponse.data.courses exists and is an array
-        const enrolledCoursesData = enrolledResponse.data?.courses || [];
+        const enrolledCoursesData = Array.isArray(enrolledResponse.data?.courses)
+          ? enrolledResponse.data.courses
+          : [];
 
-        // Add progress data to enrolled courses
-        const coursesWithProgress = enrolledCoursesData.map(course => ({
+        const progressMap = userResponse.data?.progress || {};
+        const coursesWithProgress = enrolledCoursesData.map((course: any) => ({
           ...course,
-          totalProgress: userResponse.data?.progress[course._id]?.completionPercentage || 0
+          totalProgress: progressMap[course._id]?.completionPercentage ?? 0,
         }));
         setEnrolledCourses(coursesWithProgress);
 
-        // Fetch recommended courses (unenrolled)
-        const recommendedResponse = await axios.get<{ courses: Course[] }>( // Note the response structure
+        // 3. Fetch recommended courses
+        const recommendedResponse = await axios.get<{ courses: Course[] }>(
           'http://localhost:8000/api/courses/unenrolled',
           {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
+            headers: { Authorization: `Bearer ${token}` },
+            signal: abortController.signal,
           }
         );
-        setRecommendedCourses(recommendedResponse.data?.courses || []);
+        if (isMounted) setRecommendedCourses(recommendedResponse.data?.courses || []);
 
-        // Fetch announcements for all enrolled courses
+        // 4. Fetch announcements
+        let allAnnouncements: Announcement[] = [];
         if (enrolledCoursesData.length > 0) {
-          const announcementsPromises = enrolledCoursesData.map(course =>
-            axios.get<{ announcements: Announcement[] }>(
-              `http://localhost:8000/api/enrolled/${course._id}/content`,
-              {
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem('token')}`
+          const announcementsPromises = enrolledCoursesData.map((course: any) =>
+            axios
+              .get<{ announcements: Announcement[] }>(
+                `http://localhost:8000/api/enrolled/${course._id}/content`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                  signal: abortController.signal,
                 }
-              }
-            )
+              )
+              .catch((err) => {
+                console.warn(`Failed to fetch announcements for course ${course._id}`, err);
+                return { data: { announcements: [] } };
+              })
           );
 
           const announcementsResponses = await Promise.all(announcementsPromises);
-          const allAnnouncements = announcementsResponses.flatMap(
-            response => response.data?.announcements || []
+          allAnnouncements = announcementsResponses.flatMap(
+            (res) => res.data?.announcements || []
           );
-          setAnnouncements(allAnnouncements);
+          if (isMounted) setAnnouncements(allAnnouncements);
         }
 
+        // Log all fetched data
+        const logFetchedData = () => {
+          console.log('👤 User Data:', userResponse.data);
+          console.log('🎓 Enrolled Courses:', coursesWithProgress);
+          console.log('💡 Recommended Courses:', recommendedResponse.data?.courses || []);
+          console.log('📢 Announcements:', allAnnouncements);
+        };
+        logFetchedData();
+
+        // smooth progress finish
+        const elapsed = Date.now() - startTime;
+        const delay = Math.max(0, 800 - elapsed);
+        await new Promise((res) => setTimeout(res, delay));
+        setLoadingProgress(100);
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load data. Please try again later.');
+        if (!isMounted || axios.isCancel(err)) return;
+
+        const message = axios.isAxiosError(err)
+          ? err.response?.data?.error || err.message
+          : err instanceof Error
+          ? err.message
+          : 'Failed to load data';
+
+        console.error('Fetch error:', err);
+        setError(message);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
+
     fetchData();
+
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
   }, []);
 
   const handleSearch = async (query: string) => {
