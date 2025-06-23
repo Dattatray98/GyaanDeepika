@@ -44,7 +44,7 @@ const MobileView = () => {
 
   const handleSearch = async (query: string) => {
     const trimmedQuery = query.trim();
-    setSearchQuery(query); // still update the state for UI
+    setSearchQuery(query); 
 
     if (!trimmedQuery) {
       setShowSearchResults(false);
@@ -68,7 +68,7 @@ const MobileView = () => {
         }
       });
 
-      // Expecting: { success: true, data: Course[] }
+     
       const results = Array.isArray(response.data?.data) ? response.data.data : [];
 
       setSearchResults(results);
@@ -93,12 +93,12 @@ const MobileView = () => {
     if (isEnrolled) {
       navigate(`/courses/${courseId}`);
     } else {
-      navigate(`/BrowseCourse/${courseId}`); // fixed route spelling
+      navigate(`/BrowseCourse/${courseId}`); 
     }
 
     setShowSearchResults(false);
 
-    // Optional: Only call if you are using this in your state
+  
     try {
       setShowMobileSearch(false);
     } catch (e) {

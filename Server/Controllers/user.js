@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { generateToken } = require('../middleware/auth');
+const cloudinary = require('../config/cloudinary');
 const User = require('../models/user');
 
 const saltRounds = 10;
@@ -121,19 +122,93 @@ async function getCurrentUser(req, res) {
   }
 }
 
-async function getAllSignedUsers(req, res) {
+
+
+async function updateUserProfile(req, res) {
   try {
-    const users = await User.find().select('-password -googleId');
-    res.status(200).json(users);
+    const userId = req.user.id;
+    const { firstName, lastName, email, mobile, bio } = req.body;
+
+    const updatedFields = {};
+    if (firstName) updatedFields.firstName = firstName;
+    if (lastName) updatedFields.lastName = lastName;
+    if (email) updatedFields.email = email;
+    if (mobile) updatedFields.mobile = mobile;
+    if (bio) updatedFields.bio = bio;
+
+    // If avatar file is uploaded, upload it to Cloudinary
+    if (req.file) {
+      const result = await cloudinary.uploader.upload_stream(
+        {
+          folder: 'avatars',
+          resource_type: 'image',
+        },
+        async (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            return res.status(500).json({ success: false, message: "Failed to upload avatar" });
+          }
+
+          updatedFields.avatar = result.secure_url;
+
+          const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updatedFields },
+            { new: true, runValidators: true }
+          ).select('-password -googleId');
+
+          if (!updatedUser) {
+            return res.status(404).json({
+              success: false,
+              message: "User not found"
+            });
+          }
+
+          return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user: updatedUser
+          });
+        }
+      );
+
+      // Pipe file buffer into Cloudinary upload stream
+      require('streamifier').createReadStream(req.file.buffer).pipe(result);
+    } else {
+      // No avatar upload, just update other fields
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $set: updatedFields },
+        { new: true, runValidators: true }
+      ).select('-password -googleId');
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        user: updatedUser
+      });
+    }
   } catch (error) {
-    console.error('Error fetching users:', error.message);
-    res.status(500).json({ message: 'Failed to fetch users' });
+    console.error("Profile update error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating profile"
+    });
   }
 }
+
+
 
 module.exports = {
   handleUserSignup,
   handleUserLogin,
   getCurrentUser,
-  getAllSignedUsers
+  updateUserProfile,
 };

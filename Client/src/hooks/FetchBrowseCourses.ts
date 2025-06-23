@@ -83,7 +83,6 @@ export const fetchUnenrolledCourses = async ({
   }
 };
 
-// ------------------ Enrollment Function ------------------
 
 export interface HandleEnrollOptions {
   navigate: NavigateFunction;

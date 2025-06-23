@@ -8,7 +8,7 @@ import {
     ThumbsUp, GraduationCap,
     Play, CheckCircle, Clock, FileText
 } from 'lucide-react';
-import { FaBrain } from 'react-icons/fa';
+import { FaBrain, FaUserCircle } from 'react-icons/fa';
 import { MdOutlineSummarize } from "react-icons/md";
 import VideoPlayer from '../../components/VideoPlayer.tsx';
 import { useAuth } from '../../context/AuthContext.tsx';
@@ -17,6 +17,7 @@ import type { Course, CourseContent } from '../../components/Common/Types.ts';
 import { fetchCourseContent } from '../../hooks/useContentHandlers.ts';
 import { handleAskQuestion, handleGenerateSummary } from '../../hooks/useAIHandlers.ts';
 import AOS from 'aos'
+import useNotes from '../../hooks/useNotes.ts';
 
 
 const DeskTopView = () => {
@@ -28,7 +29,7 @@ const DeskTopView = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [isLiked, setIsLiked] = useState(false);
-    const [notes, setNotes] = useState('');
+
     const [videoProgress, setVideoProgress] = useState(0);
     const [loading, setLoading] = useState(true);
     const [courseData, setCourseData] = useState<Course | null>(null);
@@ -107,6 +108,15 @@ const DeskTopView = () => {
         }
     };
 
+    if (!token) return <p>Please login to take notes.</p>;
+
+    const { note, setNote, saveNote, status } = useNotes({
+        courseId: courseData?._id || '',
+        contentId: currentContent?._id || '',
+        token,
+    });
+
+
 
     const formatDuration = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
@@ -114,9 +124,9 @@ const DeskTopView = () => {
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
+
     const fetchVideoProgress = async (courseId: string, contentId: string) => {
         try {
-            const token = localStorage.getItem('token');
             if (!token) throw new Error('User not authenticated');
 
             const api = import.meta.env.VITE_API_URL;
@@ -148,7 +158,7 @@ const DeskTopView = () => {
     ) => {
         if (!courseId || !contentId) return;
 
-        if (currentTime % 5 > 0.1) return; // Throttle updates
+        if (currentTime % 5 > 0.1) return;
 
         const completionPercentage = Math.round((currentTime / duration) * 100);
         const isCompleted = completionPercentage >= 95;
@@ -395,13 +405,13 @@ const DeskTopView = () => {
                     </div>
 
                     <div className="bg-gray-800 rounded-lg min-h-[40vh]">
-                        <div className="flex border-b border-gray-700" data-aos='zoom-in'>
+                        <div className="flex border-b border-gray-700 items-center" data-aos='zoom-in'>
                             {[
                                 { id: 'overview', label: 'Overview', icon: <BookOpen className="w-4 h-4" /> },
                                 { id: 'Write Notes', label: 'Write Notes', icon: <FileText className="w-4 h-4" /> },
                                 { id: 'Video Summary', label: 'Video Summary', icon: <MdOutlineSummarize className='w-4 h-4' /> },
                                 { id: 'Ask Question', label: 'Ask Question', icon: <FaBrain className='w-4 h-4' /> },
-                                { id: 'Video Notes', label: 'Video Notes', icon: <FileText className="w-4 h-4" /> }
+                                { id: 'Video Notes', label: 'Video Notes', icon: <FileText className="w-4 h-4" /> },
 
                             ].map(tab => (
                                 <button
@@ -416,6 +426,7 @@ const DeskTopView = () => {
                                     <span>{tab.label}</span>
                                 </button>
                             ))}
+                            <button onClick={() => navigate(`/courses/${courseId}/content/${contentId}/quiz`)} className='flex items-center space-x-2 px-6 py-4 font-medium transition-colors'>Quiz</button>
                         </div>
 
                         <div className="p-6" >
@@ -424,11 +435,19 @@ const DeskTopView = () => {
                                     <h3 className="font-bold text-lg mb-4">About this lesson</h3>
                                     <p className="text-gray-300 mb-6">{currentContent.description}</p>
 
+                                    <div className='flex gap-5 mb-13 items-center'>
+                                        <div><FaUserCircle className='h-15 w-15' /></div>
+                                        <div>
+                                            <h1 className='text-[20px] font-medium'>{courseData.instructor.name}</h1>
+                                            <p>{courseData.instructor.bio}</p>
+                                        </div>
+                                    </div>
+
                                     <div className="grid grid-cols-3 gap-4 mb-6" data-aos='zoom-in'>
                                         <div className="bg-gray-700 rounded-lg p-4 text-center">
                                             <Clock className="w-6 h-6 text-orange-500 mx-auto mb-2" />
                                             <p className="text-sm text-gray-400">Duration</p>
-                                            <p className="font-medium">{formatDuration(currentContent.duration)}</p>
+                                            <p className="font-medium">{currentContent.duration}</p>
                                         </div>
                                         <div className="bg-gray-700 rounded-lg p-4 text-center">
                                             <Users className="w-6 h-6 text-orange-500 mx-auto mb-2" />
@@ -450,24 +469,30 @@ const DeskTopView = () => {
                                     )}
                                 </div>
                             )}
-
                             {activeTab === 'Write Notes' && (
                                 <div>
                                     <h3 className="font-bold text-lg mb-4">My Notes</h3>
+
                                     <textarea
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
+                                        value={note}
+                                        onChange={(e) => setNote(e.target.value)}
                                         placeholder="Take notes while watching the video..."
                                         className="w-full h-64 bg-gray-700 rounded-lg p-4 text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                        data-aos='zoom-in'
+                                        data-aos="zoom-in"
                                     />
-                                    <div className="flex justify-end mt-4">
-                                        <button className="bg-orange-500 hover:bg-orange-600 px-6 py-2 rounded-lg font-medium transition-colors" data-aos='zoom-in'>
+
+                                    <div className="flex justify-between items-center mt-4">
+                                        <p className="text-sm text-gray-300">{status}</p>
+                                        <button
+                                            onClick={saveNote}
+                                            className="bg-orange-500 hover:bg-orange-600 px-6 py-2 rounded-lg font-medium transition-colors"
+                                        >
                                             Save Notes
                                         </button>
                                     </div>
                                 </div>
                             )}
+
 
 
                             {activeTab === 'Video Summary' && (
@@ -568,7 +593,7 @@ const DeskTopView = () => {
 
                                     <iframe
                                         src={currentContent.PdfViewUrl}
-                                        onClick={()=>console.log(currentContent.PdfViewUrl)}
+                                        onClick={() => console.log(currentContent.PdfViewUrl)}
                                         className="w-full h-[80vh] rounded-lg border border-gray-700"
                                         title="Lecture PDF Preview"
                                         data-aos="zoom-in"

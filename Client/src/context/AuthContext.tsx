@@ -5,7 +5,9 @@ interface User {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
 }
+
 
 interface SignupData {
   firstName: string;
@@ -26,6 +28,7 @@ interface AuthContextType {
   error: string | null;
   handleToken: (token: string) => Promise<void>;
   initialized: boolean;
+  updateUser: (updatedUser: User) => void; // ✅ added
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,6 +40,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
 
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
   const handleToken = useCallback(async (token: string) => {
     try {
       localStorage.setItem('token', token);
@@ -46,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await axios.get(`${api}/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       setUser({
         id: response.data.id,
         name: response.data.name || `${response.data.firstName} ${response.data.lastName}`,
@@ -141,17 +148,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
-      login, 
-      signup, 
-      googleLogin, 
-      logout, 
-      loading, 
+    <AuthContext.Provider value={{
+      user,
+      token,
+      login,
+      signup,
+      googleLogin,
+      logout,
+      loading,
       error,
       handleToken,
-      initialized
+      initialized,
+      updateUser
     }}>
       {children}
     </AuthContext.Provider>

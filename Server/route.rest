@@ -13,3 +13,7 @@ GET http://localhost:8000/api/transcribe/status/transcribe-1750392355344
 ###
 
 POST http://localhost:8000/api/summary/generate/6854b93d41c47f4dae38474e/6854b93d41c47f4dae384751
+
+###
+
+POST http://localhost:8000/api/notes/${courseId}/${contentId}

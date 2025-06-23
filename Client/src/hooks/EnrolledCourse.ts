@@ -1,4 +1,4 @@
-// ✅ Updated Function
+
 import axios from 'axios';
 import type { Course } from '../components/Common/Types';
 
@@ -6,7 +6,7 @@ interface FetchOptions {
   setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setError: React.Dispatch<React.SetStateAction<string>>;
-  token: string; // ✅ Add token to parameters
+  token: string; 
 }
 
 export const fetchEnrolledCourses = (options: FetchOptions) => {
@@ -55,12 +55,6 @@ export const fetchEnrolledCourses = (options: FetchOptions) => {
         category: course.category,
         level: course.level,
         content: course.content,
-        progress: {
-          completionPercentage: course.totalProgress || 0,
-          lastAccessed: course.lastUpdated,
-          currentVideoId: null,
-          currentVideoProgress: 0,
-        },
       }));
 
       setCourses(coursesData);

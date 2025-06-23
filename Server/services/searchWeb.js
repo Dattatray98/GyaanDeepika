@@ -3,7 +3,7 @@ const axios = require('axios');
 const BING_API_KEY = process.env.BING_SEARCH_API_KEY;
 const SERP_API_KEY = process.env.SERP_API_KEY;
 
-// 🔍 Function to search via Bing
+
 async function searchWithBing(question) {
   if (!BING_API_KEY) {
     console.warn("⚠️ No Bing API key provided. Skipping Bing search.");
@@ -33,7 +33,7 @@ async function searchWithBing(question) {
   }
 }
 
-// 🔍 Function to search via Google (SerpAPI)
+
 async function searchWithGoogle(question) {
   if (!SERP_API_KEY) {
     console.warn("⚠️ No SerpAPI key provided. Cannot perform Google search.");
@@ -61,7 +61,7 @@ async function searchWithGoogle(question) {
   }
 }
 
-// 🧠 Main function: Try Bing, fallback to Google
+
 async function searchWeb(question) {
   let results = await searchWithBing(question);
   if (results && results.length > 0) return results;

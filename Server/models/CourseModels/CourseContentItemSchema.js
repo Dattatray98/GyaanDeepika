@@ -10,6 +10,7 @@ const courseContentItemSchema = new mongoose.Schema({
     required: [true, "Content type is required"]
   },
   title: { type: String, required: true, trim: true, maxlength: 200 },
+  description: { type: String, required: true },
   duration: { type: String, required: true, default: "0 min" },
   completed: { type: Boolean, default: false },
   preview: { type: Boolean, default: false },
@@ -17,10 +18,9 @@ const courseContentItemSchema = new mongoose.Schema({
     type: String,
     required: function () { return this.type === 'video'; }
   },
-  transcript:{type: String},
-  notes: { type: String },
-  PdfDownloadUrl: {type:String},
-  PdfViewUrl: {type: String},
+  transcript: { type: String },
+  PdfDownloadUrl: { type: String },
+  PdfViewUrl: { type: String },
   resources: [{ type: String }],
   quizzes: [quizSchema]
 }, { _id: true });

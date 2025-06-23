@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { type } = require("os");
 
 // Enhanced course progress sub-schema
 const courseProgressSchema = new mongoose.Schema({
@@ -31,6 +32,24 @@ const userSchema = new mongoose.Schema({
   firstName: { type: String, trim: true },
   lastName: { type: String, trim: true },
   avatar: { type: String },
+  bio:{
+    type: String,
+    required: true,
+    maxlength:[150]
+  },
+  language:{
+    type: String,
+    required: true
+  },
+
+  mobile:{
+    type: String,
+    required: true
+  },
+  language:{
+    type: String,
+    required: true
+  },
 
   // Authentication Fields
   password: {

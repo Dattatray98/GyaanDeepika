@@ -29,19 +29,19 @@ export function useFilteredCourses({
 }: UseFilteredCoursesProps): Course[] {
     return useMemo(() => {
         return courses.filter((course) => {
-            // Search in title, description, or subtitle
+         
             const matchesSearch =
                 course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 course.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 course.subtitle?.toLowerCase().includes(searchTerm.toLowerCase());
 
-            // Match category using mapped values
+
             const matchesCategory =
                 selectedCategory === 'All' ||
                 (categoryMap[selectedCategory]?.includes(course.category) ?? false);
                 console.log(selectedCategory)
 
-            // Match level directly
+
             const matchesLevel =
                 selectedLevel === 'All' ||
                 course.level?.toLowerCase() === selectedLevel.toLowerCase();

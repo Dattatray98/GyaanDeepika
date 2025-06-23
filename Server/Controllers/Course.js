@@ -1,15 +1,15 @@
 const User = require("../models/user")
 const Course = require("../models/Course")
 
-// Controller for geting all unerolled courses for uer 
+
 
 async function UnEnrolledCourses(req, res) {
     try {
-        // Get user's enrolled courses to exclude them from results
+
         const user = await User.findById(req.user.id).select("enrolledCourses");
         const enrolledCourseIds = user?.enrolledCourses || [];
 
-        // Find courses not in user's enrolled list with more details
+
         const unenrolledCourses = await Course.find({
             _id: { $nin: enrolledCourseIds }
         }).select("title description subtitle thumbnail instructor price rating level duration totalStudents");
@@ -45,7 +45,7 @@ async function addCourse(req, res) {
             content
         } = req.body;
 
-        // Validate required fields
+
         if (!title || !description) {
             return res.status(400).json({
                 success: false,
@@ -53,7 +53,7 @@ async function addCourse(req, res) {
             });
         }
 
-        // Get instructor details from user
+
         const instructor = await User.findById(req.user.id).select("firstName lastName avatar");
         if (!instructor) {
             return res.status(404).json({
@@ -62,7 +62,7 @@ async function addCourse(req, res) {
             });
         }
 
-        // Create new course document with enhanced structure
+
         const newCourse = new Course({
             title,
             description,
@@ -87,7 +87,7 @@ async function addCourse(req, res) {
             announcements: []
         });
 
-        // Save to database
+
         const savedCourse = await newCourse.save();
 
         res.status(201).json({
@@ -106,68 +106,67 @@ async function addCourse(req, res) {
 
 
 const UserEnrolment = async (req, res) => {
-  try {
-    const { courseId } = req.params;
-    const userId = req.user?.id;
+    try {
+        const { courseId } = req.params;
+        const userId = req.user?.id;
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "Unauthorized: User ID not found"
-      });
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: "Unauthorized: User ID not found"
+            });
+        }
+
+        const [course, user] = await Promise.all([
+            Course.findById(courseId),
+            User.findById(userId)
+        ]);
+
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                error: "Course not found"
+            });
+        }
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: "User not found"
+            });
+        }
+
+        const alreadyEnrolled = user.enrolledCourses.some(
+            (id) => id.toString() === courseId
+        );
+
+        if (alreadyEnrolled) {
+            return res.status(400).json({
+                success: false,
+                error: "User is already enrolled in this course"
+            });
+        }
+
+        // Enroll the user
+        user.enrolledCourses.push(courseId);
+        course.totalStudents += 1;
+
+        // Save both documents
+        await Promise.all([user.save(), course.save()]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Successfully enrolled in course",
+            courseId
+        });
+
+    } catch (err) {
+        console.error("Enrollment error:", err);
+        return res.status(500).json({
+            success: false,
+            error: "Failed to enroll in course"
+        });
     }
-
-    // Fetch user and course in parallel
-    const [course, user] = await Promise.all([
-      Course.findById(courseId),
-      User.findById(userId)
-    ]);
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        error: "Course not found"
-      });
-    }
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: "User not found"
-      });
-    }
-
-    const alreadyEnrolled = user.enrolledCourses.some(
-      (id) => id.toString() === courseId
-    );
-
-    if (alreadyEnrolled) {
-      return res.status(400).json({
-        success: false,
-        error: "User is already enrolled in this course"
-      });
-    }
-
-    // Enroll the user
-    user.enrolledCourses.push(courseId);
-    course.totalStudents += 1;
-
-    // Save both documents
-    await Promise.all([user.save(), course.save()]);
-
-    return res.status(200).json({
-      success: true,
-      message: "Successfully enrolled in course",
-      courseId
-    });
-
-  } catch (err) {
-    console.error("Enrollment error:", err);
-    return res.status(500).json({
-      success: false,
-      error: "Failed to enroll in course"
-    });
-  }
 };
 
 
@@ -273,239 +272,103 @@ async function EnrolledCourseContent(req, res) {
 // single content itmes 
 
 async function GetSingleContentItem(req, res) {
-  try {
-    const { courseId, contentId } = req.params;
-    const userId = req.user.id;
-
-    // Check if user is enrolled
-    const user = await User.findById(userId);
-    if (!user || !user.enrolledCourses.includes(courseId)) {
-      return res.status(403).json({
-        success: false,
-        error: "You are not enrolled in this course",
-      });
-    }
-
-    // Find course and select only needed fields
-    const course = await Course.findById(courseId).select(
-      "_id title description instructor rating category content totalStudents"
-    ).populate("instructor", "name");
-
-    if (!course) {
-      return res.status(404).json({
-        success: false,
-        error: "Course not found",
-      });
-    }
-
-    let contentItem = null;
-
-    // Loop through content sections to find the item
-    for (const section of course.content) {
-      const found = section.content.find(
-        (item) => item._id.toString() === contentId
-      );
-      if (found) {
-        contentItem = found;
-        break;
-      }
-    }
-
-    if (!contentItem) {
-      return res.status(404).json({
-        success: false,
-        error: "Content item not found",
-      });
-    }
-
-    // Structure response as required
-    const flatContentList = course.content.flatMap((section) =>
-      section.content.map((item) => ({
-        _id: item._id,
-        title: item.title,
-        description: item.description,
-        videoUrl: item.videoUrl,
-        duration: item.duration,
-        isCompleted: false, // You can improve this with progress tracking
-        contentType: item.type,
-        content: item.content,
-        resources: item.resources || [],
-        quizzes: item.quizzes || [],
-        PdfDownloadUrl: item.PdfDownloadUrl,
-        PdfViewUrl: item.PdfViewUrl
-      }))
-    );
-
-    const responseCourse = {
-      _id: course._id,
-      title: course.title,
-      instructor: course.instructor.name,
-      rating: course.rating || 0,
-      students: course.totalStudents || 0,
-      category: course.category || "Uncategorized",
-      description: course.description,
-      contents: flatContentList,
-    };
-
-    const responseContent = flatContentList.find(
-      (item) => item._id.toString() === contentId
-    );
-
-    res.status(200).json({
-      success: true,
-      course: responseCourse,
-      content: responseContent,
-    });
-  } catch (err) {
-    console.error("Error fetching content item:", err);
-    res.status(500).json({
-      success: false,
-      error: "Server error while fetching content item",
-    });
-  }
-}
-
-
-
-async function UpdateUserCourseProgress(req, res) {
-    const { courseId, videoId, watchedDuration, isCompleted } = req.body;
-
-    // Validate required fields
-    if (!courseId || !videoId || typeof watchedDuration !== "number") {
-        return res.status(400).json({
-            success: false,
-            error: "courseId, videoId and watchedDuration are required"
-        });
-    }
-
     try {
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                error: "User not found"
-            });
-        }
+        const { courseId, contentId } = req.params;
+        const userId = req.user.id;
 
-        // Check if user is enrolled in the course
-        if (!user.enrolledCourses.includes(courseId)) {
+        // Check if user is enrolled
+        const user = await User.findById(userId);
+        if (!user || !user.enrolledCourses.includes(courseId)) {
             return res.status(403).json({
                 success: false,
-                error: "You are not enrolled in this course"
+                error: "You are not enrolled in this course",
             });
         }
 
-        // Initialize progress object if it doesn't exist
-        let courseProgress = user.progress.get(courseId) || {
-            completedVideos: [],
-            lastAccessed: new Date(),
-            currentVideoId: videoId,
-            currentVideoProgress: watchedDuration,
-            completionPercentage: 0
-        };
+        // Find course and populate instructor
+        const course = await Course.findById(courseId)
+            .select("_id title description instructor rating category content totalStudents")
+            .populate("instructor", "name avatar bio students rating _id");
 
-        // Update progress data
-        courseProgress.lastAccessed = new Date();
-        courseProgress.currentVideoId = videoId;
-        courseProgress.currentVideoProgress = watchedDuration;
-
-        // Find or create video progress entry
-        const existingVideo = courseProgress.completedVideos.find(v => v.videoId === videoId);
-        if (existingVideo) {
-            existingVideo.watchedDuration = watchedDuration;
-            if (typeof isCompleted !== "undefined") {
-                existingVideo.isCompleted = isCompleted;
-            }
-        } else {
-            courseProgress.completedVideos.push({
-                videoId,
-                watchedDuration,
-                isCompleted: !!isCompleted
-            });
-        }
-
-        // Calculate completion percentage
-        const completedCount = courseProgress.completedVideos.filter(v => v.isCompleted).length;
-        const totalVideos = await Course.findById(courseId).select("content");
-        const videoCount = totalVideos.content.reduce((total, section) => {
-            return total + section.content.filter(item => item.type === 'video').length;
-        }, 0);
-
-        courseProgress.completionPercentage = videoCount > 0
-            ? Math.round((completedCount / videoCount) * 100)
-            : 0;
-
-        // Save updated progress
-        user.progress.set(courseId, courseProgress);
-        await user.save();
-
-        res.status(200).json({
-            success: true,
-            message: "Progress updated successfully",
-            data: courseProgress
-        });
-    } catch (err) {
-        console.error("Progress update failed:", err);
-        res.status(500).json({
-            success: false,
-            error: "Server error while updating progress"
-        });
-    }
-};
-
-
-
-async function GetUserCourseProgressData(req, res) {
-    try {
-        const user = await User.findById(req.user.id)
-            .populate({
-                path: "enrolledCourses",
-                select: "title thumbnail instructor"
-            });
-
-        if (!user) {
+        if (!course) {
             return res.status(404).json({
                 success: false,
-                error: "User not found"
+                error: "Course not found",
             });
         }
 
-        // Convert Map to object for response and add course details
-        const progressData = {};
-        if (user.progress instanceof Map) {
-            for (const [courseId, progress] of user.progress.entries()) {
-                const course = user.enrolledCourses.find(c => c._id.toString() === courseId);
-                progressData[courseId] = {
-                    ...progress,
-                    courseTitle: course?.title || "Unknown Course",
-                    courseThumbnail: course?.thumbnail || "https://via.placeholder.com/300x200",
-                    instructorName: course?.instructor?.name || "Unknown Instructor"
-                };
-            }
-        } else {
-            for (const courseId in user.progress) {
-                const course = user.enrolledCourses.find(c => c._id.toString() === courseId);
-                progressData[courseId] = {
-                    ...user.progress[courseId],
-                    courseTitle: course?.title || "Unknown Course",
-                    courseThumbnail: course?.thumbnail || "https://via.placeholder.com/300x200",
-                    instructorName: course?.instructor?.name || "Unknown Instructor"
-                };
+        let contentItem = null;
+
+        for (const section of course.content) {
+            const found = section.content.find(
+                (item) => item._id.toString() === contentId
+            );
+            if (found) {
+                contentItem = found;
+                break;
             }
         }
 
+        if (!contentItem) {
+            return res.status(404).json({
+                success: false,
+                error: "Content item not found",
+            });
+        }
+
+        // Structure flat list of content
+        const flatContentList = course.content.flatMap((section) =>
+            section.content.map((item) => ({
+                _id: item._id,
+                title: item.title,
+                description: item.description || "", // Safe fallback
+                videoUrl: item.videoUrl,
+                duration: item.duration,
+                isCompleted: false,
+                contentType: item.type,
+                content: item.content,
+                resources: item.resources || [],
+                quizzes: item.quizzes || [],
+                PdfDownloadUrl: item.PdfDownloadUrl,
+                PdfViewUrl: item.PdfViewUrl,
+            }))
+        );
+
+        const responseCourse = {
+            _id: course._id,
+            title: course.title,
+            instructor: {
+                _id: course.instructor._id,
+                name: course.instructor.name,
+                avatar: course.instructor.avatar,
+                bio: course.instructor.bio,
+                rating: course.instructor.rating,
+                students: course.instructor.students,
+            },
+            rating: course.rating || 0,
+            students: course.totalStudents || 0,
+            category: course.category || "Uncategorized",
+            description: course.description,
+            contents: flatContentList,
+        };
+
+        const responseContent = flatContentList.find(
+            (item) => item._id.toString() === contentId
+        );
+
         res.status(200).json({
             success: true,
-            data: progressData
+            course: responseCourse,
+            content: responseContent,
         });
     } catch (err) {
-        console.error("Failed to fetch progress:", err);
+        console.error("Error fetching content item:", err);
         res.status(500).json({
             success: false,
-            error: "Server error while fetching progress"
+            error: "Server error while fetching content item",
         });
     }
-};
+}
 
 
 async function AddCourseAnnouncement(req, res) {
@@ -707,8 +570,6 @@ module.exports = {
     UserEnrolment,
     GetEnrolledCourses,
     EnrolledCourseContent,
-    UpdateUserCourseProgress,
-    GetUserCourseProgressData,
     AddCourseAnnouncement,
     GetCourseAnnouncement,
     AddCourseResourses,

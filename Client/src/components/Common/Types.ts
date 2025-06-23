@@ -8,7 +8,7 @@ export type UserData = {
   progress: Record<string, CourseProgress>;
   mobile?: string;
   language?: string;
-  location?: string;
+  bio?: string;
 };
 
 export type CourseProgress = {
@@ -83,7 +83,7 @@ export interface Announcement {
 
 
 
-export interface Instructor {
+export interface instructor {
   _id: string;
   name: string;
   avatar?: string;
@@ -101,6 +101,7 @@ export interface NavigationItem {
 }
 
 export interface Quiz {
+  _id: string | undefined;
   question: string;
   options: string[];
   correctAnswer: string;
@@ -144,3 +145,4 @@ export interface CourseContent {
   PdfViewUrl?: string;
   PdfDownloadUrl?: string;
 }
+

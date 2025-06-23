@@ -115,12 +115,7 @@ const CourseHeader = ({
             />
         </div>
 
-        <ProgressBar
-            progress={courseData.totalProgress || 0}
-            completed={courseData.completedLessons || 0}
-            total={courseData.totalLessons || 0}
-            timeRemaining={courseData.estimatedTime || 'N/A'}
-        />
+    
     </div>
 );
 
@@ -129,34 +124,6 @@ const StatCard = ({ icon, value, label }: { icon: React.ReactNode; value: string
         {icon}
         <p className="font-bold">{value}</p>
         <p className="text-sm text-gray-400">{label}</p>
-    </div>
-);
-
-const ProgressBar = ({
-    progress,
-    completed,
-    total,
-    timeRemaining
-}: {
-    progress: number;
-    completed: number;
-    total: number;
-    timeRemaining: string
-}) => (
-    <div className="bg-gray-700 rounded-lg p-4" data-aos='zoom-in'>
-        <div className="flex justify-between items-center mb-2">
-            <h3 className="font-medium">Your Progress</h3>
-            <span className="text-orange-500 font-bold">{progress}%</span>
-        </div>
-        <div className="w-full bg-gray-600 rounded-full h-3 mb-2">
-            <div
-                className="bg-orange-500 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-            ></div>
-        </div>
-        <p className="text-sm text-gray-400">
-            {completed} of {total} lessons completed • Estimated time remaining: {timeRemaining}
-        </p>
     </div>
 );
 

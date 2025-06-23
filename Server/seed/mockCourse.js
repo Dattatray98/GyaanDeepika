@@ -4,42 +4,347 @@ const Course = require("../models/Course");
 
 dotenv.config();
 
-const mockCourse ={
-  "title": "English Learning Bootcamp",
-  "description": "Improve your English speaking, listening, reading, and writing skills from beginner to intermediate level.",
-  "subtitle": "Master daily conversation, grammar, and vocabulary step by step.",
-  "thumbnail": "https://res.cloudinary.com/dx1eoqsvt/image/upload/v1750602500/english_learning_bootcamp.jpg",
+const mockCourse = {
+  "title": "Frontend Development Bootcamp",
+  "description": "Learn to build responsive websites using HTML, CSS, and JavaScript.",
+  "subtitle": "Master frontend skills and launch your web career.",
+  "thumbnail": "https://res.cloudinary.com/dx1eoqsvt/image/upload/v1750598073/frontend_development_sozdup.jpg",
   "instructor": {
-    "name": "Sarah Williams",
+    "name": "Coding.cherry",
     "avatar": "https://via.placeholder.com/150",
-    "bio": "Language Coach & Communication Trainer",
-    "rating": 4.7,
-    "students": 3400,
-    "email": "sarah@example.com"
+    "bio": "Programming expert YouTube Link : https://www.youtube.com/@Codingcherry",
+    "rating": 4.9,
+    "students": 2100
   },
-  "rating": 4.7,
-  "totalStudents": 3450,
-  "duration": "25 hours",
+  "rating": 4.9,
+  "totalStudents": 2102,
+  "duration": "15 hours",
   "level": "beginner",
   "language": "English",
-  "lastUpdated": "Sun Jun 22 2025 13:00:00 GMT+0530 (India Standard Time)",
-  "category": "Language Learning",
-  "price": 499,
+  "category": "Programming",
+  "price": 599,
   "learningOutcomes": [
-    "Speak confidently in everyday conversations",
-    "Understand and use essential English grammar",
-    "Expand vocabulary for personal and professional use",
-    "Improve pronunciation and listening skills"
+    "Build responsive layouts using Flexbox and Grid",
+    "Understand HTML semantics and accessibility",
+    "Use modern CSS for styling and animations",
+    "Add interactivity with JavaScript and DOM manipulation"
   ],
   "requirements": [
-    "Willingness to practice daily",
-    "Basic understanding of English letters and sounds",
-    "Headphones or speakers for audio practice"
+    "Basic computer usage",
+    "Access to code editor and browser"
   ],
   "content": [
     {
-      "title": "Getting Started with English",
-      "description": "Start your journey by learning the basics of English",
+      "title": "Getting Started",
+      "description": "Introduction to frontend development and Backend Development",
+      "duration": "20 min",
+      "lessons": 2,
+      "completed": 0,
+      "locked": false,
+      "content": [
+        {
+          "type": "video",
+          "title": "What is Frontend Development and Backend Development?",
+          "description": "Learn how the CSS Box Model and Flexbox layout work.",
+          "duration": "2:29",
+          "completed": false,
+          "preview": true,
+          "videoUrl": "https://res.cloudinary.com/dx1eoqsvt/video/upload/v1750645077/jn0pnqlfcx7qxweod7wr.mp4",
+          "notes": "Frontend is what users see and interact with.",
+          "resources": [
+            "https://example.com/frontend-intro.pdf"
+          ],
+          "quizzes": [
+            {
+              "title": "Basics of HTML",
+              "question": "What does HTML stand for?",
+              "options": [
+                "Hyper Text Markup Language",
+                "Home Tool Markup Language",
+                "Hyperlinks and Text Markup Language",
+                "Hyper Tool Multi Language"
+              ],
+              "correctAnswer": "Hyper Text Markup Language"
+            },
+            {
+              "title": "HTML Tags",
+              "question": "Which tag is used to create a hyperlink in HTML?",
+              "options": [
+                "<a>",
+                "<link>",
+                "<href>",
+                "<hyper>"
+              ],
+              "correctAnswer": "<a>"
+            },
+            {
+              "title": "HTML Structure",
+              "question": "Which element is the root of an HTML document?",
+              "options": [
+                "<body>",
+                "<head>",
+                "<html>",
+                "<root>"
+              ],
+              "correctAnswer": "<html>"
+            },
+            {
+              "title": "HTML Media",
+              "question": "Which tag is used to embed an image in HTML?",
+              "options": [
+                "<image>",
+                "<img>",
+                "<src>",
+                "<pic>"
+              ],
+              "correctAnswer": "<img>"
+            },
+            {
+              "title": "HTML Attributes",
+              "question": "Which attribute is used to define the source of an image?",
+              "options": [
+                "src",
+                "href",
+                "alt",
+                "link"
+              ],
+              "correctAnswer": "src"
+            }
+          ]
+          ,
+          "transcript": "Welcome to this beginner-friendly JavaScript tutorial. Today, we'll cover the fundamentals of JavaScript, including variables, data types, functions, and control flow. Let's start with variables. In JavaScript, you can declare variables using var, let, or const. Let and const were introduced in ES6 and are preferred over var.\n\nNext, let's talk about data types. JavaScript supports primitive data types like string, number, boolean, null, undefined, and symbol. It also supports objects and arrays.\n\nNow let's move on to functions. Functions in JavaScript can be declared using the function keyword or arrow syntax. Functions allow you to reuse code and make your programs more organized.\n\nControl flow in JavaScript includes if-else statements, switch cases, and loops like for, while, and do-while. These help you control the logic and behavior of your programs.\n\nThat’s it for today’s JavaScript basics. Practice these concepts to build a strong foundation. Thanks for watching!.",
+          "PdfDownloadUrl": "https://drive.google.com/file/d/14QZVMBQPG_DV2iBBSprBd3Yj9hmwmdp5/view?usp=sharing",
+          "PdfViewUrl": "https://drive.google.com/file/d/14QZVMBQPG_DV2iBBSprBd3Yj9hmwmdp5/preview"
+        },
+        {
+          "type": "video",
+          "title": "Box Model & Flexbox",
+          "description": "Learn how the CSS Box Model and Flexbox layout work.",
+          "duration": "18 min",
+          "completed": false,
+          "preview": false,
+          "videoUrl": "https://example.com/flexbox.mp4",
+          "notes": "Flexbox helps layout items in one direction.",
+          "resources": [],
+          "quizzes": [
+            {
+              "title": "Basics of HTML",
+              "question": "What does HTML stand for?",
+              "options": [
+                "Hyper Text Markup Language",
+                "Home Tool Markup Language",
+                "Hyperlinks and Text Markup Language",
+                "Hyper Tool Multi Language"
+              ],
+              "correctAnswer": "Hyper Text Markup Language"
+            },
+            {
+              "title": "HTML Tags",
+              "question": "Which tag is used to create a hyperlink in HTML?",
+              "options": [
+                "<a>",
+                "<link>",
+                "<href>",
+                "<hyper>"
+              ],
+              "correctAnswer": "<a>"
+            },
+            {
+              "title": "HTML Structure",
+              "question": "Which element is the root of an HTML document?",
+              "options": [
+                "<body>",
+                "<head>",
+                "<html>",
+                "<root>"
+              ],
+              "correctAnswer": "<html>"
+            },
+            {
+              "title": "HTML Media",
+              "question": "Which tag is used to embed an image in HTML?",
+              "options": [
+                "<image>",
+                "<img>",
+                "<src>",
+                "<pic>"
+              ],
+              "correctAnswer": "<img>"
+            },
+            {
+              "title": "HTML Attributes",
+              "question": "Which attribute is used to define the source of an image?",
+              "options": [
+                "src",
+                "href",
+                "alt",
+                "link"
+              ],
+              "correctAnswer": "src"
+            }
+          ]
+          ,
+          "transcript": "Understand margins, padding, borders, and layout."
+        },
+      ]
+    },
+    {
+      "title": "HTML Essentials",
+      "description": "Learn HTML structure and common tags",
+      "duration": "35 min",
+      "lessons": 2,
+      "completed": 0,
+      "locked": false,
+      "content": [
+        {
+          "type": "video",
+          "title": "HTML Tags & Structure",
+          "description": "Learn how the CSS Box Model and Flexbox layout work.",
+          "duration": "15 min",
+          "completed": false,
+          "preview": false,
+          "videoUrl": "https://example.com/html-tags.mp4",
+          "notes": "Structure is key to semantic HTML.",
+          "resources": [
+            "https://example.com/html-ref.pdf"
+          ],
+          "quizzes": [
+            {
+              "title": "Basics of HTML",
+              "question": "What does HTML stand for?",
+              "options": [
+                "Hyper Text Markup Language",
+                "Home Tool Markup Language",
+                "Hyperlinks and Text Markup Language",
+                "Hyper Tool Multi Language"
+              ],
+              "correctAnswer": "Hyper Text Markup Language"
+            },
+            {
+              "title": "HTML Tags",
+              "question": "Which tag is used to create a hyperlink in HTML?",
+              "options": [
+                "<a>",
+                "<link>",
+                "<href>",
+                "<hyper>"
+              ],
+              "correctAnswer": "<a>"
+            },
+            {
+              "title": "HTML Structure",
+              "question": "Which element is the root of an HTML document?",
+              "options": [
+                "<body>",
+                "<head>",
+                "<html>",
+                "<root>"
+              ],
+              "correctAnswer": "<html>"
+            },
+            {
+              "title": "HTML Media",
+              "question": "Which tag is used to embed an image in HTML?",
+              "options": [
+                "<image>",
+                "<img>",
+                "<src>",
+                "<pic>"
+              ],
+              "correctAnswer": "<img>"
+            },
+            {
+              "title": "HTML Attributes",
+              "question": "Which attribute is used to define the source of an image?",
+              "options": [
+                "src",
+                "href",
+                "alt",
+                "link"
+              ],
+              "correctAnswer": "src"
+            }
+          ]
+          ,
+          "transcript": "Learn basic tags like div, p, h1, a..."
+        },
+        {
+          "type": "video",
+          "title": "HTML Tags & Structure",
+          "description": "Learn how the CSS Box Model and Flexbox layout work.",
+          "duration": "15 min",
+          "completed": false,
+          "preview": false,
+          "videoUrl": "https://example.com/html-tags.mp4",
+          "notes": "Structure is key to semantic HTML.",
+          "resources": [
+            "https://example.com/html-ref.pdf"
+          ],
+          "quizzes": [
+            {
+              "title": "Basics of HTML",
+              "question": "What does HTML stand for?",
+              "options": [
+                "Hyper Text Markup Language",
+                "Home Tool Markup Language",
+                "Hyperlinks and Text Markup Language",
+                "Hyper Tool Multi Language"
+              ],
+              "correctAnswer": "Hyper Text Markup Language"
+            },
+            {
+              "title": "HTML Tags",
+              "question": "Which tag is used to create a hyperlink in HTML?",
+              "options": [
+                "<a>",
+                "<link>",
+                "<href>",
+                "<hyper>"
+              ],
+              "correctAnswer": "<a>"
+            },
+            {
+              "title": "HTML Structure",
+              "question": "Which element is the root of an HTML document?",
+              "options": [
+                "<body>",
+                "<head>",
+                "<html>",
+                "<root>"
+              ],
+              "correctAnswer": "<html>"
+            },
+            {
+              "title": "HTML Media",
+              "question": "Which tag is used to embed an image in HTML?",
+              "options": [
+                "<image>",
+                "<img>",
+                "<src>",
+                "<pic>"
+              ],
+              "correctAnswer": "<img>"
+            },
+            {
+              "title": "HTML Attributes",
+              "question": "Which attribute is used to define the source of an image?",
+              "options": [
+                "src",
+                "href",
+                "alt",
+                "link"
+              ],
+              "correctAnswer": "src"
+            }
+          ]
+          ,
+          "transcript": "Learn basic tags like div, p, h1, a..."
+        },
+      ]
+    },
+    {
+      "title": "CSS for Styling",
+      "description": "Style your site with modern CSS",
       "duration": "40 min",
       "lessons": 2,
       "completed": 0,
@@ -47,133 +352,167 @@ const mockCourse ={
       "content": [
         {
           "type": "video",
-          "title": "Introduction to English",
+          "title": "Box Model & Flexbox",
+          "description": "Learn how the CSS Box Model and Flexbox layout work.",
           "duration": "18 min",
           "completed": false,
-          "preview": true,
-          "videoUrl": "https://res.cloudinary.com/dx1eoqsvt/video/upload/v1749802000/intro_english.mp4",
-          "notes": "Understand what to expect and how to stay motivated.",
-          "resources": [],
-          "quizzes": [],
-          "transcript": "Welcome to your English learning journey! In this course..."
-        },
-        {
-          "type": "quiz",
-          "title": "Getting Started Quiz",
-          "duration": "6 min",
-          "completed": false,
           "preview": false,
+          "videoUrl": "https://example.com/flexbox.mp4",
+          "notes": "Flexbox helps layout items in one direction.",
           "resources": [],
           "quizzes": [
             {
-              "question": "What is the correct response to 'How are you?'",
-              "options": ["I'm fine, thank you", "Goodbye", "Yes", "Please"],
-              "correctAnswer": "I'm fine, thank you"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "title": "Essential Grammar",
-      "description": "Learn basic English grammar rules",
-      "duration": "1 hour",
-      "lessons": 2,
-      "completed": 0,
-      "locked": false,
-      "content": [
-        {
-          "type": "video",
-          "title": "Simple Tenses",
-          "duration": "30 min",
-          "completed": false,
-          "preview": false,
-          "videoUrl": "https://example.com/english-tenses.mp4",
-          "notes": "Start with Present, Past, and Future tense examples.",
-          "resources": [],
-          "quizzes": [],
-          "transcript": "We’ll look at subject + verb + object sentence patterns..."
-        },
-        {
-          "type": "quiz",
-          "title": "Grammar Basics",
-          "duration": "10 min",
-          "completed": false,
-          "preview": false,
-          "resources": [],
-          "quizzes": [
-            {
-              "question": "Which sentence is correct?",
+              "title": "Basics of HTML",
+              "question": "What does HTML stand for?",
               "options": [
-                "She go to school.",
-                "He goes to school.",
-                "They goes to school.",
-                "We goes to school."
+                "Hyper Text Markup Language",
+                "Home Tool Markup Language",
+                "Hyperlinks and Text Markup Language",
+                "Hyper Tool Multi Language"
               ],
-              "correctAnswer": "He goes to school."
+              "correctAnswer": "Hyper Text Markup Language"
+            },
+            {
+              "title": "HTML Tags",
+              "question": "Which tag is used to create a hyperlink in HTML?",
+              "options": [
+                "<a>",
+                "<link>",
+                "<href>",
+                "<hyper>"
+              ],
+              "correctAnswer": "<a>"
+            },
+            {
+              "title": "HTML Structure",
+              "question": "Which element is the root of an HTML document?",
+              "options": [
+                "<body>",
+                "<head>",
+                "<html>",
+                "<root>"
+              ],
+              "correctAnswer": "<html>"
+            },
+            {
+              "title": "HTML Media",
+              "question": "Which tag is used to embed an image in HTML?",
+              "options": [
+                "<image>",
+                "<img>",
+                "<src>",
+                "<pic>"
+              ],
+              "correctAnswer": "<img>"
+            },
+            {
+              "title": "HTML Attributes",
+              "question": "Which attribute is used to define the source of an image?",
+              "options": [
+                "src",
+                "href",
+                "alt",
+                "link"
+              ],
+              "correctAnswer": "src"
             }
           ]
-        }
-      ]
-    },
-    {
-      "title": "Daily Conversations",
-      "description": "Practice common English phrases for everyday use",
-      "duration": "50 min",
-      "lessons": 2,
-      "completed": 0,
-      "locked": false,
-      "content": [
-        {
-          "type": "video",
-          "title": "Common Greetings & Phrases",
-          "duration": "20 min",
-          "completed": false,
-          "preview": false,
-          "videoUrl": "https://example.com/english-greetings.mp4",
-          "notes": "Learn how to greet and introduce yourself confidently.",
-          "resources": [],
-          "quizzes": [],
-          "transcript": "Hello! Hi! Good morning! How are you? Let’s practice daily greetings..."
+          ,
+          "transcript": "Understand margins, padding, borders, and layout."
         },
         {
-          "type": "quiz",
-          "title": "Conversation Practice",
-          "duration": "8 min",
+          "type": "video",
+          "title": "Box Model & Flexbox",
+          "description": "Learn how the CSS Box Model and Flexbox layout work.",
+          "duration": "18 min",
           "completed": false,
           "preview": false,
+          "videoUrl": "https://example.com/flexbox.mp4",
+          "notes": "Flexbox helps layout items in one direction.",
           "resources": [],
           "quizzes": [
             {
-              "question": "What do you say after someone says 'Thank you'?",
-              "options": ["Please", "Excuse me", "You're welcome", "No"],
-              "correctAnswer": "You're welcome"
+              "title": "Basics of HTML",
+              "question": "What does HTML stand for?",
+              "options": [
+                "Hyper Text Markup Language",
+                "Home Tool Markup Language",
+                "Hyperlinks and Text Markup Language",
+                "Hyper Tool Multi Language"
+              ],
+              "correctAnswer": "Hyper Text Markup Language"
+            },
+            {
+              "title": "HTML Tags",
+              "question": "Which tag is used to create a hyperlink in HTML?",
+              "options": [
+                "<a>",
+                "<link>",
+                "<href>",
+                "<hyper>"
+              ],
+              "correctAnswer": "<a>"
+            },
+            {
+              "title": "HTML Structure",
+              "question": "Which element is the root of an HTML document?",
+              "options": [
+                "<body>",
+                "<head>",
+                "<html>",
+                "<root>"
+              ],
+              "correctAnswer": "<html>"
+            },
+            {
+              "title": "HTML Media",
+              "question": "Which tag is used to embed an image in HTML?",
+              "options": [
+                "<image>",
+                "<img>",
+                "<src>",
+                "<pic>"
+              ],
+              "correctAnswer": "<img>"
+            },
+            {
+              "title": "HTML Attributes",
+              "question": "Which attribute is used to define the source of an image?",
+              "options": [
+                "src",
+                "href",
+                "alt",
+                "link"
+              ],
+              "correctAnswer": "src"
             }
           ]
-        }
+          ,
+          "transcript": "Understand margins, padding, borders, and layout."
+        },
       ]
     }
   ],
   "resources": [
     {
-      "title": "English Grammar PDF",
+      "title": "Frontend Cheat Sheet",
       "type": "pdf",
-      "size": "1.2 MB",
-      "downloadUrl": "https://example.com/english-grammar.pdf"
+      "size": "1.5 MB",
+      "downloadUrl": "https://example.com/frontend-cheatsheet.pdf"
     }
   ],
   "announcements": [
     {
-      "title": "Welcome to the Bootcamp!",
-      "content": "Get ready to speak English with confidence. Start from Lesson 1 now!",
-      "date": "Sun Jun 22 2025 13:10:00 GMT+0530 (India Standard Time)",
+      "title": "Course Kickoff!",
+      "content": "Welcome to your frontend journey!",
+      "date": "Fri Jun 20 2025 14:35:00 GMT+0530 (India Standard Time)",
       "important": true
     }
   ],
   "totalProgress": 0,
   "completedLessons": 0,
   "totalLessons": 6,
-  "estimatedTime": "3.5 hours"
+  "estimatedTime": "3 hours",
 }
 
 async function seedMockCourse() {

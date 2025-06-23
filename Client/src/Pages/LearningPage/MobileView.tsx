@@ -21,6 +21,7 @@ import type { CourseContent, Course } from '../../components/Common/Types.ts';
 import { fetchCourseContent } from '../../hooks/useContentHandlers.ts';
 import { handleAskQuestion, handleGenerateSummary } from '../../hooks/useAIHandlers.ts';
 import AOS from 'aos'
+import useNotes from '../../hooks/useNotes.ts';
 
 const MobileView = () => {
     const { courseId, contentId } = useParams<{
@@ -29,7 +30,6 @@ const MobileView = () => {
     }>();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
-    const [notes, setNotes] = useState('');
     const [, setVideoProgress] = useState(0);
     const [loading, setLoading] = useState(true);
     const [courseData, setCourseData] = useState<Course | null>(null);
@@ -102,6 +102,16 @@ const MobileView = () => {
             );
     };
 
+
+    if (!token) return <p>Please login to take notes.</p>;
+
+    const { note, setNote, saveNote, status } = useNotes({
+        courseId: courseData?._id || '',
+        contentId: currentContent?._id || '',
+        token,
+    });
+
+
     const formatDuration = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = Math.floor(seconds % 60);
@@ -142,8 +152,7 @@ const MobileView = () => {
     ) => {
         if (!courseId || !contentId) return;
 
-        if (currentTime % 5 > 0.1) return; // Throttle updates
-
+        if (currentTime % 5 > 0.1) return; 
         const completionPercentage = Math.round((currentTime / duration) * 100);
         const isCompleted = completionPercentage >= 95;
         setVideoProgress(completionPercentage);
@@ -275,7 +284,7 @@ const MobileView = () => {
                     onClick={() => setShowSidebar(!showSidebar)}
                     data-aos='zoom-in'
                 >
-                    {/* <Menu className="w-6 h-6" /> */}
+                   
                 </button>
             </header>
 
@@ -435,15 +444,22 @@ const MobileView = () => {
 
                 {activeTab === 'Write Notes' && (
                     <div>
-                        <h3 className="font-bold text-lg mb-3" data-aos='zoom-in'>My Notes</h3>
+                        <h3 className="font-bold text-lg mb-4">My Notes</h3>
+
                         <textarea
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
                             placeholder="Take notes while watching the video..."
-                            className="w-full h-48 bg-gray-800 rounded-lg p-3 text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm" data-aos='zoom-in'
+                            className="w-full h-64 bg-gray-700 rounded-lg p-4 text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500"
+                            data-aos="zoom-in"
                         />
-                        <div className="flex justify-end mt-3" data-aos='zoom-in'>
-                            <button className="bg-orange-500 hover:bg-orange-600 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors">
+
+                        <div className="flex justify-between items-center mt-4">
+                            <p className="text-sm text-gray-300">{status}</p>
+                            <button
+                                onClick={saveNote}
+                                className="bg-orange-500 hover:bg-orange-600 px-6 py-2 rounded-lg font-medium transition-colors"
+                            >
                                 Save Notes
                             </button>
                         </div>
@@ -526,14 +542,33 @@ const MobileView = () => {
                     </div>
                 )}
 
-                {activeTab === 'Video Notes' && (
+                {activeTab === 'Video Notes' && currentContent?.PdfViewUrl && (
                     <div>
-                        <h3 className="font-bold text-lg mb-3" data-aos="zoom-in">Lecture Notes (PDF)</h3>
+                        <div className="flex gap-4 mb-5 items-center">
+                            <h3 className="font-bold text-lg" data-aos="zoom-in">Lecture Notes (PDF)</h3>
+
+                            {currentContent?.PdfDownloadUrl && (
+                                <a
+                                    href={currentContent.PdfDownloadUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    download
+                                >
+                                    <button
+                                        className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                                        aria-label="Download PDF"
+                                    >
+                                        <Download className="w-5 h-5" />
+                                    </button>
+                                </a>
+                            )}
+                        </div>
 
                         <iframe
-                            src=""
-                            className="w-full h-[500px] rounded-lg border border-gray-700"
-                            title="Lecture PDF"
+                            src={currentContent.PdfViewUrl}
+                            onClick={() => console.log(currentContent.PdfViewUrl)}
+                            className="w-full h-[80vh] rounded-lg border border-gray-700"
+                            title="Lecture PDF Preview"
                             data-aos="zoom-in"
                         />
                     </div>

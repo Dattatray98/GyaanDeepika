@@ -22,7 +22,7 @@ const ProfileFetchUser = (
                 });
 
                 if (response.data) {
-                    setUser(response.data); // assuming `response.data` is the user object
+                    setUser(response.data); 
                 }
             } catch (err) {
                 console.error("❌ Error fetching user data:", err);

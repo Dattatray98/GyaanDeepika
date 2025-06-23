@@ -12,6 +12,8 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import OAuthRedirect from "./Pages/Auth/OAuthRedirect.tsx";
 import VideoPlayerPage from "./Pages/LearningPage/VideoPlayerPage.tsx";
 import Auth from "./Pages/Auth/Auth.tsx";
+import QuizPage from "./Pages/QuizPage/QuizPage.tsx";
+import ProfileEditPage from "./Pages/Profile/ProfileEditPage.tsx";
 
 
 function App() {
@@ -28,11 +30,13 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<HomePage />} />
             <Route path="/ProfilePage" element={<ProfilePage />} />
+            <Route path="/profileEditPage" element={<ProfileEditPage />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/CourseContent/:courseId/content" element={<CourseContent />} />
             <Route path="/EnrolledCoursesPage" element={<EnrolledCoursesPage />} />
             <Route path="/BrowseCousre" element={<BrowseCourses />} />
             <Route path="/courses/:courseId/content/:contentId" element={<VideoPlayerPage />} />
+            <Route path="/courses/:courseId/content/:contentId/quiz" element={<QuizPage />} />
           </Route>
 
           {/* Fallback Route */}

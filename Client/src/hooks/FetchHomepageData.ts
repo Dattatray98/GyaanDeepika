@@ -55,12 +55,10 @@ const FetchHomepageData = ({
           ? enrolledResponse.data.data
           : [];
 
-        const progressMap = userResponse.data?.progress || {};
-        const coursesWithProgress = enrolledCoursesData.map((course: any) => ({
+        const courseData = enrolledCoursesData.map((course: any) => ({
           ...course,
-          totalProgress: progressMap[course._id]?.completionPercentage ?? 0
         }));
-        if (isMounted) setEnrolledCourses(coursesWithProgress);
+        if (isMounted) setEnrolledCourses(courseData);
 
         // 3. Recommended
         const recommendedResponse = await axios.get(`${api}/api/courses/unenrolled`, {

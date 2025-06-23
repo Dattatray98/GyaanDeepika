@@ -1,4 +1,4 @@
-// src/utils/fetchCourseContent.ts
+
 import axios from 'axios';
 import type { ApiResponse, Course, CourseContent } from '../components/Common/Types';
 import type { Dispatch, SetStateAction } from 'react';

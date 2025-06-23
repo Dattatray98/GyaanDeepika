@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext.tsx';
 import Loading from '../../components/Common/Loading.tsx';
 import type { Course } from '../../components/Common/Types.ts';
 import { fetchUnenrolledCourses } from '../../hooks/FetchBrowseCourses.ts';
+import BottomNavigation from '../../components/Common/BottomNavigation.tsx';
 
 const MobileView = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -287,6 +288,8 @@ const MobileView = () => {
       </section>
 
       <Footer />
+
+      <BottomNavigation />
     </div>
   );
 }

@@ -4,7 +4,7 @@ const {
 } = require("@aws-sdk/client-bedrock-runtime");
 
 const bedrockClient = new BedrockRuntimeClient({
-  region: "eu-north-1", // ✅ Region for Nova models
+  region: "eu-north-1",
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -15,7 +15,7 @@ async function generateSummary(transcript) {
   const prompt = `Summarize the following transcript:\n\n${transcript}`;
 
   const command = new InvokeModelCommand({
-    modelId: "amazon.nova-lite-v1:0fdsf",
+    modelId: "amazon.nova-lite-v1:0",
     contentType: "application/json",
     accept: "application/json",
     body: JSON.stringify({
@@ -37,7 +37,7 @@ async function generateSummary(transcript) {
 
     const parsed = JSON.parse(responseString);
 
-    // ✅ Correct extraction for Nova Lite output structure
+    
     const summaryText = parsed.output?.message?.content?.[0]?.text?.trim() || null;
 
     if (!summaryText) {

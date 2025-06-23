@@ -10,10 +10,10 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/home', label: 'Home' },
-    { path: '/about', label: 'About' },
-    { path: '/EnrolledCoursesPage', label: 'Services' },
+    { path: 'AboutSection', label: 'About' },
+    { path: 'services', label: 'Services' },
     { path: '/BrowseCousre', label: 'Resources' },
-    { path: '/LearningPage', label: 'Testimonials' },
+    { path: 'TestimonialsSection', label: 'Testimonials' },
     { path: '/contact', label: 'Contact' },
   ];
 
@@ -32,15 +32,16 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <Link
+              <button
                 key={link.path}
-                to={link.path}
-                className="text-white hover:text-orange-500 transition-colors text-sm font-medium"
+                onClick={() => window.scrollTo({ top: document.getElementById(link.path)?.offsetTop, behavior: 'smooth' })}
+                className="text-white hover:text-orange-500 transition-colors text-sm font-medium bg-transparent border-none"
                 data-aos="fade-down"
               >
                 {link.label}
-              </Link>
+              </button>
             ))}
+
           </div>
 
           {/* Auth Buttons - Desktop */}

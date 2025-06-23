@@ -14,7 +14,7 @@ const BottomNavigation = () => {
     { icon: <FiUser size={20} />, label: 'Profile', value: 'profile', path: '/ProfilePage' },
   ];
 
-  // Determine active tab from current route
+
   const getActiveTab = () => {
     if (location.pathname.startsWith('/courses')) return 'my-learning';
 

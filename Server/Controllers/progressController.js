@@ -256,7 +256,7 @@ async function GetVideoProgress(req, res) {
             });
         }
 
-        // Find the specific video progress
+     // Find the specific video progress
         const videoProgress = progress.completedVideos.find(v => v.contentId === contentId);
         if (!videoProgress) {
             return res.status(404).json({

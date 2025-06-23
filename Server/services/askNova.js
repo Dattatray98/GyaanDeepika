@@ -4,7 +4,7 @@ const {
 } = require("@aws-sdk/client-bedrock-runtime");
 
 const bedrockClient = new BedrockRuntimeClient({
-  region: "eu-north-1", // Make sure your Nova model is supported in this region
+  region: "eu-north-1",
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -36,7 +36,7 @@ async function askNova(question, context) {
     const responseString = await response.body.transformToString();
     const parsed = JSON.parse(responseString);
 
-    // Safely extract response from different possible Nova output formats
+    
     const answer =
       parsed?.outputs?.[0]?.content?.[0]?.text?.trim() ||
       parsed?.output?.message?.content?.[0]?.text?.trim() ||

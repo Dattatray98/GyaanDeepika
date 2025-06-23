@@ -36,6 +36,10 @@ app.use('/api', require("./Routes/transcribeRoute"));
 app.use("/api/summary", require("./Routes/summaryRoute"));
 app.use("/api/qa", require("./Routes/qaRoutes"));
 app.use("/api/progress", require("./Routes/progressRoutes"));
+app.use("/api/notes", require("./Routes/Notes"));
+app.use("/api", require("./Routes/QuizRoute"));
+
+
 app.get("/", (req, res) => {
   res.send("🎓 GyaanDeepika Backend is Live");
 });

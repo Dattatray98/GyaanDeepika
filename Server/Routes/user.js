@@ -1,16 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { 
-  handleUserSignup, 
-  handleUserLogin, 
+const {
+  handleUserSignup,
+  handleUserLogin,
   getCurrentUser,
-  getAllSignedUsers 
+  updateUserProfile,
 } = require("../Controllers/user");
+const upload = require('../middleware/upload');
 const { verifyToken } = require("../middleware/auth");
 
 router.post("/signup", handleUserSignup);
 router.post("/login", handleUserLogin);
 router.get("/me", verifyToken, getCurrentUser);
-router.get("/getsignedusers", verifyToken, getAllSignedUsers);
+router.put('/edit', verifyToken, upload.single('avatar'), updateUserProfile);
 
 module.exports = router;

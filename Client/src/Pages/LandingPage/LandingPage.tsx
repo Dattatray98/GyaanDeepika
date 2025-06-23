@@ -20,7 +20,7 @@ const LandingPage = () => {
   
   const [loading, setLoading] = useState(true);
 
-  // Set timeout to remove loading screen after 2.5 seconds
+ 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);

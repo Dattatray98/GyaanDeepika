@@ -1,4 +1,3 @@
-// services/s3Uploader.js
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const { s3Client } = require('../config/aws');
 
@@ -10,7 +9,7 @@ async function uploadToS3(fileBuffer, fileName, mimeType) {
     Key: key,
     Body: fileBuffer,
     ContentType: mimeType,
-    ACL: 'public-read', // Optional: public access
+    ACL: 'public-read', 
   };
 
   try {
