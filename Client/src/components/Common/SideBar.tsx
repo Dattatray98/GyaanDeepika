@@ -48,7 +48,6 @@ const Sidebar = ({
     const navItems: NavItem[] = [
         { icon: <FiHome />, label: 'Home', value: 'home', path: "/home" },
         { icon: <FiCompass />, label: 'Discover', value: 'discover', path: "/BrowseCousre" },
-        { icon: <FiBook />, label: 'My Learning', value: 'learning', path: "/courses/:courseId/content/:contentId" },
         { icon: <FiBook />, label: 'Upload', value: 'upload', path: "/upload" },
         { icon: <FiSettings />, label: "Settings", value: "settings", path: "/settings" }
   ];
