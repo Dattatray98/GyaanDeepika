@@ -120,7 +120,7 @@ return (
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.5 + index * 0.1 }}
-                            onClick={() => navigate(`/courses/${course._id}`)}
+                            onClick={() => navigate(`/CourseContent/${course._id}/Content`)}
                         >
                             <motion.img
                                 src={course.thumbnail || '/default-course.jpg'}

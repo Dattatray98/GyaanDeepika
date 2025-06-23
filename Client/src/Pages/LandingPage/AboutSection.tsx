@@ -49,7 +49,7 @@ const AboutSection = () => {
           {/* Image */}
           <div data-aos="zoom-in" data-aos-delay="300">
             <img
-              src="/about-image.png"
+              src="/about.png"
               alt="Digital learning"
               className="w-full max-w-md rounded-lg shadow-xl mx-auto"
             />

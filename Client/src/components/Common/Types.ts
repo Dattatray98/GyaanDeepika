@@ -6,6 +6,9 @@ export type UserData = {
   avatar?: string;
   enrolledCourses: string[];
   progress: Record<string, CourseProgress>;
+  mobile?: string;
+  language?: string;
+  location?: string;
 };
 
 export type CourseProgress = {
@@ -20,6 +23,8 @@ export type Course = {
   title: string;
   description: string;
   thumbnail: string;
+  students: number;
+  contents: CourseContent[];
   instructor: {
     bio: string;
     rating: number;
@@ -58,27 +63,14 @@ export type Course = {
 };
 
 export type CourseSection = {
- _id: string;
+  _id: string;
   title: string;
   description?: string;
   duration: string;
   lessons: number;
   completed: number;
   locked: boolean;
-  content: CourseContentItem[];
-};
-
-export type CourseContentItem = {
-  completed: boolean;
-  _id: string;
-  title: string;
-  duration: string;
-  type: 'video' | 'reading' | 'quiz' | 'assignment' | 'string';
-  preview?: boolean;
-  videoUrl?: string;
-  notes?: string;
-  resources?: string[];
-  quizzes?: Quiz[];
+  content: CourseContent[];
 };
 
 export interface Announcement {
@@ -122,3 +114,33 @@ export interface Resource {
   downloadUrl: string;
 }
 
+export interface ApiResponse {
+  course: Course;
+  content: CourseContent;
+}
+
+export interface SummaryResponse {
+  data: {
+    summaryText: string;
+  };
+}
+
+export interface CourseContent {
+  type: string;
+  _id: string;
+  title: string;
+  description: string;
+  videoUrl: string;
+  duration: number;
+  isCompleted: boolean;
+  contentType: string;
+  content?: string;
+  sectionId: string;
+  completed: boolean;
+  preview?: boolean;
+  notes?: string;
+  resources?: string[];
+  quizzes?: Quiz[];
+  PdfViewUrl?: string;
+  PdfDownloadUrl?: string;
+}

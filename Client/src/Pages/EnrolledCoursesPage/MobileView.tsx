@@ -2,19 +2,21 @@ import React from 'react'
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    FiSearch, FiUsers, FiStar, FiHome,
-    FiCompass, FiBook, FiUser, FiClock,
+    FiSearch, FiUsers, FiStar,
+    FiBook, FiClock,
     FiPlay,
     FiChevronRight,
     FiBarChart2,
     FiCircle,
     FiCheckCircle
 } from 'react-icons/fi';
-import { FaGraduationCap } from 'react-icons/fa';
-import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import type { Course, CourseSection } from '../../components/Common/Types.ts';
+import BottomNavigation from '../../components/Common/BottomNavigation.tsx';
+import { fetchEnrolledCourses } from '../../hooks/EnrolledCourse.ts';
+import Loading from '../../components/Common/Loading.tsx';
+import { useAuth } from '../../context/AuthContext.tsx';
 
 const MobileView = () => {
     const [activeFilter, setActiveFilter] = useState('all');
@@ -22,13 +24,13 @@ const MobileView = () => {
     const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [activeTab, setActiveTab] = useState('my-learning');
     const [courses, setCourses] = useState<Course[]>([]);
     const navigate = useNavigate();
+    const {token} = useAuth();
 
     useEffect(() => {
         AOS.init({
-            duration: 800,
+            duration: 1000,
             easing: 'ease-in-out',
             once: true,
             offset: 100,
@@ -36,82 +38,18 @@ const MobileView = () => {
     });
 
     useEffect(() => {
-        let isMounted = true;
-        const abortController = new AbortController();
+        if (!token) return;
 
-        const fetchEnrolledCourses = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) throw new Error('Authentication token is missing');
+        const cleanup = fetchEnrolledCourses({
+            token,
+            setCourses,
+            setLoading,
+            setError,
+        });
 
-                setLoading(true);
-                setError('');
-const api = import.meta.env.VITE_API_URL;
-                const response = await axios.get(`${api}/api/enrolled/enrolled`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    signal: abortController.signal
-                });
+        return cleanup;
+    }, [token]);
 
-                if (!isMounted) return;
-
-                if (!response.data.success) {
-                    throw new Error(response.data.error || 'Failed to fetch courses');
-                }
-
-                const coursesData = response.data.data.map((course: any) => ({
-                    _id: course._id,
-                    title: course.title,
-                    description: course.description,
-                    subtitle: course.subtitle,
-                    thumbnail: course.thumbnail,
-                    instructor: {
-                        _id: course.instructor._id,
-                        name: course.instructor.name,
-                        avatar: course.instructor.avatar,
-                        email: course.instructor.email,
-                    },
-                    price: course.price,
-                    rating: course.rating,
-                    totalStudents: course.totalStudents,
-                    duration: course.duration,
-                    category: course.category,
-                    level: course.level,
-                    content: course.content,
-                    progress: {
-                        completionPercentage: course.totalProgress || 0,
-                        lastAccessed: course.lastUpdated,
-                        currentVideoId: null,
-                        currentVideoProgress: 0,
-                    },
-                }));
-
-                setCourses(coursesData);
-            } catch (err) {
-                if (!isMounted || axios.isCancel(err)) return;
-
-                const message = axios.isAxiosError(err)
-                    ? err.response?.data?.error || err.message
-                    : err instanceof Error
-                        ? err.message
-                        : 'Failed to load courses';
-
-                console.error('Fetch error:', err);
-                setError(message);
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-
-        fetchEnrolledCourses();
-
-        return () => {
-            isMounted = false;
-            abortController.abort();
-        };
-    }, []);
 
     const handleCourseNavigation = (courseId: string) => {
         navigate(`/CourseContent/${courseId}/content`);
@@ -180,25 +118,11 @@ const api = import.meta.env.VITE_API_URL;
         }, 0);
     };
 
-    const navItems = [
-        { icon: <FiHome size={20} />, label: 'Home', value: 'home', path: "/home" },
-        { icon: <FiCompass size={20} />, label: 'Discover', value: 'discover', path: "/browse-courses" },
-        { icon: <FiBook size={20} />, label: 'My Learning', value: 'my-learning', path: "/my-learning" },
-        { icon: <FiUser size={20} />, label: 'Profile', value: 'profile', path: "/profile" }
-    ];
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
-                <div className="animate-pulse flex flex-col items-center">
-                    <FaGraduationCap className="text-orange-500 text-4xl mb-4" />
-                    <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-orange-500 animate-pulse" style={{ width: '70%' }} />
-                    </div>
-                    <p className="mt-4 text-gray-400">Loading your courses...</p>
-                </div>
-            </div>
-        );
+            <Loading />
+        )
     }
 
     if (error) {
@@ -218,7 +142,7 @@ const api = import.meta.env.VITE_API_URL;
         );
     }
 
-    
+
     return (
         // Mobile View Component
         <div className="flex bg-gray-900 text-white min-h-screen relative w-full">
@@ -275,7 +199,7 @@ const api = import.meta.env.VITE_API_URL;
                             <div className="flex flex-col items-start gap-4">
                                 <div className="w-full aspect-video">
                                     <img
-                                        src={continueLearning.thumbnail || '/placeholder-course.jpg'}
+                                        src={continueLearning.thumbnail}
                                         alt={continueLearning.title || 'Course'}
                                         className="w-full h-full rounded-lg object-cover"
                                         onError={handleImageError}
@@ -372,7 +296,7 @@ const api = import.meta.env.VITE_API_URL;
                                     >
                                         <div className="w-16 h-16 min-w-[64px] rounded-lg overflow-hidden mr-4">
                                             <img
-                                                src={course.thumbnail || '/placeholder-course.jpg'}
+                                                src={course.thumbnail}
                                                 alt={course.title || 'Course'}
                                                 className="w-full h-full object-cover"
                                                 onError={handleImageError}
@@ -512,25 +436,7 @@ const api = import.meta.env.VITE_API_URL;
                 </section>
             </main>
 
-            {/* Mobile Bottom Navigation */}
-            <nav className="fixed bottom-0 left-0 right-0 bg-[#1D1D1D] flex justify-around py-3 border-t border-gray-800 z-10">
-                {navItems.map((item, index) => (
-                    <button
-                        key={item.value}
-                        onClick={() => {
-                            setActiveTab(item.value);
-                            navigate(item.path);
-                        }}
-                        className={`flex flex-col items-center p-2 transition-colors rounded-lg ${activeTab === item.value ? 'text-orange-500 bg-gray-800' : 'text-gray-400 hover:text-white'
-                            }`}
-                        data-aos="fade-up"
-                        data-aos-delay={index * 100}
-                    >
-                        {item.icon}
-                        <span className="text-xs mt-1">{item.label}</span>
-                    </button>
-                ))}
-            </nav>
+            <BottomNavigation />
         </div>
     );
 }

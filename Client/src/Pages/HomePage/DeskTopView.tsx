@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiSearch, FiBookmark, FiUsers, FiStar, FiBell } from 'react-icons/fi';
+import { FiSearch, FiBookmark, FiUsers, FiStar } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import Loading from "../../components/Common/Loading.tsx";
 import type { UserData, Course, Announcement } from '../../components/Common/Types.ts';
 import Sidebar from '../../components/Common/SideBar.tsx';
+import FetchHomepageData from '../../hooks/FetchHomepageData.ts';
 
 const DeskTopView = () => {
   const [activeTab, setActiveTab] = useState('home');
@@ -22,105 +23,14 @@ const DeskTopView = () => {
   const navigate = useNavigate();
 
 
-  useEffect(() => {
-    let isMounted = true;
-    const abortController = new AbortController();
-
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError('');
-
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error('No auth token found');
-        const api = import.meta.env.VITE_API_URL;
-        // 1. Fetch user data
-        const userResponse = await axios.get<UserData>(`${api}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: abortController.signal,
-        });
-        if (!isMounted) return;
-        setUserData(userResponse.data);
-
-        // 2. Fetch enrolled courses
-        const enrolledResponse = await axios.get(`${api}/api/enrolled/enrolled`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          signal: abortController.signal,
-        });
-        if (!isMounted) return;
-
-        const enrolledCoursesData = Array.isArray(enrolledResponse.data?.courses)
-          ? enrolledResponse.data.courses
-          : [];
-
-        const progressMap = userResponse.data?.progress || {};
-        const coursesWithProgress = enrolledCoursesData.map((course: any) => ({
-          ...course,
-          totalProgress: progressMap[course._id]?.completionPercentage ?? 0,
-        }));
-        setEnrolledCourses(coursesWithProgress);
-
-        // 3. Fetch recommended courses
-        const recommendedResponse = await axios.get<{ courses: Course[] }>(
-          `${api}/api/courses/unenrolled`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            signal: abortController.signal,
-          }
-        );
-        if (isMounted) setRecommendedCourses(recommendedResponse.data?.courses || []);
-
-        // 4. Fetch announcements
-        let allAnnouncements: Announcement[] = [];
-        if (enrolledCoursesData.length > 0) {
-          const announcementsPromises = enrolledCoursesData.map((course: any) =>
-            axios
-              .get<{ announcements: Announcement[] }>(
-                `${api}/api/enrolled/${course._id}/content`,
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                  signal: abortController.signal,
-                }
-              )
-              .catch((err) => {
-                console.warn(`Failed to fetch announcements for course ${course._id}`, err);
-                return { data: { announcements: [] } };
-              })
-          );
-
-          const announcementsResponses = await Promise.all(announcementsPromises);
-          allAnnouncements = announcementsResponses.flatMap(
-            (res) => res.data?.announcements || []
-          );
-          if (isMounted) setAnnouncements(allAnnouncements);
-        }
-
-      } catch (err) {
-        if (!isMounted || axios.isCancel(err)) return;
-
-        const message = axios.isAxiosError(err)
-          ? err.response?.data?.error || err.message
-          : err instanceof Error
-            ? err.message
-            : 'Failed to load data';
-
-        console.error('Fetch error:', err);
-        setError(message);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      isMounted = false;
-      abortController.abort();
-    };
-  }, []);
+ FetchHomepageData({
+  setLoading,
+  setError,
+  setUserData,
+  setEnrolledCourses,
+  setRecommendedCourses,
+  setAnnouncements
+});
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -283,7 +193,6 @@ const DeskTopView = () => {
               whileHover={{ scale: 1.2, rotate: 10 }}
               whileTap={tap}
             >
-              <FiBell className="text-xl text-gray-400 hover:text-white cursor-pointer" />
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -333,7 +242,7 @@ const DeskTopView = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    onClick={() => navigate(`/courses/${course._id}`)}
+                    onClick={() => navigate(`/CourseContent/${course._id}/content`)}
                   >
                     <motion.img
                       src={course.thumbnail || '/default-course.jpg'}
@@ -437,7 +346,7 @@ const DeskTopView = () => {
                   key={course._id}
                   variants={slideUp}
                   className="bg-gray-700 rounded-lg overflow-hidden hover:bg-gray-600 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/BrowseCousre/${course._id}`)}
+                  onClick={() => navigate(`/BrowseCousre`)}
                   whileHover={{
                     y: -5,
                     boxShadow: "0 10px 20px rgba(0,0,0,0.2)"

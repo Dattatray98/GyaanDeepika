@@ -331,6 +331,8 @@ async function GetSingleContentItem(req, res) {
         content: item.content,
         resources: item.resources || [],
         quizzes: item.quizzes || [],
+        PdfDownloadUrl: item.PdfDownloadUrl,
+        PdfViewUrl: item.PdfViewUrl
       }))
     );
 

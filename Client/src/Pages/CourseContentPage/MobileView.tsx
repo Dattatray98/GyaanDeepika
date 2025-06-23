@@ -9,7 +9,6 @@ import {
     BookOpen,
     FileText,
     Download,
-    Bookmark,
     Target,
     ChevronDown,
     ChevronRight,
@@ -22,8 +21,10 @@ import {
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext.tsx';
 import Loading from '../../components/Common/Loading.tsx';
-import type { Course, CourseContentItem, } from '../../components/Common/Types.ts';
-
+import type { Course, CourseContent, } from '../../components/Common/Types.ts';
+import BottomNavigation from '../../components/Common/BottomNavigation.tsx';
+import { fetchCourseContent } from '../../hooks/fetchCourseContent.ts';
+import AOS from 'aos'
 
 const MobileView = () => {
     const { courseId } = useParams();
@@ -33,86 +34,31 @@ const MobileView = () => {
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
     //   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
     const [searchTerm, setSearchTerm] = useState('');
-    const [isBookmarked, setIsBookmarked] = useState(false);
     //   const [showFilters, setShowFilters] = useState(false);
     const [courseData, setCourseData] = useState<Course | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    //   useEffect(() => {
-    //     const checkScreenSize = () => {
-    //       setIsMobile(window.innerWidth < 1024);
-    //     };
-
-    //     checkScreenSize();
-    //     window.addEventListener('resize', checkScreenSize);
-    //     return () => window.removeEventListener('resize', checkScreenSize);
-    //   }, []);
 
     useEffect(() => {
-        const fetchCourseData = async () => {
-            try {
-                setLoading(true);
-                setError('');
-                if (!courseId || !token) {
-                    throw new Error('Missing course ID or authentication token');
-                }
-                const api = import.meta.env.VITE_API_URL;
-                const response = await axios.get(`${api}/api/enrolled/${courseId}/content`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+        AOS.init({
+            duration: 1000,
+            once: true,
+            mirror: false,
+        });
+    })
 
-                const courseData = response.data?.data?.course || response.data?.data;
-
-                if (!courseData || !courseData.courseTitle || !courseData.courseDescription) {
-                    throw new Error('Invalid course data structure');
-                }
-                setCourseData(courseData);
-
-                const content = courseData.content || courseData.course?.content;
-                if (content?.length) {
-                    setExpandedSections([content[0]._id]);
-                }
-            } catch (err: unknown) {
-                if (axios.isAxiosError(err)) {
-                    const errorMessage = err.response?.data?.message || err.message || 'Request failed';
-                    setError(errorMessage);
-                    console.error('Axios error:', errorMessage);
-                } else if (err instanceof Error) {
-                    setError(err.message);
-                    console.error('Error:', err.message);
-                } else {
-                    setError('An unknown error occurred');
-                    console.error('Unknown error:', err);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCourseData();
+    useEffect(() => {
+        fetchCourseContent({
+            courseId,
+            token,
+            setCourseData,
+            setExpandedSections,
+            setLoading,
+            setError,
+        });
     }, [courseId, token]);
 
-    const toggleBookmark = async () => {
-        try {
-            if (!courseId || !token) return;
-            const api = import.meta.env.VITE_API_URL;
-            await axios.post(
-                `${api}/api/enrolled/${courseId}/bookmark`,
-                null,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
-            setIsBookmarked(!isBookmarked);
-        } catch (err) {
-            console.error('Error toggling bookmark:', err);
-        }
-    };
 
     const toggleSection = (sectionId: string) => {
         setExpandedSections(prev =>
@@ -142,7 +88,7 @@ const MobileView = () => {
         }
     };
 
-    const handleContentClick = async (content: CourseContentItem, sectionId: string) => {
+    const handleContentClick = async (content: CourseContent, sectionId: string) => {
         if (!courseData || !courseId) return;
 
         if (content.type === 'video') {
@@ -234,7 +180,7 @@ const MobileView = () => {
     return (
         <div className="bg-gray-900 text-white min-h-screen">
             {/* Mobile Header */}
-            <header className="bg-gray-800 p-4 sticky top-0 z-10">
+            <header className="bg-gray-800 p-4 sticky top-0 z-10" data-aos='zoom-in'>
                 <div className="flex items-center justify-between mb-4">
                     <button
                         onClick={() => navigate(-1)}
@@ -243,16 +189,10 @@ const MobileView = () => {
                         <ArrowLeft className="w-6 h-6" />
                     </button>
                     <h1 className="font-bold text-lg flex-1 mx-4 text-center truncate">{courseData.title}</h1>
-                    <button
-                        onClick={toggleBookmark}
-                        className={`${isBookmarked ? 'text-orange-500' : 'text-gray-400'}`}
-                    >
-                        <Bookmark className="w-6 h-6" />
-                    </button>
                 </div>
 
                 {/* Tab Navigation */}
-                <div className="flex space-x-1 bg-gray-700 rounded-lg p-1">
+                <div className="flex space-x-1 bg-gray-700 rounded-lg p-1" data-aos='zoom-in'>
                     {[
                         { id: 'content', label: 'Content' },
                         { id: 'about', label: 'About' },
@@ -277,7 +217,7 @@ const MobileView = () => {
                 {activeTab === 'content' && (
                     <div>
                         {/* Progress Overview */}
-                        <div className="bg-gray-800 rounded-lg p-4 mb-6">
+                        <div className="bg-gray-800 rounded-lg p-4 mb-6" data-aos='zoom-in'>
                             <div className="flex justify-between items-center mb-3">
                                 <h3 className="font-bold">Your Progress</h3>
                                 <span className="text-orange-500 font-medium">{courseData.totalProgress || 0}%</span>
@@ -294,7 +234,7 @@ const MobileView = () => {
                         </div>
 
                         {/* Search */}
-                        <div className="relative mb-4">
+                        <div className="relative mb-4" data-aos='zoom-in'>
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 type="text"
@@ -308,7 +248,7 @@ const MobileView = () => {
                         {/* Course Sections */}
                         <div className="space-y-4">
                             {filteredSections.map((section) => (
-                                <div key={section._id} className="bg-gray-800 rounded-lg overflow-hidden">
+                                <div key={section._id} className="bg-gray-800 rounded-lg overflow-hidden" data-aos='zoom-in'>
                                     <button
                                         onClick={() => toggleSection(section._id)}
                                         className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-700 transition-colors"
@@ -426,7 +366,7 @@ const MobileView = () => {
                             <h3 className="font-bold mb-3">Instructor</h3>
                             <div className="flex items-center">
                                 <img
-                                    src={courseData.instructor.avatar || 'https://via.placeholder.com/150'}
+                                    src={courseData.instructor.avatar}
                                     alt={courseData.instructor.name}
                                     className="w-12 h-12 rounded-full object-cover mr-3"
                                 />
@@ -510,6 +450,8 @@ const MobileView = () => {
                     </div>
                 )}
             </div>
+
+            <BottomNavigation />
         </div>
     );
 }

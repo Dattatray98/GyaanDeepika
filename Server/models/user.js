@@ -1,14 +1,17 @@
 const mongoose = require("mongoose");
 
-// Define course progress sub-schema
+// Enhanced course progress sub-schema
 const courseProgressSchema = new mongoose.Schema({
   completedVideos: [
     {
       contentId: { type: String, required: true },
       watchedDuration: { type: Number, default: 0 }, // seconds watched
       isCompleted: { type: Boolean, default: false },
+      firstAccessedAt: { type: Date, default: Date.now },
+      lastWatchedAt: { type: Date, default: Date.now }
     }
   ],
+  startedAt: { type: Date, default: Date.now },
   lastAccessed: { type: Date, default: Date.now },
   currentcontentId: { type: String, default: null },
   currentVideoProgress: { type: Number, default: 0 }, // seconds watched

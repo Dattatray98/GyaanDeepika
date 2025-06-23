@@ -19,6 +19,8 @@ const courseContentItemSchema = new mongoose.Schema({
   },
   transcript:{type: String},
   notes: { type: String },
+  PdfDownloadUrl: {type:String},
+  PdfViewUrl: {type: String},
   resources: [{ type: String }],
   quizzes: [quizSchema]
 }, { _id: true });

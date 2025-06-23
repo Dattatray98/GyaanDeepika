@@ -1,50 +1,15 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FiUser } from "react-icons/fi";
-import { useAuth } from "../../context/AuthContext.tsx"; // Adjust path as needed
+import ProfileFetchUser from "../../hooks/ProfileFetchUser.ts";
+import type { UserData } from "../../components/Common/Types.ts";
 
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  mobile?: string;
-  language?: string;
-  location?: string;
-}
 
 const ProfileBlock: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuth(); // Get token from AuthContext
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setLoading(true);
-        const api = import.meta.env.VITE_API_URL;
-        const response = await axios.get(`${api}/users/me`, {
-          headers: {
-            Authorization: `Bearer ${token}` // Send token with request
-          }
-        });
-
-        if (response.data) {
-          setUser(response.data); // Assuming backend returns user object directly
-        }
-      } catch (err) {
-        console.error("❌ Error fetching user data:", err);
-        setError("Failed to load profile data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (token) {
-      fetchUserData();
-    }
-  }, [token]);
+    ProfileFetchUser(setUser, setLoading, setError);
 
   if (loading) {
     return (

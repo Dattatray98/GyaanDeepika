@@ -26,27 +26,6 @@ router.get("/:courseId/content", verifyToken, EnrolledCourseContent);
 router.get('/:courseId/content/:contentId', verifyToken, GetSingleContentItem);
 
 
-/**
- * @route   POST /api/courses/progress
- * @desc    Update user's progress in a course
- * @access  Private
- * @returns {Object} Updated progress data
- */
-router.post("/progress", verifyToken, UpdateUserCourseProgress);
-
-
-
-
-/**
- * @route   GET /api/courses/progress
- * @desc    Get all progress data for the authenticated user
- * @access  Private
- * @returns {Object} All course progress data for the user
- */
-router.get("/progress", verifyToken, GetUserCourseProgressData);
-
-
-
 
 /**
  * @route   GET /api/courses/:courseId/announcements

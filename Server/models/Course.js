@@ -23,7 +23,7 @@ const courseSchema = new mongoose.Schema({
   },
   rating: { type: Number, min: 0, max: 5, default: 0 },
   totalStudents: { type: Number, min: 0, default: 0 },
-  duration: { type: String, default: "0 hours" },
+  duration: { type: String, default: "0 seconds" },
   level: { type: String, enum: ['beginner', 'intermediate', 'advanced'], default: 'beginner' },
   language: { type: String, default: "English" },
   lastUpdated: { type: String, default: () => new Date().toISOString() },

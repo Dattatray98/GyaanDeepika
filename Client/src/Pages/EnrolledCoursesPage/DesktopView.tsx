@@ -11,12 +11,13 @@ import {
     FiCircle,
     FiCheckCircle
 } from 'react-icons/fi';
-import { FaGraduationCap } from 'react-icons/fa';
-import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import type { Course, CourseSection } from '../../components/Common/Types.ts';
 import Sidebar from '../../components/Common/SideBar.tsx';
+import { fetchEnrolledCourses } from '../../hooks/EnrolledCourse.ts';
+import Loading from '../../components/Common/Loading.tsx';
+import { useAuth } from '../../context/AuthContext.tsx';
 
 const DesktopView = () => {
     const [activeFilter, setActiveFilter] = useState('all');
@@ -27,10 +28,11 @@ const DesktopView = () => {
     const [activeTab, setActiveTab] = useState('my-learning');
     const [courses, setCourses] = useState<Course[]>([]);
     const navigate = useNavigate();
+    const {token} = useAuth();
 
     useEffect(() => {
         AOS.init({
-            duration: 800,
+            duration: 1000,
             easing: 'ease-in-out',
             once: true,
             offset: 100,
@@ -38,82 +40,18 @@ const DesktopView = () => {
     });
 
     useEffect(() => {
-        let isMounted = true;
-        const abortController = new AbortController();
+        if (!token) return;
 
-        const fetchEnrolledCourses = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) throw new Error('Authentication token is missing');
+        const cleanup = fetchEnrolledCourses({
+            token,
+            setCourses,
+            setLoading,
+            setError,
+        });
 
-                setLoading(true);
-                setError('');
-                const api = import.meta.env.VITE_API_URL;
-                const response = await axios.get(`${api}/api/enrolled/enrolled`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    signal: abortController.signal
-                });
+        return cleanup;
+    }, [token]);
 
-                if (!isMounted) return;
-
-                if (!response.data.success) {
-                    throw new Error(response.data.error || 'Failed to fetch courses');
-                }
-
-                const coursesData = response.data.data.map((course: any) => ({
-                    _id: course._id,
-                    title: course.title,
-                    description: course.description,
-                    subtitle: course.subtitle,
-                    thumbnail: course.thumbnail,
-                    instructor: {
-                        _id: course.instructor._id,
-                        name: course.instructor.name,
-                        avatar: course.instructor.avatar,
-                        email: course.instructor.email,
-                    },
-                    price: course.price,
-                    rating: course.rating,
-                    totalStudents: course.totalStudents,
-                    duration: course.duration,
-                    category: course.category,
-                    level: course.level,
-                    content: course.content,
-                    progress: {
-                        completionPercentage: course.totalProgress || 0,
-                        lastAccessed: course.lastUpdated,
-                        currentVideoId: null,
-                        currentVideoProgress: 0,
-                    },
-                }));
-
-                setCourses(coursesData);
-            } catch (err) {
-                if (!isMounted || axios.isCancel(err)) return;
-
-                const message = axios.isAxiosError(err)
-                    ? err.response?.data?.error || err.message
-                    : err instanceof Error
-                        ? err.message
-                        : 'Failed to load courses';
-
-                console.error('Fetch error:', err);
-                setError(message);
-            } finally {
-                if (isMounted) setLoading(false);
-            }
-        };
-
-        fetchEnrolledCourses();
-
-        return () => {
-            isMounted = false;
-            abortController.abort();
-        };
-    }, []);
 
     const handleCourseNavigation = (courseId: string) => {
         navigate(`/CourseContent/${courseId}/content`);
@@ -184,17 +122,7 @@ const DesktopView = () => {
 
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-[#0F0F0F]">
-                <div className="animate-pulse flex flex-col items-center">
-                    <FaGraduationCap className="text-orange-500 text-4xl mb-4" />
-                    <div className="w-32 h-2 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-orange-500 animate-pulse" style={{ width: '70%' }} />
-                    </div>
-                    <p className="mt-4 text-gray-400">Loading your courses...</p>
-                </div>
-            </div>
-        );
+        return (<Loading />);
     }
 
     if (error) {
@@ -278,7 +206,7 @@ const DesktopView = () => {
                             <div className="flex flex-row items-start gap-4">
                                 <div className="w-1/4 aspect-video">
                                     <img
-                                        src={continueLearning.thumbnail || '/placeholder-course.jpg'}
+                                        src={continueLearning.thumbnail}
                                         alt={continueLearning.title || 'Course'}
                                         className="w-full h-full rounded-lg object-cover"
                                         onError={handleImageError}
@@ -375,7 +303,7 @@ const DesktopView = () => {
                                     >
                                         <div className="w-16 h-16 min-w-[64px] rounded-lg overflow-hidden mr-4">
                                             <img
-                                                src={course.thumbnail || '/placeholder-course.jpg'}
+                                                src={course.thumbnail}
                                                 alt={course.title || 'Course'}
                                                 className="w-full h-full object-cover"
                                                 onError={handleImageError}

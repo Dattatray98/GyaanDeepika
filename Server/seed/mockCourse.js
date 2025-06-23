@@ -4,169 +4,177 @@ const Course = require("../models/Course");
 
 dotenv.config();
 
-const mockCourse = {
-  title: "Frontend Development Bootcamp",
-  description: "Learn to build responsive websites using HTML, CSS, and JavaScript.",
-  subtitle: "Master frontend skills and launch your web career.",
-  thumbnail: "https://via.placeholder.com/300x200",
-  instructor: {
-    _id: new mongoose.Types.ObjectId(), // required if schema expects this
-    name: "Jane Smith",
-    avatar: "https://via.placeholder.com/150",
-    bio: "Frontend Engineer & UI/UX Expert",
-    rating: 4.9,
-    students: 2100
+const mockCourse ={
+  "title": "English Learning Bootcamp",
+  "description": "Improve your English speaking, listening, reading, and writing skills from beginner to intermediate level.",
+  "subtitle": "Master daily conversation, grammar, and vocabulary step by step.",
+  "thumbnail": "https://res.cloudinary.com/dx1eoqsvt/image/upload/v1750602500/english_learning_bootcamp.jpg",
+  "instructor": {
+    "name": "Sarah Williams",
+    "avatar": "https://via.placeholder.com/150",
+    "bio": "Language Coach & Communication Trainer",
+    "rating": 4.7,
+    "students": 3400,
+    "email": "sarah@example.com"
   },
-  rating: 4.9,
-  totalStudents: 2101,
-  duration: "15 hours",
-  level: "beginner",
-  language: "English",
-  lastUpdated: new Date("2025-06-20T09:00:00.000Z"),
-  category: "Web Development",
-  price: 599,
-  learningOutcomes: [
-    "Build responsive layouts using Flexbox and Grid",
-    "Understand HTML semantics and accessibility",
-    "Use modern CSS for styling and animations",
-    "Add interactivity with JavaScript and DOM manipulation"
+  "rating": 4.7,
+  "totalStudents": 3450,
+  "duration": "25 hours",
+  "level": "beginner",
+  "language": "English",
+  "lastUpdated": "Sun Jun 22 2025 13:00:00 GMT+0530 (India Standard Time)",
+  "category": "Language Learning",
+  "price": 499,
+  "learningOutcomes": [
+    "Speak confidently in everyday conversations",
+    "Understand and use essential English grammar",
+    "Expand vocabulary for personal and professional use",
+    "Improve pronunciation and listening skills"
   ],
-  requirements: [
-    "Basic computer usage",
-    "Access to code editor and browser"
+  "requirements": [
+    "Willingness to practice daily",
+    "Basic understanding of English letters and sounds",
+    "Headphones or speakers for audio practice"
   ],
-  content: [
+  "content": [
     {
-      title: "Getting Started",
-      description: "Introduction to frontend development",
-      duration: "20 min",
-      lessons: 2,
-      completed: 0,
-      locked: false,
-      content: [
+      "title": "Getting Started with English",
+      "description": "Start your journey by learning the basics of English",
+      "duration": "40 min",
+      "lessons": 2,
+      "completed": 0,
+      "locked": false,
+      "content": [
         {
-          type: "video",
-          title: "What is Frontend Development?",
-          duration: "10 min",
-          completed: false,
-          preview: true,
-          videoUrl: "https://res.cloudinary.com/dx1eoqsvt/video/upload/v1749800762/twpaqoqrjrgwgywtdxsu.mp4",
-          Transcript: "This video explains the role of a frontend developer.",
-          notes: "Frontend is what users see and interact with.",
-          resources: ["https://example.com/frontend-intro.pdf"],
-          quizzes: []
+          "type": "video",
+          "title": "Introduction to English",
+          "duration": "18 min",
+          "completed": false,
+          "preview": true,
+          "videoUrl": "https://res.cloudinary.com/dx1eoqsvt/video/upload/v1749802000/intro_english.mp4",
+          "notes": "Understand what to expect and how to stay motivated.",
+          "resources": [],
+          "quizzes": [],
+          "transcript": "Welcome to your English learning journey! In this course..."
         },
         {
-          type: "quiz",
-          title: "Web Tech Basics",
-          duration: "10 min",
-          completed: false,
-          preview: false,
-          resources: [],
-          quizzes: [
+          "type": "quiz",
+          "title": "Getting Started Quiz",
+          "duration": "6 min",
+          "completed": false,
+          "preview": false,
+          "resources": [],
+          "quizzes": [
             {
-              question: "Which of the following is NOT a frontend language?",
-              options: ["HTML", "CSS", "JavaScript", "Python"],
-              correctAnswer: "Python"
+              "question": "What is the correct response to 'How are you?'",
+              "options": ["I'm fine, thank you", "Goodbye", "Yes", "Please"],
+              "correctAnswer": "I'm fine, thank you"
             }
           ]
         }
       ]
     },
     {
-      title: "HTML Essentials",
-      description: "Learn HTML structure and common tags",
-      duration: "35 min",
-      lessons: 2,
-      completed: 0,
-      locked: false,
-      content: [
+      "title": "Essential Grammar",
+      "description": "Learn basic English grammar rules",
+      "duration": "1 hour",
+      "lessons": 2,
+      "completed": 0,
+      "locked": false,
+      "content": [
         {
-          type: "video",
-          title: "HTML Tags & Structure",
-          duration: "15 min",
-          completed: false,
-          preview: false,
-          videoUrl: "https://example.com/html-tags.mp4",
-          Transcript: "Learn basic tags like div, p, h1, a...",
-          notes: "Structure is key to semantic HTML.",
-          resources: ["https://example.com/html-ref.pdf"],
-          quizzes: []
+          "type": "video",
+          "title": "Simple Tenses",
+          "duration": "30 min",
+          "completed": false,
+          "preview": false,
+          "videoUrl": "https://example.com/english-tenses.mp4",
+          "notes": "Start with Present, Past, and Future tense examples.",
+          "resources": [],
+          "quizzes": [],
+          "transcript": "We’ll look at subject + verb + object sentence patterns..."
         },
         {
-          type: "quiz",
-          title: "HTML Quiz",
-          duration: "8 min",
-          completed: false,
-          preview: false,
-          quizzes: [
+          "type": "quiz",
+          "title": "Grammar Basics",
+          "duration": "10 min",
+          "completed": false,
+          "preview": false,
+          "resources": [],
+          "quizzes": [
             {
-              question: "What tag is used for paragraphs?",
-              options: ["<div>", "<p>", "<span>", "<text>"],
-              correctAnswer: "<p>"
+              "question": "Which sentence is correct?",
+              "options": [
+                "She go to school.",
+                "He goes to school.",
+                "They goes to school.",
+                "We goes to school."
+              ],
+              "correctAnswer": "He goes to school."
             }
           ]
         }
       ]
     },
     {
-      title: "CSS for Styling",
-      description: "Style your site with modern CSS",
-      duration: "40 min",
-      lessons: 2,
-      completed: 0,
-      locked: false,
-      content: [
+      "title": "Daily Conversations",
+      "description": "Practice common English phrases for everyday use",
+      "duration": "50 min",
+      "lessons": 2,
+      "completed": 0,
+      "locked": false,
+      "content": [
         {
-          type: "video",
-          title: "Box Model & Flexbox",
-          duration: "18 min",
-          videoUrl: "https://example.com/flexbox.mp4",
-          Transcript: "Understand margins, padding, borders, and layout.",
-          completed: false,
-          preview: false,
-          notes: "Flexbox helps layout items in one direction.",
-          resources: [],
-          quizzes: []
+          "type": "video",
+          "title": "Common Greetings & Phrases",
+          "duration": "20 min",
+          "completed": false,
+          "preview": false,
+          "videoUrl": "https://example.com/english-greetings.mp4",
+          "notes": "Learn how to greet and introduce yourself confidently.",
+          "resources": [],
+          "quizzes": [],
+          "transcript": "Hello! Hi! Good morning! How are you? Let’s practice daily greetings..."
         },
         {
-          type: "quiz",
-          title: "CSS Quiz",
-          duration: "7 min",
-          completed: false,
-          preview: false,
-          quizzes: [
+          "type": "quiz",
+          "title": "Conversation Practice",
+          "duration": "8 min",
+          "completed": false,
+          "preview": false,
+          "resources": [],
+          "quizzes": [
             {
-              question: "What does the 'margin' property control?",
-              options: ["Text color", "Border width", "Space outside elements", "Padding inside box"],
-              correctAnswer: "Space outside elements"
+              "question": "What do you say after someone says 'Thank you'?",
+              "options": ["Please", "Excuse me", "You're welcome", "No"],
+              "correctAnswer": "You're welcome"
             }
           ]
         }
       ]
     }
   ],
-  resources: [
+  "resources": [
     {
-      title: "Frontend Cheat Sheet",
-      type: "pdf",
-      size: "1.5 MB",
-      downloadUrl: "https://example.com/frontend-cheatsheet.pdf"
+      "title": "English Grammar PDF",
+      "type": "pdf",
+      "size": "1.2 MB",
+      "downloadUrl": "https://example.com/english-grammar.pdf"
     }
   ],
-  announcements: [
+  "announcements": [
     {
-      title: "Course Kickoff!",
-      content: "Welcome to your frontend journey!",
-      important: true,
-      date: new Date("2025-06-20T09:05:00.000Z")
+      "title": "Welcome to the Bootcamp!",
+      "content": "Get ready to speak English with confidence. Start from Lesson 1 now!",
+      "date": "Sun Jun 22 2025 13:10:00 GMT+0530 (India Standard Time)",
+      "important": true
     }
   ],
-  totalProgress: 0,
-  completedLessons: 0,
-  totalLessons: 6,
-  estimatedTime: "3 hours"
-};
+  "totalProgress": 0,
+  "completedLessons": 0,
+  "totalLessons": 6,
+  "estimatedTime": "3.5 hours"
+}
 
 async function seedMockCourse() {
   try {
