@@ -38,6 +38,7 @@ app.use("/api/qa", require("./Routes/qaRoutes"));
 app.use("/api/progress", require("./Routes/progressRoutes"));
 app.use("/api/notes", require("./Routes/Notes"));
 app.use("/api", require("./Routes/QuizRoute"));
+app.use("/api", require("./Routes/StudyHub"));
 
 
 app.get("/", (req, res) => {

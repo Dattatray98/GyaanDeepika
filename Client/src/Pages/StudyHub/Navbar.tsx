@@ -44,25 +44,6 @@ const Navbar = () => {
 
           </div>
 
-          {/* Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
-            <button
-              onClick={() => navigate('/auth/login')}
-              className="border-2 border-orange-500 text-orange-500 px-4 py-1 rounded-lg font-medium hover:bg-orange-500 hover:text-white transition-colors text-sm"
-              data-aos="zoom-in"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => navigate('/auth/SignUp')}
-              className="bg-orange-500 text-white px-4 py-1 rounded-lg font-medium hover:bg-orange-600 transition-colors text-sm"
-              data-aos="zoom-in"
-              data-aos-delay="200"
-            >
-              Sign Up
-            </button>
-          </div>
-
           {/* Mobile menu button */}
           <div className="md:hidden">
             <button
@@ -89,26 +70,7 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <div className="pt-4 border-t border-gray-700">
-            <button
-              onClick={() => {
-                navigate('/auth/login');
-                setIsOpen(false);
-              }}
-              className="w-full text-center px-4 py-2 text-orange-500 border border-orange-500 rounded-lg mb-2 font-medium"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => {
-                navigate('/auth/signup');
-                setIsOpen(false);
-              }}
-              className="w-full text-center px-4 py-2 bg-orange-500 text-white rounded-lg font-medium"
-            >
-              Sign Up
-            </button>
-          </div>
+          
         </div>
       </div>
     </nav>

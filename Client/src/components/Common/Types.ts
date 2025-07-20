@@ -146,3 +146,14 @@ export interface CourseContent {
   PdfDownloadUrl?: string;
 }
 
+export interface StudyHub {
+  id: string;
+  title: string;
+  type: 'notes' | 'papers' | 'formulas' | 'videos';
+  examType: string;
+  subject: string;
+  year: string;
+  downloads: number;
+  rating: number;
+  description: string;
+}

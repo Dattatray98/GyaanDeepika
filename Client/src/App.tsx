@@ -14,6 +14,7 @@ import VideoPlayerPage from "./Pages/LearningPage/VideoPlayerPage.tsx";
 import Auth from "./Pages/Auth/Auth.tsx";
 import QuizPage from "./Pages/QuizPage/QuizPage.tsx";
 import ProfileEditPage from "./Pages/Profile/ProfileEditPage.tsx";
+import StudyHub from "./Pages/StudyHub/StudyHub.tsx";
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/StudyHub" element={<StudyHub />} />
           <Route path="/auth/:type" element={<Auth />} />
           <Route path="/oauth-redirect" element={<OAuthRedirect />} />
 
