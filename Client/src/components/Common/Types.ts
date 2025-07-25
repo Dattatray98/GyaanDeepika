@@ -9,6 +9,7 @@ export type UserData = {
   mobile?: string;
   language?: string;
   bio?: string;
+  role: 'admin' | 'student' | 'instructor';
 };
 
 export type CourseProgress = {

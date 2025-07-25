@@ -1,6 +1,8 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext.tsx';
+
+// User-facing pages
 import LandingPage from "./Pages/LandingPage/LandingPage.tsx";
 import BrowseCourses from "./Pages/BrowseCourse/BrowseCourse.tsx";
 import HomePage from "./Pages/HomePage/HomePage.tsx";
@@ -8,13 +10,19 @@ import EnrolledCoursesPage from "./Pages/EnrolledCoursesPage/EnrolledCoursesPage
 import CourseContent from "./Pages/CourseContentPage/CourseContentPage.tsx";
 import ProfilePage from "./Pages/Profile/ProfilePage.tsx";
 import Settings from "./Pages/Settings/Settings.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import OAuthRedirect from "./Pages/Auth/OAuthRedirect.tsx";
 import VideoPlayerPage from "./Pages/LearningPage/VideoPlayerPage.tsx";
 import Auth from "./Pages/Auth/Auth.tsx";
 import QuizPage from "./Pages/QuizPage/QuizPage.tsx";
 import ProfileEditPage from "./Pages/Profile/ProfileEditPage.tsx";
-import StudyHub from "./Pages/StudyHub/StudyHub.tsx";
+import StudyHubPage from "./Pages/StudyHub/StudyHubPage.tsx";
+import StudyHubUpload from "./Pages/Admin/StudyHubUpload.tsx";
+
+// Admin dashboard
+import AdminLayout from './Pages/Admin/AdminLayout.tsx';
+
+// Auth
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 
 function App() {
@@ -22,13 +30,15 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public Routes */}
+
+          {/* 🌐 Public Routes */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/StudyHub" element={<StudyHub />} />
           <Route path="/auth/:type" element={<Auth />} />
           <Route path="/oauth-redirect" element={<OAuthRedirect />} />
+          <Route path="/StudyHub" element={<StudyHubPage />} />
+          <Route path="/StudyHub/Upload" element={<StudyHubUpload />} />
 
-          {/* Protected Routes */}
+          {/* 🔐 Protected User Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<HomePage />} />
             <Route path="/ProfilePage" element={<ProfilePage />} />
@@ -41,9 +51,17 @@ function App() {
             <Route path="/courses/:courseId/content/:contentId/quiz" element={<QuizPage />} />
           </Route>
 
-          {/* Fallback Route */}
+          {/* <Route element={<AdminRoute />}> */}
+            <Route path="/admin/*" element={<AdminLayout />} />
+          {/* </Route> */}
+
+
+
+          {/* ❓Fallback */}
           <Route path="*" element={<LandingPage />} />
+
         </Routes>
+
       </Router>
     </AuthProvider>
   );

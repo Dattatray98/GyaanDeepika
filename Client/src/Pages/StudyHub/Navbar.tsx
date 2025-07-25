@@ -43,6 +43,7 @@ const Navbar = () => {
             ))}
 
           </div>
+          
 
           {/* Mobile menu button */}
           <div className="md:hidden">

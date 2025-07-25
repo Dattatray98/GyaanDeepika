@@ -1,12 +1,14 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 
+
 interface User {
   id: string;
   name: string;
   email: string;
   avatar?: string;
 }
+
 
 
 interface SignupData {

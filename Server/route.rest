@@ -16,4 +16,4 @@ POST http://localhost:8000/api/summary/generate/6854b93d41c47f4dae38474e/6854b93
 
 ###
 
-POST http://localhost:8000/api/notes/${courseId}/${contentId}
+POST http://localhost:8000/api/StudyHub/upload

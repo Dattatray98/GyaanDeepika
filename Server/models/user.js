@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
-const { type } = require("os");
 
 // Enhanced course progress sub-schema
 const courseProgressSchema = new mongoose.Schema({
   completedVideos: [
     {
       contentId: { type: String, required: true },
-      watchedDuration: { type: Number, default: 0 }, // seconds watched
+      watchedDuration: { type: Number, default: 0 },
       isCompleted: { type: Boolean, default: false },
       firstAccessedAt: { type: Date, default: Date.now },
       lastWatchedAt: { type: Date, default: Date.now }
@@ -15,16 +14,16 @@ const courseProgressSchema = new mongoose.Schema({
   startedAt: { type: Date, default: Date.now },
   lastAccessed: { type: Date, default: Date.now },
   currentcontentId: { type: String, default: null },
-  currentVideoProgress: { type: Number, default: 0 }, // seconds watched
+  currentVideoProgress: { type: Number, default: 0 },
   completionPercentage: { type: Number, default: 0 }
 }, { _id: false });
 
 const userSchema = new mongoose.Schema({
-  // Core Identity Fields
   email: {
     type: String,
     required: true,
     unique: true,
+    index: true,
     trim: true,
     lowercase: true,
     match: [/^\S+@\S+\.\S+$/, "Invalid email format"]
@@ -32,26 +31,19 @@ const userSchema = new mongoose.Schema({
   firstName: { type: String, trim: true },
   lastName: { type: String, trim: true },
   avatar: { type: String },
-  bio:{
+  bio: {
     type: String,
-    required: true,
-    maxlength:[150]
+    maxlength: [150],
+    default: ''
   },
-  language:{
+  language: {
     type: String,
-    required: true
+    default: 'English'
   },
-
-  mobile:{
+  mobile: {
     type: String,
-    required: true
+    default: ''
   },
-  language:{
-    type: String,
-    required: true
-  },
-
-  // Authentication Fields
   password: {
     type: String,
     select: false,
@@ -67,21 +59,18 @@ const userSchema = new mongoose.Schema({
     default: false
   },
 
-  // Course Management
   enrolledCourses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Course",
     default: []
   }],
 
-  // Course Progress Map: courseId -> progress object
   progress: {
     type: Map,
     of: courseProgressSchema,
     default: {}
   },
 
-  // Roles & Timestamps
   role: {
     type: String,
     enum: ["student", "instructor", "admin"],
@@ -93,7 +82,6 @@ const userSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual for full name
 userSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`.trim();
 });

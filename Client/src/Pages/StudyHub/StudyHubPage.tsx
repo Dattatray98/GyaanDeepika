@@ -14,22 +14,24 @@ import {
 import Navbar from './Navbar';
 import fetchStudyHub from '../../hooks/StudyHub';
 import type { StudyHub } from '../../components/Common/Types';
+import { useNavigate } from 'react-router-dom';
 
 
 const examTypes = ['All', 'JEE Mains', 'NEET', 'CBSE Board', 'Engineering', 'Others'];
 const subjects = ['All', 'Physics', 'Chemistry', 'Mathematics', 'Biology', 'Computer Science'];
 
-function StudyHub() {
+function StudyHubPage() {
+    const navigate = useNavigate()
 
     const [studyHub, setStudyHub] = useState<StudyHub[]>([]);
 
 
-   useEffect(() => {
-    const loadData = async () => {
-        await fetchStudyHub(setStudyHub);
-    };
-    loadData();
-}, []);
+    useEffect(() => {
+        const loadData = async () => {
+            await fetchStudyHub(setStudyHub);
+        };
+        loadData();
+    }, []);
 
     console.log("👀 studyHub", studyHub); // Debug: check state
 
@@ -45,9 +47,9 @@ function StudyHub() {
             const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 resource.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-                console.log(matchesExam)
-                console.log(matchesSubject)
-                console.log(matchesSearch)
+            console.log(matchesExam)
+            console.log(matchesSubject)
+            console.log(matchesSearch)
 
             return matchesExam && matchesSubject && matchesSearch;
         });
@@ -96,7 +98,7 @@ function StudyHub() {
                                 Start Browsing
                             </button>
                             <button
-                                onClick={() => setShowSuggestionForm(true)}
+                                onClick={() => navigate(`/StudyHub/Upload`)}
                                 className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-blue-600 transform hover:scale-105 transition-all duration-300"
                             >
                                 Contribute Resources
@@ -338,4 +340,4 @@ function StudyHub() {
     );
 }
 
-export default StudyHub;
+export default StudyHubPage;
