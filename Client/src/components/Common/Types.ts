@@ -71,7 +71,7 @@ export type CourseData = {
   completedLessons?: number;
   totalLessons?: number;
   estimatedTime?: string;
-  course?: {
+  CourseData?: {
     content?: CourseSection[];
   };
   status: 'active' | 'inactive' | 'pending';
