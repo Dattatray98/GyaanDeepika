@@ -1,12 +1,12 @@
 // src/api/AvailableCourses.ts
 import { useEffect } from 'react';
 import axios from 'axios';
-import type { CourseData } from '../../components/Common/Types';
+import type { Course } from '../../components/Common/Types';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const AvailableCourses = (
-  setCourses: React.Dispatch<React.SetStateAction<CourseData[]>>,
+  setCourses: React.Dispatch<React.SetStateAction<Course[]>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setError: React.Dispatch<React.SetStateAction<string | null>>
 ) => {
@@ -44,7 +44,7 @@ const AvailableCourses = (
           throw new Error('Invalid or unexpected API response');
         }
 
-        const formattedCourses: CourseData[] = response.data.data.map((course: any) => ({
+        const formattedCourses: Course[] = response.data.data.map((course: any) => ({
           id: course.id,
           title: course.title,
           description: course.description,

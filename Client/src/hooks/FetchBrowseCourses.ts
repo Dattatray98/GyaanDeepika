@@ -1,10 +1,10 @@
 import axios from 'axios';
 import type { NavigateFunction } from 'react-router-dom';
-import type { CourseData } from '../components/Common/Types';
+import type { Course } from '../components/Common/Types';
 
 interface FetchUnenrolledCoursesOptions {
   navigate: NavigateFunction;
-  setCourses: React.Dispatch<React.SetStateAction<CourseData[]>>;
+  setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setError: React.Dispatch<React.SetStateAction<string>>;
   token: string;
@@ -43,7 +43,7 @@ export const fetchUnenrolledCourses = async ({
       throw new Error(response.data.error || 'Failed to fetch courses');
     }
 
-    const formattedCourses: CourseData[] = response.data.data.map((course: any): CourseData => ({
+    const formattedCourses: Course[] = response.data.data.map((course: any): Course => ({
       _id: course._id,
       title: course.title,
       description: course.description,
@@ -91,7 +91,7 @@ export const fetchUnenrolledCourses = async ({
 
 export interface HandleEnrollOptions {
   navigate: NavigateFunction;
-  setCourses: React.Dispatch<React.SetStateAction<CourseData[]>>;
+  setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
   alert: (message: string) => void;
   token: string;
   courseId: string;

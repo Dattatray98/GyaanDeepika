@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Search,
-  Filter,
   MoreVertical,
   Edit,
   Trash2,
@@ -20,8 +19,8 @@ type UserStatus = 'active' | 'inactive' | 'pending';
 // top of file remains the same...
 
 const UserManagement: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<UserStatus | 'all'>('all');
+  const [searchTerm] = useState('');
+  const [filterStatus] = useState<UserStatus | 'all'>('all');
   const [selectedUsers, setSelectedUsers] = useState<String[]>([]);
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FaGraduationCap } from 'react-icons/fa';
 import { FiBook, FiCompass, FiHome, FiSettings } from 'react-icons/fi';
-import type { CourseData } from './Types.ts';
+import type { Course } from './Types.ts';
 
 // Animation variants (can be moved to a separate animations file)
 const sidebarAnimations = {
@@ -33,7 +33,7 @@ interface NavItem {
 }
 
 interface SidebarProps {
-    enrolledCourses?: CourseData[];
+    enrolledCourses?: Course[];
     activeTab?: string;
     onTabChange?: (tab: string) => void;
 }

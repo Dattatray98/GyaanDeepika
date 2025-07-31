@@ -53,10 +53,10 @@ const getContentTypeColor = (type: string) => {
 
 // Sub-components for better organization
 const CourseHeader = ({
-    courseData,
+    course,
     navigate
 }: {
-    courseData: Course;
+    course: Course;
     navigate: (path: string | number) => void
 }) => (
     <div className="bg-gray-800 p-6" data-aos="fade-in">
@@ -72,8 +72,8 @@ const CourseHeader = ({
                 <div className="flex items-center">
                     <GraduationCap className="text-orange-500 text-2xl mr-3" />
                     <div>
-                        <h1 className="font-bold text-2xl">{courseData.title}</h1>
-                        <p className="text-gray-400">{courseData.subtitle}</p>
+                        <h1 className="font-bold text-2xl">{course.title}</h1>
+                        <p className="text-gray-400">{course.subtitle}</p>
                     </div>
                 </div>
             </div>
@@ -90,27 +90,27 @@ const CourseHeader = ({
         <div className="grid grid-cols-5 gap-6 mb-6" data-aos='slide-down'>
             <StatCard
                 icon={<Star className="w-6 h-6 text-yellow-400 mx-auto mb-2" />}
-                value={courseData.rating || 0}
+                value={course.rating || 0}
                 label="Rating"
             />
             <StatCard
                 icon={<Users className="w-6 h-6 text-blue-400 mx-auto mb-2" />}
-                value={courseData.totalStudents || 0}
+                value={course.totalStudents || 0}
                 label="Students"
             />
             <StatCard
                 icon={<Clock className="w-6 h-6 text-green-400 mx-auto mb-2" />}
-                value={courseData.duration || 'N/A'}
+                value={course.duration || 'N/A'}
                 label="Duration"
             />
             <StatCard
                 icon={<BarChart3 className="w-6 h-6 text-purple-400 mx-auto mb-2" />}
-                value={courseData.level || 'N/A'}
+                value={course.level || 'N/A'}
                 label="Level"
             />
             <StatCard
                 icon={<Award className="w-6 h-6 text-orange-400 mx-auto mb-2" />}
-                value={courseData.price || 'Free'}
+                value={course.price || 'Free'}
                 label="Price"
             />
         </div>
@@ -463,7 +463,7 @@ const DesktopView = () => {
 
     return (
         <div className="bg-gray-900 text-white min-h-screen">
-            <CourseHeader courseData={courseData} navigate={(path) => navigate(`${path}`)} />
+            <CourseHeader course={courseData} navigate={(path) => navigate(`${path}`)} />
 
 
             <div className="flex">

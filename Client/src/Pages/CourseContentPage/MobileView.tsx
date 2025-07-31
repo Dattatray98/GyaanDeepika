@@ -124,7 +124,7 @@ const MobileView = () => {
         }
     };
 
-    const filteredSections = (courseData?.content || courseData?.course?.content || []).filter(section => {
+    const filteredSections = (courseData?.content || courseData?.Course?.content || []).filter(section => {
         if (searchTerm) {
             return section.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (section.content || []).some(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()));

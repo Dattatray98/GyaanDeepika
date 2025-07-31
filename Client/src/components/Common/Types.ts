@@ -31,7 +31,7 @@ export type CourseProgress = {
   lastAccessed?: string;
 };
 
-export type CourseData = {
+export type Course = {
   _id: string;
   title: string;
   description: string;
@@ -71,7 +71,7 @@ export type CourseData = {
   completedLessons?: number;
   totalLessons?: number;
   estimatedTime?: string;
-  CourseData?: {
+  Course?: {
     content?: CourseSection[];
   };
   status: 'active' | 'inactive' | 'pending';
@@ -135,7 +135,7 @@ export interface Resource {
 }
 
 export interface ApiResponse {
-  course: CourseData;
+  course: Course;
   content: CourseContent;
 }
 
