@@ -14,7 +14,7 @@ import {
   Star,
   Users
 } from 'lucide-react';
-import type { CourseData } from '../../components/Common/Types';
+import type { Course } from '../../components/Common/Types';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import AvailableCourses from '../../hooks/AdminHooks/AvailableCourses';
@@ -33,7 +33,7 @@ interface Article {
 const ContentManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('courses');
   const [searchTerm, setSearchTerm] = useState('');
-  const [courses, setCourses] = useState<CourseData[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [articles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
