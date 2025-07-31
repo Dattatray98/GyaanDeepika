@@ -122,6 +122,31 @@ async function getCurrentUser(req, res) {
   }
 }
 
+async function getallusers(req, res) {
+  try {
+    const users = await User.find({}, '-password'); // Exclude sensitive fields like password
+    
+    // Optionally map users to ensure fields are consistent
+    const formattedUsers = users.map(user => ({
+      id: user._id,
+      name: user.firstName,
+      email: user.email,
+      phone: user.phone || '',
+      location: user.location || '',
+      status: user.isActive? 'active' : 'inactive',
+      role: user.role,
+      avatar: user.avatar || '',
+      courses: user.enrolledCourses?.length || 0,
+      createdAt: user.createdAt,
+    }));
+
+    res.status(200).json({ success: true, data: formattedUsers });
+  } catch (err) {
+    console.error("Error in getAllUsers:", err);
+    res.status(500).json({ success: false, error: err.message || 'Server error' });
+  }
+}
+
 
 
 async function updateUserProfile(req, res) {
@@ -206,9 +231,13 @@ async function updateUserProfile(req, res) {
 
 
 
+
+
+
 module.exports = {
   handleUserSignup,
   handleUserLogin,
   getCurrentUser,
   updateUserProfile,
+  getallusers
 };

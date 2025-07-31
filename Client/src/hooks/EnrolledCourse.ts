@@ -1,9 +1,9 @@
 
 import axios from 'axios';
-import type { Course } from '../components/Common/Types';
+import type { CourseData } from '../components/Common/Types';
 
 interface FetchOptions {
-  setCourses: React.Dispatch<React.SetStateAction<Course[]>>;
+  setCourses: React.Dispatch<React.SetStateAction<CourseData[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setError: React.Dispatch<React.SetStateAction<string>>;
   token: string; 
@@ -36,7 +36,7 @@ export const fetchEnrolledCourses = (options: FetchOptions) => {
         throw new Error(response.data.error || 'Failed to fetch courses');
       }
 
-      const coursesData: Course[] = response.data.data.map((course: any) => ({
+      const coursesData: CourseData[] = response.data.data.map((course: any) => ({
         _id: course._id,
         title: course.title,
         description: course.description,

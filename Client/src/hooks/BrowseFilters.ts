@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { Course } from '../components/Common/Types';
+import type { CourseData } from '../components/Common/Types';
 
 // Exported so you can reuse these in dropdowns
 export const categories = ['All', 'Programming', 'Design', 'Business', 'Language', 'Other'];
@@ -15,7 +15,7 @@ const categoryMap: { [key: string]: string[] } = {
 };
 
 interface UseFilteredCoursesProps {
-    courses: Course[];
+    courses: CourseData[];
     searchTerm: string;
     selectedCategory: string;
     selectedLevel: string;
@@ -26,7 +26,7 @@ export function useFilteredCourses({
     searchTerm,
     selectedCategory,
     selectedLevel
-}: UseFilteredCoursesProps): Course[] {
+}: UseFilteredCoursesProps): CourseData[] {
     return useMemo(() => {
         return courses.filter((course) => {
          

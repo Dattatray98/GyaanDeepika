@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 
 const StudyHubUpload: React.FC = () => {
-  const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -10,88 +9,111 @@ const StudyHubUpload: React.FC = () => {
     examType: "",
     subject: "",
     year: "",
+    fileUrl: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
+  const extractFileId = (url: string): string | null => {
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!file) {
-      alert("Please select a file.");
-      return;
+    const fileId = extractFileId(formData.fileUrl);
+    if (!fileId) {
+      return alert("Invalid Google Drive URL. Make sure it's in the format: https://drive.google.com/file/d/FILE_ID/view");
     }
 
-    const data = new FormData();
-    data.append("file", file);
-    Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value);
-    });
+    const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
     try {
       const api = import.meta.env.VITE_API_URL;
-      const res = await axios.post(`${api}/api/StudyHub/upload`, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        `${api}/api/StudyHub/upload`,
+        { ...formData, fileUrl: directDownloadUrl },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       alert("Upload successful!");
-      console.log(res.data);
+      console.log("Uploaded:", res.data);
     } catch (err) {
-      console.error("Upload failed", err);
-      alert("Upload failed.");
+      console.error("Upload failed:", err);
+      alert("Failed to upload. Try again.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Upload Study Material</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md"
+    >
+      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+        Upload Study Material
+      </h2>
 
       <div className="space-y-4">
+        {["title", "examType", "subject", "year"].map((field) => (
+          <div key={field}>
+            <label
+              htmlFor={field}
+              className="block text-sm font-medium text-gray-700"
+            >
+              {field.charAt(0).toUpperCase() + field.slice(1)}
+            </label>
+            <input
+              id={field}
+              name={field}
+              placeholder={`Enter ${field}`}
+              required
+              onChange={handleChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+        ))}
+
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
-          <input
-            id="title"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            type="text"
-            name="title"
-            placeholder="Enter title"
+          <label
+            htmlFor="description"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Enter description"
+            rows={4}
             required
             onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-          <textarea
-            id="description"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            name="description"
-            rows={4}
-            placeholder="Enter description"
-            required
-            onChange={handleChange}
-          ></textarea>
-        </div>
-
-        <div>
-          <label htmlFor="type" className="block text-sm font-medium text-gray-700">Material Type</label>
+          <label
+            htmlFor="type"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Material Type
+          </label>
           <select
             id="type"
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
             name="type"
-            onChange={handleChange}
             required
+            onChange={handleChange}
+            className="mt-1 block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           >
             <option value="">Select Type</option>
             <option value="notes">Notes</option>
@@ -100,62 +122,26 @@ const StudyHubUpload: React.FC = () => {
         </div>
 
         <div>
-          <label htmlFor="examType" className="block text-sm font-medium text-gray-700">Exam Type</label>
+          <label
+            htmlFor="fileUrl"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Google Drive File URL
+          </label>
           <input
-            id="examType"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            type="text"
-            name="examType"
-            placeholder="e.g. Midterm, Final"
+            id="fileUrl"
+            name="fileUrl"
+            placeholder="Paste Google Drive shareable link"
             required
             onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
           />
-        </div>
-
-        <div>
-          <label htmlFor="subject" className="block text-sm font-medium text-gray-700">Subject</label>
-          <input
-            id="subject"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            type="text"
-            name="subject"
-            placeholder="Enter subject"
-            required
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="year" className="block text-sm font-medium text-gray-700">Year</label>
-          <input
-            id="year"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            type="text"
-            name="year"
-            placeholder="e.g. 2023"
-            required
-            onChange={handleChange}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700">File</label>
-          <div className="mt-1 flex items-center">
-            <input
-              id="file"
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={handleFileChange}
-              required
-            />
-          </div>
         </div>
 
         <div className="pt-4">
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+            className="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
           >
             Upload Material
           </button>

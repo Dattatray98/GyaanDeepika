@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Plus,
     Search,
@@ -11,14 +11,52 @@ import {
     Video,
     Star,
     Download,
+    Delete,
 } from 'lucide-react';
-
 import { useNavigate } from 'react-router-dom';
+import type { StudyHub } from '../../components/Common/Types';
+import fetchStudyHub from '../../hooks/StudyHub';
 
 const StudyHubManagement: React.FC = () => {
     const [activeTab, setActiveTab] = useState('resources');
     const [searchTerm, setSearchTerm] = useState('');
     const navigate = useNavigate();
+    const [studyHub, setStudyHub] = useState<StudyHub[]>([]);
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                await fetchStudyHub(setStudyHub);
+            } catch (error) {
+                console.error("Failed to fetch study hub resources:", error);
+            }
+        };
+        loadData();
+    }, []);
+
+    const deleteStudyResource = async (id: string) => {
+        const confirmed = window.confirm("Are you sure you want to delete this?");
+        if (!confirmed) return;
+
+        try {
+            const api = import.meta.env.VITE_API_URL;
+            const res = await fetch(`${api}/api/StudyHub/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                alert("Resource deleted ✅");
+                // Optionally refresh the list
+            } else {
+                alert("Failed to delete ❌");
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+            alert("Error deleting resource");
+        }
+    };
+    
+
 
     const articles = [
         {
@@ -63,9 +101,27 @@ const StudyHubManagement: React.FC = () => {
     };
 
     const tabs = [
-        { id: 'resources', label: 'Resources', icon: Image, count: 8, path: '/StudyHub/Upload' },
+        { id: 'resources', label: 'Resources', icon: Image, count: studyHub.length, path: '/StudyHub/Upload' },
         { id: 'articles', label: 'Articles', icon: FileText, count: articles.length },
     ];
+
+    const getResourceColor = (type?: string) => {
+        switch (type) {
+            case 'pdf': return 'from-blue-500 to-blue-600';
+            case 'image': return 'from-green-500 to-green-600';
+            case 'video': return 'from-purple-500 to-purple-600';
+            default: return 'from-gray-500 to-gray-600';
+        }
+    };
+
+    const getResourceIcon = (type?: string) => {
+        switch (type) {
+            case 'pdf': return <FileText className="w-5 h-5" />;
+            case 'image': return <Image className="w-5 h-5" />;
+            case 'video': return <Video className="w-5 h-5" />;
+            default: return <FileText className="w-5 h-5" />;
+        }
+    };
 
     return (
         <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
@@ -85,8 +141,8 @@ const StudyHubManagement: React.FC = () => {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center space-x-2 py-4 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab.id
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                            ? 'border-blue-500 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700'
                                         }`}
                                 >
                                     <Icon className="w-4 h-4" />
@@ -126,9 +182,12 @@ const StudyHubManagement: React.FC = () => {
                             </div>
                         </div>
 
-                        <button className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm touch-manipulation">
+                        <button
+                            className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm touch-manipulation"
+                            onClick={() => activeTab === 'resources' && navigate('/StudyHub/Upload')}
+                        >
                             <Plus className="w-4 h-4" />
-                            <span className="hidden sm:inline" onClick={() => activeTab === 'resources' && navigate('/StudyHub/Upload')} >Create New {activeTab.slice(0, -1)}</span>
+                            <span className="hidden sm:inline">Create New {activeTab.slice(0, -1)}</span>
                             <span className="sm:hidden">Create</span>
                         </button>
                     </div>
@@ -194,52 +253,20 @@ const StudyHubManagement: React.FC = () => {
                 </div>
             )}
 
-            {(activeTab === 'resources') && (
+            {activeTab === 'resources' && (
                 <div className="space-y-6">
-                    {/* Add the resource cards grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[
-                            {
-                                id: 1,
-                                title: 'NEET Physics Formulas',
-                                description: 'Complete collection of essential formulas for NEET Physics preparation',
-                                type: 'pdf',
-                                examType: 'NEET',
-                                subject: 'Physics',
-                                downloads: 1250,
-                                rating: 4.7
-                            },
-                            {
-                                id: 2,
-                                title: 'JEE Advanced Math Problems',
-                                description: 'Solved problems from previous JEE Advanced papers',
-                                type: 'pdf',
-                                examType: 'JEE',
-                                subject: 'Mathematics',
-                                downloads: 980,
-                                rating: 4.8
-                            },
-                            {
-                                id: 3,
-                                title: 'Organic Chemistry Reactions',
-                                description: 'Important organic chemistry reactions with mechanisms',
-                                type: 'image',
-                                examType: 'NEET/JEE',
-                                subject: 'Chemistry',
-                                downloads: 2100,
-                                rating: 4.9
-                            }
-                        ].map((resource) => (
+                        {studyHub.map((resource) => (
                             <div key={resource.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:transform hover:-translate-y-1 overflow-hidden">
-                                <div className={`h-2 bg-gradient-to-r ${resource.type === 'pdf' ? 'from-blue-500 to-blue-600' : resource.type === 'image' ? 'from-green-500 to-green-600' : 'from-purple-500 to-purple-600'}`}></div>
+                                <div className={`h-2 bg-gradient-to-r ${getResourceColor(resource.type)}`}></div>
                                 <div className="p-6">
                                     <div className="flex items-start justify-between mb-4">
-                                        <div className={`p-3 rounded-lg bg-gradient-to-r ${resource.type === 'pdf' ? 'from-blue-500 to-blue-600' : resource.type === 'image' ? 'from-green-500 to-green-600' : 'from-purple-500 to-purple-600'} text-white`}>
-                                            {resource.type === 'pdf' ? <FileText className="w-5 h-5" /> : resource.type === 'image' ? <Image className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+                                        <div className={`p-3 rounded-lg bg-gradient-to-r ${getResourceColor(resource.type)} text-white`}>
+                                            {getResourceIcon(resource.type)}
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                            <span className="text-sm font-medium">{resource.rating}</span>
+                                            <span className="text-sm font-medium">{resource.rating || 0}</span>
                                         </div>
                                     </div>
 
@@ -252,18 +279,18 @@ const StudyHubManagement: React.FC = () => {
                                     </p>
 
                                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                        <span className="bg-gray-100 px-2 py-1 rounded">{resource.examType}</span>
-                                        <span className="bg-gray-100 px-2 py-1 rounded">{resource.subject}</span>
+                                        <span className="bg-gray-100 px-2 py-1 rounded">{resource.examType || 'General'}</span>
+                                        <span className="bg-gray-100 px-2 py-1 rounded">{resource.subject || 'All'}</span>
                                     </div>
 
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-1 text-sm text-gray-500">
                                             <Download className="w-4 h-4" />
-                                            <span>{resource.downloads.toLocaleString()}</span>
+                                            <span>{(resource.downloads || 0).toLocaleString()}</span>
                                         </div>
 
-                                        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center gap-2">
-                                            <Download className="w-4 h-4" />
+                                        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center gap-2" onClick={() => deleteStudyResource(resource.id)} >
+                                            <Delete className="w-4 h-4"/>
                                             Delete
                                         </button>
                                     </div>
@@ -272,7 +299,6 @@ const StudyHubManagement: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Keep the "Add New Resource" button */}
                     <div className="bg-white rounded-xl shadow-sm p-8 sm:p-12 text-center mt-8">
                         <button
                             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto touch-manipulation"

@@ -1,4 +1,14 @@
+import type { ReactNode } from "react";
+
 export type UserData = {
+  createdAt: string | number | Date;
+  id: string;
+  name: ReactNode;
+  phone: string;
+  location: string;
+  joinDate: ReactNode;
+  courses: number;
+  certificates: number;
   _id: string;
   firstName: string;
   lastName: string;
@@ -9,7 +19,9 @@ export type UserData = {
   mobile?: string;
   language?: string;
   bio?: string;
+  status: 'active' | 'inactive' | 'pending';
   role: 'admin' | 'student' | 'instructor';
+  
 };
 
 export type CourseProgress = {
@@ -19,7 +31,7 @@ export type CourseProgress = {
   lastAccessed?: string;
 };
 
-export type Course = {
+export type CourseData = {
   _id: string;
   title: string;
   description: string;
@@ -33,6 +45,7 @@ export type Course = {
     _id: string;
     name: string;
     avatar: string;
+
   };
   rating: number;
   totalStudents: number;
@@ -61,6 +74,11 @@ export type Course = {
   course?: {
     content?: CourseSection[];
   };
+  status: 'active' | 'inactive' | 'pending';
+  lessons: ReactNode,
+  image: string,
+  phone: Number,
+  createdAt: 'year' | 'month' | 'day'
 };
 
 export type CourseSection = {
@@ -117,7 +135,7 @@ export interface Resource {
 }
 
 export interface ApiResponse {
-  course: Course;
+  course: CourseData;
   content: CourseContent;
 }
 
@@ -148,6 +166,7 @@ export interface CourseContent {
 }
 
 export interface StudyHub {
+  fileType(id: string, title: string, fileType: any): void;
   id: string;
   title: string;
   type: 'notes' | 'papers' | 'formulas' | 'videos';

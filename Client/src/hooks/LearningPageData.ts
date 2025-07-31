@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import type { ApiResponse, Course, CourseContent } from '../components/Common/Types';
+import type { ApiResponse, CourseData, CourseContent } from '../components/Common/Types';
 import type { Dispatch, SetStateAction } from 'react';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,7 +10,7 @@ interface Props {
   token: string;
   setLoading: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<string | null>>;
-  setCourseData: Dispatch<SetStateAction<Course | null>>;
+  setCourseData: Dispatch<SetStateAction<CourseData | null>>;
   setCurrentContent: Dispatch<SetStateAction<CourseContent | null>>;
 }
 

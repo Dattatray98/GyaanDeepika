@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import axios from 'axios';
-import type { UserData, Course, Announcement } from '../components/Common/Types';
+import type { UserData, CourseData, Announcement } from '../components/Common/Types';
 import { useAuth } from '../context/AuthContext';
 
 type FetchHomepageData = {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setError: React.Dispatch<React.SetStateAction<string | null>>;
   setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
-  setEnrolledCourses: React.Dispatch<React.SetStateAction<Course[]>>;
-  setRecommendedCourses: React.Dispatch<React.SetStateAction<Course[]>>;
+  setEnrolledCourses: React.Dispatch<React.SetStateAction<CourseData[]>>;
+  setRecommendedCourses: React.Dispatch<React.SetStateAction<CourseData[]>>;
   setAnnouncements: React.Dispatch<React.SetStateAction<Announcement[]>>;
 };
 

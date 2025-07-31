@@ -1,6 +1,6 @@
 const express = require("express");
 const { verifyToken } = require("../middleware/auth.js");
-const { UnEnrolledCourses, addCourse, UserEnrolment, AddCourseAnnouncement, AddCourseResourses } = require("../Controllers/Course.js");
+const { UnEnrolledCourses, addCourse, UserEnrolment, AddCourseAnnouncement, AddCourseResourses, GetallCourses } = require("../Controllers/Course.js");
 const router = express.Router();
 
 /**
@@ -26,6 +26,8 @@ router.post("/addCourse", verifyToken, addCourse);
  * @returns {Object} Success message
  */
 router.post("/enroll/:courseId", verifyToken, UserEnrolment);
+
+router.get("/getallcourses", verifyToken, GetallCourses);
 
 
 

@@ -564,6 +564,51 @@ async function GetCourseResoures(req, res) {
     }
 };
 
+const GetallCourses = async (req, res) => {
+    try {
+        const allCourses = await Course.find()
+            .select("title description createdAt instructor rating totalStudents")
+            .populate({
+                path: "instructor",
+                select: "name avatar rating students",
+            });
+
+        // Safe formatting
+        const formattedCourses = allCourses.map(course => ({
+            id: course._id,
+            title: course.title,
+            description: course.description,
+            createdAt: course.createdAt,
+            instructor: course.instructor
+                ? {
+                    _id: course.instructor._id,
+                    name: course.instructor.name,
+                    avatar: course.instructor.avatar,
+                    bio: course.instructor.bio || "",
+                    rating: course.instructor.rating?.toFixed?.(1) || "0.0",
+                    students: course.instructor.students || 0,
+                }
+                : null,
+            rating: course.rating?.toFixed?.(1) || "0.0",
+            totalStudents: course.totalStudents || 0,
+        }));
+
+        return res.status(200).json({
+            success: true,
+            count: formattedCourses.length,
+            data: formattedCourses,
+        });
+    } catch (err) {
+        console.error("Error in GetallCourses:", err);
+        return res.status(500).json({
+            success: false,
+            error: err.message,
+        });
+    }
+};
+
+
+
 module.exports = {
     UnEnrolledCourses,
     addCourse,
@@ -574,6 +619,7 @@ module.exports = {
     GetCourseAnnouncement,
     AddCourseResourses,
     GetCourseResoures,
-    GetSingleContentItem
+    GetSingleContentItem,
+    GetallCourses
 }
 

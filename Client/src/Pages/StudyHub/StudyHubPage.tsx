@@ -24,7 +24,7 @@ function StudyHubPage() {
     const navigate = useNavigate()
 
     const [studyHub, setStudyHub] = useState<StudyHub[]>([]);
-
+    const api = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const loadData = async () => {
@@ -72,6 +72,16 @@ function StudyHubPage() {
             case 'formulas': return 'from-orange-500 to-orange-600';
             case 'videos': return 'from-purple-500 to-purple-600';
             default: return 'from-gray-500 to-gray-600';
+        }
+    };
+
+    const handleDownload = async (id: string) => {
+        try {
+            // Instead of downloading directly, redirect to the MaterialView page
+            const pdfUrl = encodeURIComponent(`${api}/api/download/${id}`);
+            window.location.href = `/material/${pdfUrl}`;
+        } catch (err) {
+            console.error("Failed to redirect to PDF viewer", err);
         }
     };
 
@@ -205,10 +215,14 @@ function StudyHubPage() {
                                         <span>{resource.downloads.toLocaleString()}</span>
                                     </div>
 
-                                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center gap-2">
+                                    <button
+                                        onClick={() => { handleDownload(resource.id) }}
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center gap-2"
+                                    >
                                         <Download className="w-4 h-4" />
-                                        Download
+                                        View & Download
                                     </button>
+
                                 </div>
                             </div>
                         </div>

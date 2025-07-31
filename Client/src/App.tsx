@@ -23,6 +23,7 @@ import AdminLayout from './Pages/Admin/AdminLayout.tsx';
 
 // Auth
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import MaterialView from "./Pages/StudyHub/MaterialView.tsx";
 
 
 function App() {
@@ -37,6 +38,10 @@ function App() {
           <Route path="/oauth-redirect" element={<OAuthRedirect />} />
           <Route path="/StudyHub" element={<StudyHubPage />} />
           <Route path="/StudyHub/Upload" element={<StudyHubUpload />} />
+          <Route path="/material/:pdfUrl" element={<MaterialView />} />
+
+          {/* If you want a more specific route for downloads: */}
+          <Route path="/view-material/:id" element={<MaterialView />} />
 
           {/* 🔐 Protected User Routes */}
           <Route element={<ProtectedRoute />}>
@@ -52,7 +57,7 @@ function App() {
           </Route>
 
           {/* <Route element={<AdminRoute />}> */}
-            <Route path="/admin/*" element={<AdminLayout />} />
+          <Route path="/admin/*" element={<AdminLayout />} />
           {/* </Route> */}
 
 
