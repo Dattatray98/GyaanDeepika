@@ -57,8 +57,8 @@ function App() {
           </Route>
 
           {/* <Route element={<AdminRoute />}> */}
-          <Route path="/admin/*" element={<AdminLayout />} />
           {/* </Route> */}
+            <Route path="/admin/*" element={<AdminLayout />} />
 
 
 

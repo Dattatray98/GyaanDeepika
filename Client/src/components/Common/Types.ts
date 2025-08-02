@@ -176,4 +176,7 @@ export interface StudyHub {
   downloads: number;
   rating: number;
   description: string;
+  uploadDate: string;
+  fileSize: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
 }

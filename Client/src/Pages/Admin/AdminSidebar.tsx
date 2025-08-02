@@ -12,7 +12,7 @@ import {
   MessageSquare,
   X
 } from 'lucide-react';
-import { FaNoteSticky } from "react-icons/fa6";
+import { FaGraduationCap, FaNoteSticky } from "react-icons/fa6";
 
 interface AdminSidebarProps {
   activeSection: string;
@@ -67,10 +67,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionCha
           </button>
         </div>
 
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-800">Gyaandeepika</h1>
+        <div className="p-4 border-b border-gray-200">
+          <div className='flex gap-1'>
+            <FaGraduationCap className="text-orange-400 text-3xl" />
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-800 to-orange-500 bg-clip-text text-transparent">
+              GyaanDeepika
+            </h1>
+          </div>
           <p className="text-sm text-gray-500 mt-1">Admin Panel</p>
-        </div>
+        </div>a
 
         <nav className="mt-6 pb-6 overflow-y-auto">
           {menuItems.map((item) => {
@@ -82,8 +87,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ activeSection, onSectionCha
                 key={item.id}
                 onClick={() => handleItemClick(item.id)}
                 className={`w-full flex items-center px-6 py-3 text-left transition-all duration-200 hover:bg-blue-50 touch-manipulation ${isActive
-                    ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
-                    : 'text-gray-600 hover:text-blue-600'
+                  ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600'
+                  : 'text-gray-600 hover:text-blue-600'
                   }`}
               >
                 <Icon className="w-5 h-5 mr-3" />
