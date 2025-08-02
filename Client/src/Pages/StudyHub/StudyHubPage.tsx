@@ -1012,15 +1012,25 @@ function StudyHubPage() {
                     <Bookmark className="w-5 h-5" />
                     <span className="text-xs mt-1">Saved</span>
                 </button>
-                <button
+
+                 <button
+                    onClick={() => setActiveTab('upload')}
+                    className={`flex flex-col items-center p-3 ${activeTab === 'upload' ? 'text-blue-600' : 'text-gray-500'}`}
+                >
+                    <Upload className="w-5 h-5" />
+                    <span className="text-xs mt-1">Suggest</span>
+                </button>
+
+                {/* <button
                     onClick={() => navigate('/StudyHub/Upload')}
                     className="flex flex-col items-center p-3 text-blue-600"
                 >
-                    <div className="bg-blue-600 text-white p-2 rounded-full -mt-6 shadow-lg">
+                    <div className="bg-blue-600 text-white p-2 rounded-full -mt-1 shadow-lg">
                         <Upload className="w-5 h-5" />
                     </div>
                     <span className="text-xs">Upload</span>
-                </button>
+                </button> */}
+
                 <button
                     onClick={() => setActiveTab('profile')}
                     className={`flex flex-col items-center p-3 ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-500'}`}
