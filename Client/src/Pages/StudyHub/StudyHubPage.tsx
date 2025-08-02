@@ -11,10 +11,10 @@ import {
     Users,
     Clock
 } from 'lucide-react';
-import Navbar from './Navbar';
 import fetchStudyHub from '../../hooks/StudyHub';
 import type { StudyHub } from '../../components/Common/Types';
 import { useNavigate } from 'react-router-dom';
+import { FaGraduationCap } from 'react-icons/fa';
 
 
 const examTypes = ['All', 'JEE Mains', 'NEET', 'CBSE Board', 'Engineering', 'Others'];
@@ -88,11 +88,22 @@ function StudyHubPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Navbar />
+
             {/* Hero Section */}
             <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white">
+                <div className="max-w-7xl mx-auto px-4 relative top-10 sm:px-6 lg:px-8 flex justify-center">
+                    <div className="flex items-center justify-between h-16">
+                        {/* Logo */}
+                        <div className="flex justify-center items-center space-x-1 relative z-15">
+                            <FaGraduationCap className="text-orange-500 text-5xl mr-2" />
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-800 to-orange-400 bg-clip-text text-transparent">
+                                Gyaan<span>Deepika</span>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
                 <div className="absolute inset-0 bg-black/20"></div>
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                     <div className="text-center">
                         <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
                             📚 Free Study Resources for All Students
