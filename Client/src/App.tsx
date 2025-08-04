@@ -26,6 +26,7 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import MaterialView from "./Pages/StudyHub/MaterialView.tsx";
 
 
+
 function App() {
   return (
     <AuthProvider>
@@ -39,6 +40,7 @@ function App() {
           <Route path="/StudyHub" element={<StudyHubPage />} />
           <Route path="/StudyHub/Upload" element={<StudyHubUpload />} />
           <Route path="/material/:pdfUrl" element={<MaterialView />} />
+
 
           {/* If you want a more specific route for downloads: */}
           <Route path="/view-material/:id" element={<MaterialView />} />

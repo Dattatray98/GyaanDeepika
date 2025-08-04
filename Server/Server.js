@@ -39,7 +39,7 @@ app.use("/api/progress", require("./Routes/progressRoutes"));
 app.use("/api/notes", require("./Routes/Notes"));
 app.use("/api", require("./Routes/QuizRoute"));
 app.use("/api", require("./Routes/StudyHub"));
-
+app.use('/api/suggestions', require("./Routes/StudyHubSuggetion"));
 
 app.get("/", (req, res) => {
   res.send("🎓 GyaanDeepika Backend is Live");
