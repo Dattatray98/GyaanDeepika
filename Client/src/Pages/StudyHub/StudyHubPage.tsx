@@ -25,6 +25,7 @@ import type { StudyHub } from '../../components/Common/Types';
 import { useNavigate } from 'react-router-dom';
 import { FaGraduationCap } from 'react-icons/fa';
 import fetchStudyHub from '../../hooks/StudyHub';
+import { Helmet } from 'react-helmet';
 
 // Constants
 const EXAM_TYPES = ['All', 'JEE Mains', 'NEET', 'CBSE Board', 'Engineering', 'Others'] as const;
@@ -118,8 +119,96 @@ function StudyHubPage() {
     const [submitSuccess, setSubmitSuccess] = useState(false);
 
     // Blog state
+
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
     const [activeBlogCategory, setActiveBlogCategory] = useState<BlogCategory>('All');
+
+
+    return (
+        <>
+            <Helmet>
+                <title>Free JEE & NEET Notes, PYQs & PDFs | 2024-25 Study Materials – GyaanDeepika</title>
+
+                <meta
+                    name="description"
+                    content="Access 10,000+ free study materials for JEE, NEET, and Engineering exams. Download handwritten notes, solved PYQs, mock tests, and PDFs – updated daily!"
+                />
+
+                <meta
+                    name="keywords"
+                    content="JEE notes PDF, NEET handwritten notes, free study material, JEE PYQs, NEET solved papers, engineering notes, GyaanDeepika, 2024 notes download"
+                />
+
+                <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+                <link rel="canonical" href="https://gyaan-deepika.vercel.app/StudyHub" />
+
+                <meta name="author" content="GyaanDeepika Educational Team" />
+                <meta name="publisher" content="GyaanDeepika" />
+                <meta name="geo.region" content="IN" />
+                <meta name="geo.country" content="IN" />
+
+                {/* Open Graph for social preview */}
+                <meta property="og:title" content="Free JEE NEET Study Materials | Notes, PYQs, PDFs 2024 – GyaanDeepika" />
+                <meta property="og:description" content="Download JEE NEET handwritten notes, PYQs, and study materials. Trusted by 1M+ students across India." />
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://gyaan-deepika.vercel.app/StudyHub" />
+                <meta property="og:site_name" content="GyaanDeepika - Free Study Resources" />
+                <meta property="og:image" content="https://gyaan-deepika.vercel.app/images/jee-neet-study-materials-2024.jpg" />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                <meta property="og:locale" content="en_IN" />
+
+                {/* Twitter Card */}
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:site" content="@GyaanDeepika" />
+                <meta name="twitter:title" content="Free JEE & NEET Notes, PYQs & Study Materials – GyaanDeepika" />
+                <meta name="twitter:description" content="Download 10,000+ free notes, PYQs, and PDFs for JEE, NEET, and more. Updated daily!" />
+                <meta name="twitter:image" content="https://gyaan-deepika.vercel.app/images/jee-neet-study-materials-2024.jpg" />
+
+                {/* Optional SEO Meta Tags */}
+                <meta name="language" content="English" />
+                <meta name="revisit-after" content="1 day" />
+                <meta name="distribution" content="global" />
+                <meta name="rating" content="general" />
+
+                {/* Structured Data (Schema.org) */}
+                <script type="application/ld+json">
+                    {JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "EducationalOrganization",
+                        "name": "GyaanDeepika",
+                        "url": "https://gyaan-deepika.vercel.app",
+                        "logo": "https://gyaan-deepika.vercel.app/logo.png",
+                        "sameAs": [
+                            "https://www.facebook.com/gyaandeepika",
+                            "https://www.instagram.com/gyaandeepika",
+                            "https://www.youtube.com/gyaandeepika"
+                        ],
+                        "description": "Download free study materials for JEE, NEET, and Engineering exams – notes, PYQs, and guides.",
+                        "address": {
+                            "@type": "PostalAddress",
+                            "addressCountry": "IN"
+                        },
+                        "offers": {
+                            "@type": "Offer",
+                            "category": "Educational Materials",
+                            "price": "0",
+                            "priceCurrency": "INR",
+                            "availability": "https://schema.org/InStock"
+                        }
+                    })}
+                </script>
+
+                {/* Page Performance Optimization */}
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                <link rel="dns-prefetch" href="https://gyaan-deepika.vercel.app" />
+            </Helmet>
+
+        </>
+    )
+
 
     // Device detection with debounce
     useEffect(() => {
@@ -141,7 +230,7 @@ function StudyHubPage() {
                 setIsLoading(true);
                 setError(null);
                 await fetchStudyHub(setStudyHub);
-                
+
                 // Mock blog data - replace with actual API call
                 const mockBlogPosts: BlogPost[] = [
                     {
@@ -324,17 +413,17 @@ function StudyHubPage() {
         });
 
         // Show only recent or searched items
-        if (searchQuery === '' && activeExamType === 'All' && activeSubject === 'All' && 
+        if (searchQuery === '' && activeExamType === 'All' && activeSubject === 'All' &&
             activeDifficulty === 'All' && activeResourceType === 'All') {
             return filtered.slice(0, 15); // Show only first 15 recent items
         }
-        
+
         return filtered;
     }, [studyHub, activeExamType, activeSubject, activeDifficulty, activeResourceType, searchQuery, sortBy]);
 
     const filteredBlogPosts = useMemo(() => {
-        return activeBlogCategory === 'All' 
-            ? blogPosts 
+        return activeBlogCategory === 'All'
+            ? blogPosts
             : blogPosts.filter(post => post.category === activeBlogCategory);
     }, [blogPosts, activeBlogCategory]);
 
@@ -505,7 +594,7 @@ function StudyHubPage() {
                                         {subject}
                                         <input type="text" placeholder='enter subject suggestion' />
                                     </option>
-                                ))} 
+                                ))}
                             </select>
                         </div>
 
@@ -611,7 +700,7 @@ function StudyHubPage() {
     const BlogTabContent = () => (
         <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Educational Blog</h2>
-            
+
             <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                     Filter by Category
@@ -1032,8 +1121,8 @@ function StudyHubPage() {
                         <div>
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-bold text-gray-800">
-                                    {searchQuery || getActiveFiltersCount > 0 
-                                        ? `${filteredResources.length} Resources Found` 
+                                    {searchQuery || getActiveFiltersCount > 0
+                                        ? `${filteredResources.length} Resources Found`
                                         : 'Recently Added Resources'}
                                 </h2>
                                 {searchQuery && (
@@ -1230,7 +1319,7 @@ function StudyHubPage() {
                             <TrendingUp className="w-4 h-4" />
                             <span>{studyHub.length} Resources</span>
                         </div>
-                         <button
+                        <button
                             onClick={() => setActiveTab('blog')}
                             className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                         >
@@ -1262,8 +1351,8 @@ function StudyHubPage() {
                         <p className="text-xl text-blue-100 mb-8">
                             Access premium study resources for JEE, NEET, CBSE and more - completely free
                         </p>
-                         <p className="text-xl text-blue-100 mb-8">
-                           Can’t find the resource you need? Let us know in the Suggestions tab — we’ll add it for you!
+                        <p className="text-xl text-blue-100 mb-8">
+                            Can’t find the resource you need? Let us know in the Suggestions tab — we’ll add it for you!
                         </p>
                         <div className="flex flex-wrap justify-center gap-6 text-blue-100">
                             <div className="flex items-center space-x-2">
@@ -1334,6 +1423,6 @@ function StudyHubPage() {
             </footer>
         </div>
     );
-} 
+}
 
 export default StudyHubPage;
