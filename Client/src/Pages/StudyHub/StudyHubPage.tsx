@@ -25,6 +25,8 @@ import type { StudyHub } from '../../components/Common/Types';
 import { useNavigate } from 'react-router-dom';
 import { FaGraduationCap } from 'react-icons/fa';
 import fetchStudyHub from '../../hooks/StudyHub';
+import AdComponent from '../../components/AdComponent';
+import Footer from '../LandingPage/Footer';
 
 // Constants
 const EXAM_TYPES = ['All', 'JEE Mains', 'NEET', 'CBSE Board', 'Engineering', 'Others'] as const;
@@ -415,6 +417,7 @@ function StudyHubPage() {
     // Component for suggestion tab content
     const SuggestionTabContent = () => (
         <div className="p-6">
+            <AdComponent />
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Request Study Resources</h2>
 
             {submitSuccess ? (
@@ -612,6 +615,7 @@ function StudyHubPage() {
     // Blog tab content
     const BlogTabContent = () => (
         <div className="p-6">
+            <AdComponent />
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Educational Blog</h2>
 
             <div className="mb-6">
@@ -745,6 +749,7 @@ function StudyHubPage() {
                 const savedResources = studyHub.filter(resource => savedItems.has(resource.id));
                 return (
                     <div className="p-6">
+                        <AdComponent />
                         <h2 className="text-2xl font-bold text-gray-800 mb-6">Saved Resources</h2>
                         {savedResources.length === 0 ? (
                             <div className="text-center py-12">
@@ -829,6 +834,7 @@ function StudyHubPage() {
             default:
                 return (
                     <div className="space-y-6">
+                        <AdComponent />
                         {/* Search Section */}
                         <div className="bg-white rounded-xl shadow-sm p-6">
                             <div className="relative mb-4">
@@ -1296,44 +1302,47 @@ function StudyHubPage() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-gray-900 text-white py-16 mt-20">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center">
-                        <div className="flex justify-center items-center space-x-3 mb-6">
-                            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-xl">
-                                <FaGraduationCap className="text-white text-2xl" />
-                            </div>
-                            <h3 className="text-2xl font-bold">GyaanDeepika</h3>
-                        </div>
-                        <p className="text-gray-400 mb-8 max-w-2xl mx-auto text-lg">
-                            Empowering students with free, high-quality educational resources since 2023.
-                            Our mission is to make quality education accessible to all students regardless of their background.
-                        </p>
-                        <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-400">
-                            <div className="flex items-center space-x-2">
-                                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                <span>Open Source</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                                <span>No Login Required</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                                <span>Always Free</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                                <span>Community Driven</span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                <span>Regular Updates</span>
+            <footer className="bg-gray-900 text-white py-5 mt-20">
+                <div className="max-w-3xl mx-auto px-6 py-12 text-center">
+                    {/* Logo & Title */}
+                    <div className="flex flex-col items-center mb-1">
+                        <div className="flex items-center mb-4">
+                            {/* Replace with your logo */}
+                            <div className='flex gap-1'>
+                                <FaGraduationCap className="text-purple-500 text-3xl" />
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-400 bg-clip-text text-transparent">
+                                    GyaanDeepika
+                                </h1>
                             </div>
                         </div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">StudyHub Resources</h2>
+                        <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4"></div>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-gray-600 mb-8 text-lg leading-relaxed">
+                        Free, high-quality educational resources for all students.
+                        <br />
+                        Accessible learning without barriers.
+                    </p>
+
+                    {/* Key Features */}
+                    <div className="flex flex-wrap justify-center gap-4 text-sm">
+                        {[
+                            { text: 'Open Source', color: 'bg-green-500' },
+                            { text: 'No Login', color: 'bg-blue-500' },
+                            { text: 'Always Free', color: 'bg-purple-500' },
+                            { text: 'Community', color: 'bg-orange-500' }
+                        ].map((item, index) => (
+                            <div key={index} className="flex items-center px-3 py-1 rounded-full bg-gray-50">
+                                <span className={`w-2 h-2 ${item.color} rounded-full mr-2`}></span>
+                                <span className="text-gray-700">{item.text}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </footer>
+            <Footer />
         </div>
     );
 }

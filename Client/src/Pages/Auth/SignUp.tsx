@@ -1,9 +1,10 @@
+// SignUp.tsx
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext.tsx";
-import { useNavigate } from "react-router-dom";
+
 const SignUp = () => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -12,7 +13,8 @@ const SignUp = () => {
     password: "",
     confirmPassword: ""
   });
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signup, googleLogin, loading, error } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,67 +38,201 @@ const SignUp = () => {
         mobile: formData.mobile,
         password: formData.password
       });
-      navigate("/home");
     } catch (err) {
       // Error handled in AuthContext
     }
   };
 
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="backdrop-blur-md bg-white/5 border border-white/10 shadow-[0_0_20px_#00FFFF80] p-5 rounded-xl max-w-[70vh]"
-    >
-      <div className="mb-[30px]">
-        <h1 className="text-[19px] text-white">
-          Create an account with GyaanDeepika and start your learning journey
-        </h1>
-      </div>
+  const handleGoogleLogin = async () => {
+    try {
+      await googleLogin();
+    } catch (error) {
+      console.error("Google login failed:", error);
+    }
+  };
 
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="mb-4 p-2 bg-red-500/20 text-red-300 rounded text-sm">
+        <div className="p-3 bg-red-500/20 text-red-300 rounded-lg text-sm">
           {error}
         </div>
       )}
 
-      {/* Form Fields */}
-      {['firstName', 'lastName', 'email', 'mobile', 'password', 'confirmPassword'].map((field) => (
-        <div key={field} className="flex h-[40px] w-full items-center justify-center bg-transparent mb-6">
-          <label className="relative w-full">
-            <input
-              type={field.includes('password') ? 'password' : field === 'email' ? 'email' : 'text'}
-              name={field}
-              value={formData[field as keyof typeof formData]}
-              onChange={handleChange}
-              className="h-[40px] w-full px-2 py-2 text-lg outline-none border border-[#CBCBCB] rounded duration-200 peer focus:border-indigo-600 bg-inherit"
-              required
-              pattern={field === 'mobile' ? '[0-9]{10}' : undefined}
-            />
-            <span className="absolute left-0 top-2 px-1 text-[16px] tracking-wide pointer-events-none duration-200 peer-focus:text-sm peer-focus:-translate-y-7 bg-transparent ml-[3px] peer-valid:text-sm peer-valid:-translate-y-7 text-white">
-              {field === 'confirmPassword' ? 'Confirm Password' : `Enter ${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}`}
-            </span>
+      {/* Name Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="firstName" className="block text-gray-300 text-sm mb-2">
+            First Name
           </label>
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 transition"
+            required
+            disabled={loading}
+          />
         </div>
-      ))}
-
-      <div className="flex gap-8 items-center justify-evenly">
-        <button 
-          type="submit" 
-          disabled={loading}
-          className="bg-blue-400 text-white p-2 rounded w-full h-12 hover:bg-blue-600 disabled:opacity-70"
-        >
-          {loading ? 'Creating account...' : 'Create User'}
-        </button>
-        <p className="text-white">Or</p>
-        <button
-          type="button"
-          onClick={googleLogin}
-          disabled={loading}
-          className="bg-transparent text-white p-2 rounded w-full flex items-center gap-3 max-w-[160px] border border-gray-600 hover:border-gray-400"
-        >
-          Sign Up with <FcGoogle className="h-5 w-5" />
-        </button>
+        <div>
+          <label htmlFor="lastName" className="block text-gray-300 text-sm mb-2">
+            Last Name
+          </label>
+          <input
+            type="text"
+            id="lastName"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 transition"
+            required
+            disabled={loading}
+          />
+        </div>
       </div>
+
+      {/* Email */}
+      <div>
+        <label htmlFor="email" className="block text-gray-300 text-sm mb-2">
+          Email Address
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 transition"
+          required
+          disabled={loading}
+        />
+      </div>
+
+      {/* Mobile */}
+      <div>
+        <label htmlFor="mobile" className="block text-gray-300 text-sm mb-2">
+          Mobile Number
+        </label>
+        <input
+          type="tel"
+          id="mobile"
+          name="mobile"
+          value={formData.mobile}
+          onChange={handleChange}
+          className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 transition"
+          pattern="[0-9]{10}"
+          required
+          disabled={loading}
+        />
+      </div>
+
+      {/* Password */}
+      <div>
+        <label htmlFor="password" className="block text-gray-300 text-sm mb-2">
+          Password
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 transition pr-12"
+            required
+            disabled={loading}
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+            onClick={() => setShowPassword(!showPassword)}
+            disabled={loading}
+          >
+            {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Confirm Password */}
+      <div>
+        <label htmlFor="confirmPassword" className="block text-gray-300 text-sm mb-2">
+          Confirm Password
+        </label>
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            id="confirmPassword"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-white/10 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white placeholder-gray-400 transition pr-12"
+            required
+            disabled={loading}
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            disabled={loading}
+          >
+            {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full py-3 px-4 rounded-lg font-medium transition duration-200 flex items-center justify-center gap-2 ${
+          loading
+            ? "bg-indigo-700 cursor-not-allowed"
+            : "bg-indigo-600 hover:bg-indigo-700"
+        }`}
+      >
+        {loading ? (
+          <>
+            <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Creating Account...
+          </>
+        ) : (
+          "Create Account"
+        )}
+      </button>
+
+      {/* Divider */}
+      <div className="flex items-center">
+        <div className="flex-1 border-t border-gray-600"></div>
+        <span className="px-4 text-gray-400 text-sm">OR</span>
+        <div className="flex-1 border-t border-gray-600"></div>
+      </div>
+
+      {/* Google Sign Up */}
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        disabled={loading}
+        className="w-full py-3 px-4 bg-white/5 hover:bg-white/10 border border-gray-600 rounded-lg font-medium transition duration-200 flex items-center justify-center gap-2"
+      >
+        <FcGoogle size={20} />
+        Sign Up with Google
+      </button>
+
+      {/* Login Link */}
+      <p className="text-center text-gray-400 text-sm">
+        Already have an account?{" "}
+        <a 
+          href="/auth/login" 
+          className="text-indigo-400 hover:text-indigo-300 font-medium"
+        >
+          Log in
+        </a>
+      </p>
     </form>
   );
 };

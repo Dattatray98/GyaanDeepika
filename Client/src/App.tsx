@@ -24,6 +24,8 @@ import AdminLayout from './Pages/Admin/AdminLayout.tsx';
 // Auth
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import MaterialView from "./Pages/StudyHub/MaterialView.tsx";
+import PrivacyPolicy from "./components/PrivacyPolicy.tsx";
+import TermsAndConditions from "./components/TermsAndConditions.tsx";
 
 
 
@@ -40,7 +42,8 @@ function App() {
           <Route path="/StudyHub" element={<StudyHubPage />} />
           <Route path="/StudyHub/Upload" element={<StudyHubUpload />} />
           <Route path="/material/:pdfUrl" element={<MaterialView />} />
-
+          <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
+          <Route path="/TermsAndConditions" element={<TermsAndConditions /> } />
 
           {/* If you want a more specific route for downloads: */}
           <Route path="/view-material/:id" element={<MaterialView />} />

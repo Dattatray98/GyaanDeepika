@@ -230,6 +230,15 @@ async function updateUserProfile(req, res) {
 }
 
 
+async function GetSuggestionofUser(req, res) {
+  try{
+    
+  }catch{
+    
+  }
+}
+
+
 
 
 
