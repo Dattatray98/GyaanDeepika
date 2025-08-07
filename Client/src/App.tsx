@@ -44,7 +44,6 @@ function App() {
           <Route path="/material/:pdfUrl" element={<MaterialView />} />
           <Route path="/PrivacyPolicy" element={<PrivacyPolicy />} />
           <Route path="/TermsAndConditions" element={<TermsAndConditions /> } />
-
           {/* If you want a more specific route for downloads: */}
           <Route path="/view-material/:id" element={<MaterialView />} />
 
