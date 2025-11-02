@@ -90,7 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const api = import.meta.env.VITE_API_URL;
       const response = await axios.post(`${api}/users/login`, { email, password });
+      console.log(password);
       await handleToken(response.data.token);
+
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
       throw err;

@@ -1,0 +1,260 @@
+const bcrypt = require('bcryptjs');
+const { generateToken } = require('../middleware/auth.middleware');
+const cloudinary = require('../config/cloudinary');
+const User = require('../models/user.model');
+
+const saltRounds = 10;
+
+async function handleUserSignup(req, res) {
+  try {
+    const { firstName, lastName, email, mobile, password } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      email,
+      mobile,
+      password: hashedPassword,
+    });
+
+    const token = generateToken(newUser);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token,
+      user: {
+        id: newUser._id,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email
+      }
+    });
+  } catch (error) {
+    console.error("Signup error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error registering user",
+    });
+  }
+}
+
+async function handleUserLogin(req, res) {
+  try {
+    const { email, password } = req.body;
+    console.log(req.body);
+    
+    if(!email || !password){
+      return res.status(400).json({
+        message : "Email and passwrod are required"
+      });
+    }
+
+    const user = await User.findOne({ email }).select("+password");
+    console.log('user password : ',user);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    console.log("password : ", password);
+    console.log("user.password :", user.password);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+
+    if (!isMatch) {
+      console.log("passwrod : ", password, "user.password :", user.password);
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    const token = generateToken(user);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error logging in user",
+    });
+  }
+}
+
+async function getCurrentUser(req, res) {
+  try {
+    const user = await User.findById(req.user.id).select('-password -googleId');
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function getallusers(req, res) {
+  try {
+    const users = await User.find({}, '-password'); // Exclude sensitive fields like password
+    
+    // Optionally map users to ensure fields are consistent
+    const formattedUsers = users.map(user => ({
+      id: user._id,
+      name: user.firstName,
+      email: user.email,
+      phone: user.phone || '',
+      location: user.location || '',
+      status: user.isActive? 'active' : 'inactive',
+      role: user.role,
+      avatar: user.avatar || '',
+      courses: user.enrolledCourses?.length || 0,
+      createdAt: user.createdAt,
+    }));
+
+    res.status(200).json({ success: true, data: formattedUsers });
+  } catch (err) {
+    console.error("Error in getAllUsers:", err);
+    res.status(500).json({ success: false, error: err.message || 'Server error' });
+  }
+}
+
+
+
+async function updateUserProfile(req, res) {
+  try {
+    const userId = req.user.id;
+    const { firstName, lastName, email, mobile, bio } = req.body;
+
+    const updatedFields = {};
+    if (firstName) updatedFields.firstName = firstName;
+    if (lastName) updatedFields.lastName = lastName;
+    if (email) updatedFields.email = email;
+    if (mobile) updatedFields.mobile = mobile;
+    if (bio) updatedFields.bio = bio;
+
+    // If avatar file is uploaded, upload it to Cloudinary
+    if (req.file) {
+      const result = await cloudinary.uploader.upload_stream(
+        {
+          folder: 'avatars',
+          resource_type: 'image',
+        },
+        async (error, result) => {
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            return res.status(500).json({ success: false, message: "Failed to upload avatar" });
+          }
+
+          updatedFields.avatar = result.secure_url;
+
+          const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: updatedFields },
+            { new: true, runValidators: true }
+          ).select('-password -googleId');
+
+          if (!updatedUser) {
+            return res.status(404).json({
+              success: false,
+              message: "User not found"
+            });
+          }
+
+          return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user: updatedUser
+          });
+        }
+      );
+
+      // Pipe file buffer into Cloudinary upload stream
+      require('streamifier').createReadStream(req.file.buffer).pipe(result);
+    } else {
+      // No avatar upload, just update other fields
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $set: updatedFields },
+        { new: true, runValidators: true }
+      ).select('-password -googleId');
+
+      if (!updatedUser) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        user: updatedUser
+      });
+    }
+  } catch (error) {
+    console.error("Profile update error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while updating profile"
+    });
+  }
+}
+
+
+async function GetSuggestionofUser(req, res) {
+  try{
+    
+  }catch{
+    
+  }
+}
+
+
+
+
+
+
+module.exports = {
+  handleUserSignup,
+  handleUserLogin,
+  getCurrentUser,
+  updateUserProfile,
+  getallusers
+};

@@ -27,19 +27,19 @@ mongoose.connect(process.env.MONGO_URL)
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // Routes
-app.use("/users", require("./Routes/user"));
-app.use("/auth", require("./Routes/auth"));
-app.use("/api/courses", require("./Routes/course"))
-app.use("/api/enrolled", require("./Routes/EnrolledCourse")) 
-app.use('/api', require("./Routes/uploadRoute"));
-app.use('/api', require("./Routes/transcribeRoute"));
-app.use("/api/summary", require("./Routes/summaryRoute"));
-app.use("/api/qa", require("./Routes/qaRoutes"));
-app.use("/api/progress", require("./Routes/progressRoutes"));
-app.use("/api/notes", require("./Routes/Notes"));
-app.use("/api", require("./Routes/QuizRoute"));
-app.use("/api", require("./Routes/StudyHub"));
-app.use('/api/suggestions', require("./Routes/StudyHubSuggetion"));
+app.use("/users", require("./Routes/user.route"));
+app.use("/auth", require("./Routes/auth.route"));
+app.use("/api/courses", require("./Routes/course.route"))
+app.use("/api/enrolled", require("./Routes/EnrolledCourse.route")) 
+app.use('/api', require("./Routes/uploadRoute.route"));
+app.use('/api', require("./Routes/transcribeRoute.route"));
+app.use("/api/summary", require("./Routes/summaryRoute.route"));
+app.use("/api/qa", require("./Routes/qaRoutes.route"));
+app.use("/api/progress", require("./Routes/progressRoutes.route"));
+app.use("/api/notes", require("./Routes/Notes.route"));
+app.use("/api", require("./Routes/QuizRoute.route"));
+app.use("/api", require("./Routes/StudyHub.route"));
+app.use('/api/suggestions', require("./Routes/StudyHubSuggetion.route"));
 
 app.get("/", (req, res) => {
   res.send("🎓 GyaanDeepika Backend is Live");
